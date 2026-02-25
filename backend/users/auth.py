@@ -77,7 +77,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSe
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    stmt = select(users_table).where(user_table.c.email == email)
+    stmt = select(users_table).where(users_table.c.email == email)
     result = await session.execute(stmt)
     user = result.fetchone()
 

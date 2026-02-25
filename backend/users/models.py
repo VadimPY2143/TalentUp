@@ -1,6 +1,10 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr, SecretStr
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 
 class UserRole(str, Enum):
     employer = "employer"
@@ -18,3 +22,8 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     role: UserRole
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: SecretStr
