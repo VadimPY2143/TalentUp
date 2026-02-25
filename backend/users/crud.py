@@ -8,8 +8,10 @@ from .models import User, UserResponse
 
 router = APIRouter()
 
-@router.post("/users/register", response_model=UserResponse)
-async def user_register(user: User, session: AsyncSession = Depends(get_session)) -> UserResponse:
+@router.post("/user/register", response_model=UserResponse)
+async def user_register(
+        user: User,
+        session: AsyncSession = Depends(get_session)) -> UserResponse:
     stmt = users_table.select().where(users_table.c.username == user.username)
     result = await session.execute(stmt)
     user_exists = result.fetchone()
@@ -27,3 +29,11 @@ async def user_register(user: User, session: AsyncSession = Depends(get_session)
         email=user.email,
         role=user.role.value,
     )
+
+@router.post("/user/login", response_model=UserResponse)
+async def user_login(
+        user: User,
+        session: AsyncSession = Depends(get_session),
+):
+    pass
+

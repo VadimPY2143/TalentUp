@@ -21,7 +21,7 @@ if not JWT_SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/user/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -77,7 +77,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSe
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    stmt = select(user_table).where(user_table.c.email == email)
+    stmt = select(users_table).where(user_table.c.email == email)
     result = await session.execute(stmt)
     user = result.fetchone()
 
