@@ -6,6 +6,6 @@
 
 @layer base {
   body {
-    @apply bg-sky-50 text-slate-900 font-sans;
+    @apply bg-[#e9edf4] text-slate-900 font-sans;
   }
 }

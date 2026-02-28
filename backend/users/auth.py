@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
+import hashlib
+import secrets
 from typing import Optional
 from jose import JWTError, jwt
+from jose.exceptions import ExpiredSignatureError
 import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -9,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import users_table, get_session
 import os
 from dotenv import load_dotenv
-import logger
+from logger import logger as LOGGER
 
 load_dotenv()
 
@@ -20,6 +23,7 @@ if not JWT_SECRET_KEY:
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
 
@@ -46,6 +50,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 
+def create_refresh_token() -> str:
+    return secrets.token_urlsafe(48)
+
+
+def hash_refresh_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def get_refresh_token_expiry() -> datetime:
+    return datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
+
 def verify_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
@@ -57,8 +73,15 @@ def verify_token(token: str) -> dict:
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return payload
+    except ExpiredSignatureError as e:
+        LOGGER.error(f"JWT expired: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except JWTError as e:
-        logger.error(f"JWT verification error: {e}")
+        LOGGER.error(f"JWT verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

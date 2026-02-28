@@ -14,3 +14,10 @@ export const loginUser = (payload: LoginPayload) => {
     body: JSON.stringify(payload),
   })
 }
+
+export const refreshTokens = (refreshToken: string) => {
+  return apiFetch<TokenResponse>("/user/refresh", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  })
+}

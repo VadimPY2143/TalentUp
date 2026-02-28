@@ -2,10 +2,10 @@ import { freelancers } from "../data/freelancers"
 
 const TopFreelancers = () => {
   return (
-    <section className="bg-sky-50 pb-20">
+    <section className="bg-[#e9edf4] pb-16 pt-4">
       <div className="mx-auto max-w-[1120px] px-4">
-        <h2 className="animate-fade text-center font-display text-2xl font-semibold text-slate-900 md:text-3xl">
-          Топ фрилансери
+        <h2 className="animate-fade text-center font-display text-3xl font-semibold text-slate-900 md:text-5xl">
+          Топ спеціалісти
         </h2>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {freelancers.map((freelancer) => (
@@ -13,7 +13,7 @@ const TopFreelancers = () => {
               className="rounded-2xl bg-white p-6 text-center shadow-soft"
               key={freelancer.name}
             >
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/15 text-lg font-semibold text-slate-900">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#fde6c9] text-lg font-semibold text-slate-900">
                 {freelancer.name[0]}
               </div>
               <div className="text-base font-semibold text-slate-900">
@@ -26,7 +26,7 @@ const TopFreelancers = () => {
                 {freelancer.rate}
               </div>
               <button
-                className="mt-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-2 text-sm font-semibold text-white"
+                className="mt-4 rounded-xl bg-orange-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
                 type="button"
               >
                 Найняти фахівця

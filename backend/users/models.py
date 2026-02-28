@@ -6,6 +6,12 @@ class Token(BaseModel):
     token_type: str
 
 
+class TokenPair(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+
 class UserRole(str, Enum):
     employer = "employer"
     worker = "worker"
@@ -27,3 +33,7 @@ class UserResponse(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: SecretStr
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str

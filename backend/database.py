@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import Column, Enum, Integer, MetaData, String, Table
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -42,6 +42,42 @@ users_table = Table(
         nullable=False,
         server_default='worker',
     ),
+)
+
+resumes_table = Table(
+    'resumes',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('title', String(255), nullable=False),
+    Column('summary', Text),
+    Column('desired_role', String(255)),
+    Column('employment_type', ARRAY(String(50))),
+    Column('location', String(255)),
+    Column('salary_min', Integer),
+    Column('salary_max', Integer),
+    Column('salary_currency', String(10)),
+    Column('years_experience', Integer),
+    Column('is_active', Boolean, nullable=False, server_default='true'),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+)
+
+refresh_tokens_table = Table(
+    'refresh_tokens',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('token_hash', String(64), unique=True, nullable=False),
+    Column('expires_at', DateTime(timezone=True), nullable=False),
+    Column('revoked_at', DateTime(timezone=True)),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
 
 

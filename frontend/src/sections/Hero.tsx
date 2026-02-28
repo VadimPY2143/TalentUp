@@ -2,36 +2,38 @@ import { Link } from "react-router-dom"
 
 const Hero = () => {
   return (
-    <section className="bg-gradient-to-b from-navy-900 to-navy-700 pb-24 pt-20 text-white">
-      <div className="mx-auto flex max-w-[1120px] flex-col items-center px-4 text-center">
-        <h1 className="animate-fade-up font-display text-3xl font-semibold md:text-5xl">
-          Знайди роботу. Продай навички.
-        </h1>
-        <p className="animate-fade-up-delay mt-4 max-w-2xl text-base text-white/75 md:text-lg">
-          Платформа нового покоління для фрилансерів та бізнесу
-        </p>
-        <div className="animate-fade-up-delay mt-10 w-full max-w-xl">
-          <div className="flex w-full flex-col gap-3 rounded-3xl bg-white p-2 shadow-soft sm:flex-row sm:items-center sm:rounded-full">
-            <input
-              className="w-full bg-transparent px-4 py-2 text-sm text-slate-700 outline-none"
-              placeholder="Наприклад: UI Design, React, Marketing..."
-              aria-label="Пошук"
-            />
-            <button
-              className="rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-2 text-sm font-semibold text-white"
-              type="button"
-            >
-              Пошук
-            </button>
+    <section className="bg-navy-700 pb-24 pt-20 text-white">
+      <div className="mx-auto max-w-[1120px] px-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="animate-fade-up font-display text-4xl font-semibold md:text-6xl">
+            Знайди роботу. Продай навички.
+          </h1>
+          <p className="animate-fade-up-delay mt-5 text-base text-white/80 md:text-lg">
+            Платформа нового покоління для шукачів роботи та роботодавців
+          </p>
+          <div className="animate-fade-up-delay mt-10">
+            <div className="mx-auto flex w-full max-w-[760px] flex-col gap-3 rounded-2xl bg-white p-2 shadow-soft sm:flex-row sm:items-center sm:rounded-full">
+              <input
+                className="w-full bg-transparent px-4 py-2 text-sm text-slate-700 placeholder:text-slate-500 outline-none"
+                placeholder="Наприклад: UI Design, React, Marketing..."
+                aria-label="Пошук"
+              />
+              <button
+                className="rounded-xl bg-orange-500 px-8 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600 sm:rounded-full"
+                type="button"
+              >
+                Пошук
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="mt-6 animate-fade">
-          <Link
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-2.5 text-sm font-semibold text-white shadow-soft"
-            to="/register"
-          >
-            Почати зараз
-          </Link>
+          <div className="mt-7 animate-fade">
+            <Link
+              className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-8 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
+              to="/register"
+            >
+              Почати зараз
+            </Link>
+          </div>
         </div>
       </div>
     </section>
