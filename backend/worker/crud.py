@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session, resumes_table
 from users.auth import get_current_user
 from .models import EmploymentType, Resume, ResumeUpdate
+from logger import logger as LOGGER
+
 
 router = APIRouter()
 

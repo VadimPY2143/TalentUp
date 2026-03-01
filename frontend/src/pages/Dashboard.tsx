@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import Navbar from "../components/layout/Navbar"
 import { createResume, deleteResume, listResumes, updateResume } from "../api/resumes"
-import type { EmploymentType, Resume, ResumeBase } from "../types/resume"
+import type { CurrencyType, EmploymentType, Resume, ResumeBase } from "../types/resume"
 
 const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
+const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
 
 const employmentLabels: Record<EmploymentType, string> = {
   Remote: "Віддалено",
   Office: "Офіс",
   Hybrid: "Гібрид",
+}
+const currencyLabels: Record<CurrencyType, string> = {
+  UAH: "UAH (грн)",
+  USD: "USD ($)",
+  EUR: "EUR (€)",
 }
 
 const emptyResume: ResumeBase = {
@@ -289,12 +295,17 @@ const Dashboard = () => {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
-                  placeholder="Валюта"
-                  value={form.salary_currency ?? ""}
-                  onChange={(event) => updateField("salary_currency", event.target.value)}
-                />
+                <select
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-orange-500/60"
+                  value={form.salary_currency ?? "UAH"}
+                  onChange={(event) => updateField("salary_currency", event.target.value as CurrencyType)}
+                >
+                  {currencyOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {currencyLabels[option]}
+                    </option>
+                  ))}
+                </select>
                 <input
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
                   placeholder="Роки досвіду"
