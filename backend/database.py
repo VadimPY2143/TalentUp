@@ -59,6 +59,10 @@ resumes_table = Table(
     Column('salary_currency', String(10)),
     Column('years_experience', Integer),
     Column('is_active', Boolean, nullable=False, server_default='true'),
+    Column('pdf_file_path', String(500)),
+    Column('pdf_original_name', String(255)),
+    Column('pdf_size', Integer),
+    Column('pdf_uploaded_at', DateTime(timezone=True)),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
     Column(
         'updated_at',

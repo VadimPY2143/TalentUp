@@ -23,3 +23,16 @@ class Resume(BaseModel):
     salary_currency: CurrencyType = CurrencyType.UAH
     years_experience: Optional[int] = None
     is_active: bool = True
+
+
+class ResumeUpdate(BaseModel):
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    desired_role: Optional[str] = None
+    employment_type: Optional[List[EmploymentType]] = None
+    location: Optional[str] = None
+    salary_min: Optional[int] = None
+    salary_max: Optional[int] = None
+    salary_currency: Optional[CurrencyType] = None
+    years_experience: Optional[int] = None
+    is_active: Optional[bool] = None

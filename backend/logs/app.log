@@ -10,3 +10,8 @@
 2026-03-01 12:02:54 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-01 12:03:38 - moodshare - DEBUG - Normalizing employment type [<EmploymentType.remote: 'Remote'>, <EmploymentType.hybrid: 'Hybrid'>]
 2026-03-01 12:03:38 - moodshare - DEBUG - ['Remote', 'Hybrid']
+2026-03-01 14:27:59 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-01 14:27:59 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-01 14:29:38 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6
+2026-03-01 14:38:32 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6
+2026-03-01 14:39:03 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6

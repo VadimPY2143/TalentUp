@@ -16,4 +16,8 @@ export interface ResumeBase {
 
 export interface Resume extends ResumeBase {
   id: number
+  pdf_file_path?: string | null
+  pdf_original_name?: string | null
+  pdf_size?: number | null
+  pdf_uploaded_at?: string | null
 }

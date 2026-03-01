@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import Navbar from "../components/layout/Navbar"
-import { createResume, deleteResume, listResumes, updateResume } from "../api/resumes"
+import {
+  createResume,
+  deleteResume,
+  deleteResumePdf,
+  listResumes,
+  openResumePdf,
+  updateResume,
+  uploadResumePdf,
+} from "../api/resumes"
 import type { CurrencyType, EmploymentType, Resume, ResumeBase } from "../types/resume"
 
 const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
@@ -39,6 +47,10 @@ const Dashboard = () => {
   const [actionLoading, setActionLoading] = useState(false)
 
   const heading = useMemo(() => (editingId ? "Редагувати резюме" : "Нове резюме"), [editingId])
+  const editingResume = useMemo(
+    () => resumes.find((resume) => resume.id === editingId) ?? null,
+    [resumes, editingId],
+  )
 
   const loadResumes = async () => {
     try {
@@ -147,6 +159,52 @@ const Dashboard = () => {
     }
   }
 
+  const handleUploadPdf = async (resumeId: number, file: File) => {
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Можна завантажувати тільки PDF")
+      return
+    }
+
+    try {
+      setActionLoading(true)
+      await uploadResumePdf(resumeId, file)
+      await loadResumes()
+      setError(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Помилка завантаження PDF"
+      setError(message)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleOpenPdf = async (resumeId: number) => {
+    try {
+      setActionLoading(true)
+      await openResumePdf(resumeId)
+      setError(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Помилка відкриття PDF"
+      setError(message)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeletePdf = async (resumeId: number) => {
+    try {
+      setActionLoading(true)
+      await deleteResumePdf(resumeId)
+      await loadResumes()
+      setError(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Помилка видалення PDF"
+      setError(message)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#e9edf4]">
       <Navbar />
@@ -190,6 +248,7 @@ const Dashboard = () => {
                           className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-orange-500/70"
                           type="button"
                           onClick={() => handleEdit(resume)}
+                          disabled={actionLoading}
                         >
                           Редагувати
                         </button>
@@ -197,6 +256,7 @@ const Dashboard = () => {
                           className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-600 transition hover:bg-orange-500/20"
                           type="button"
                           onClick={() => handleDelete(resume.id)}
+                          disabled={actionLoading}
                         >
                           Видалити
                         </button>
@@ -323,6 +383,64 @@ const Dashboard = () => {
                 />
                 Активне резюме
               </label>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-2 text-sm font-semibold text-slate-700">PDF резюме</div>
+                {!editingId && (
+                  <div className="text-sm text-slate-500">
+                    Щоб додати PDF, спочатку створіть резюме.
+                  </div>
+                )}
+
+                {editingId && (
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      <label className="cursor-pointer rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-orange-500/70">
+                        Завантажити PDF
+                        <input
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          className="hidden"
+                          onChange={async (event) => {
+                            const selectedFile = event.target.files?.[0]
+                            if (selectedFile && editingId) {
+                              await handleUploadPdf(editingId, selectedFile)
+                            }
+                            event.target.value = ""
+                          }}
+                        />
+                      </label>
+
+                      {editingResume?.pdf_file_path && (
+                        <>
+                          <button
+                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-orange-500/70"
+                            type="button"
+                            onClick={() => handleOpenPdf(editingId)}
+                            disabled={actionLoading}
+                          >
+                            Відкрити PDF
+                          </button>
+                          <button
+                            className="rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-600 transition hover:bg-orange-500/20"
+                            type="button"
+                            onClick={() => handleDeletePdf(editingId)}
+                            disabled={actionLoading}
+                          >
+                            Видалити PDF
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="text-xs text-slate-500">
+                      {editingResume?.pdf_original_name
+                        ? `Файл: ${editingResume.pdf_original_name}`
+                        : "PDF ще не завантажено"}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {error && (
                 <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-2 text-sm text-orange-600">

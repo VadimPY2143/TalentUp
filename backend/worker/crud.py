@@ -1,18 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import delete, insert, select, update
+import time
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session, resumes_table
 from users.auth import get_current_user
 from .models import EmploymentType, Resume, ResumeUpdate
 from logger import logger as LOGGER
-
+from .tools import (
+    BACKEND_DIR,
+    MAX_PDF_SIZE_BYTES,
+    UPLOAD_ROOT,
+    get_owned_resume,
+    normalize_employment_type,
+    remove_pdf_from_disk,
+)
 
 router = APIRouter()
 
-def normalize_employment_type(value):
-    if value is None:
-        return None
-    return [item.value if isinstance(item, EmploymentType) else item for item in value]
 
 
 @router.get("/resumes")
@@ -56,14 +63,7 @@ async def update_resume(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(get_current_user),
 ):
-    stmt = select(resumes_table.c.user_id).where(resumes_table.c.id == resume_id)
-    result = await session.execute(stmt)
-    owner_id = result.scalar()
-
-    if owner_id is None:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    if owner_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Not allowed")
+    await get_owned_resume(session, resume_id, current_user["id"])
 
     values = resume.model_dump(exclude_unset=True)
     if "employment_type" in values:
@@ -83,15 +83,100 @@ async def delete_resume(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(get_current_user),
 ):
-    stmt = select(resumes_table.c.user_id).where(resumes_table.c.id == resume_id)
-    result = await session.execute(stmt)
-    owner_id = result.scalar()
-
-    if owner_id is None:
-        raise HTTPException(status_code=404, detail="Resume not found")
-    if owner_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Not allowed")
+    resume = await get_owned_resume(session, resume_id, current_user["id"])
+    remove_pdf_from_disk(resume.get("pdf_file_path"))
 
     await session.execute(delete(resumes_table).where(resumes_table.c.id == resume_id))
+    await session.commit()
+    return {"status": "ok"}
+
+
+@router.post("/resumes/{resume_id}/pdf")
+async def upload_resume_pdf(
+    resume_id: int,
+    file: UploadFile = File(...),
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+):
+    resume = await get_owned_resume(session, resume_id, current_user["id"])
+    original_name = file.filename or "resume.pdf"
+    extension = Path(original_name).suffix.lower()
+    if extension != ".pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+    content = await file.read(MAX_PDF_SIZE_BYTES + 1)
+    if len(content) > MAX_PDF_SIZE_BYTES:
+        raise HTTPException(status_code=400, detail="PDF file is too large")
+    if not content.startswith(b"%PDF"):
+        raise HTTPException(status_code=400, detail="Invalid PDF file")
+
+    user_dir = UPLOAD_ROOT / str(current_user["id"])
+    user_dir.mkdir(parents=True, exist_ok=True)
+    server_filename = f"resume_{resume_id}_{int(time.time())}.pdf"
+    file_path = user_dir / server_filename
+    file_path.write_bytes(content)
+
+    old_pdf = resume.get("pdf_file_path")
+    remove_pdf_from_disk(old_pdf)
+
+    relative_path = str(file_path.relative_to(BACKEND_DIR))
+    stmt = (
+        update(resumes_table)
+        .where(resumes_table.c.id == resume_id)
+        .values(
+            pdf_file_path=relative_path,
+            pdf_original_name=original_name[:255],
+            pdf_size=len(content),
+            pdf_uploaded_at=func.now(),
+        )
+    )
+    await session.execute(stmt)
+    await session.commit()
+    LOGGER.info("Resume PDF uploaded: resume_id=%s user_id=%s", resume_id, current_user["id"])
+    return {"status": "ok", "filename": original_name, "size": len(content)}
+
+
+@router.get("/resumes/{resume_id}/pdf")
+async def download_resume_pdf(
+    resume_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+):
+    resume = await get_owned_resume(session, resume_id, current_user["id"])
+    pdf_file_path = resume.get("pdf_file_path")
+    if not pdf_file_path:
+        raise HTTPException(status_code=404, detail="PDF not found")
+
+    file_path = (BACKEND_DIR / pdf_file_path).resolve()
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="PDF file missing on server")
+
+    return FileResponse(
+        path=file_path,
+        media_type="application/pdf",
+        filename=resume.get("pdf_original_name") or "resume.pdf",
+    )
+
+
+@router.delete("/resumes/{resume_id}/pdf")
+async def delete_resume_pdf(
+    resume_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+):
+    resume = await get_owned_resume(session, resume_id, current_user["id"])
+    remove_pdf_from_disk(resume.get("pdf_file_path"))
+
+    stmt = (
+        update(resumes_table)
+        .where(resumes_table.c.id == resume_id)
+        .values(
+            pdf_file_path=None,
+            pdf_original_name=None,
+            pdf_size=None,
+            pdf_uploaded_at=None,
+        )
+    )
+    await session.execute(stmt)
     await session.commit()
     return {"status": "ok"}
