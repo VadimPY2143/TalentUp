@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import insert, select, update
 from datetime import datetime, timedelta
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import get_session, refresh_tokens_table, users_table
+from .models import RefreshRequest, TokenPair, User, UserLogin, UserResponse
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -10,9 +13,7 @@ from .auth import (
     hash_refresh_token,
     verify_password,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
-from database import get_session, refresh_tokens_table, users_table
-from .models import RefreshRequest, TokenPair, User, UserLogin, UserResponse
+
 
 router = APIRouter()
 
