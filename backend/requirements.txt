@@ -1,4 +1,4 @@
-aiofiles==25.1.0
+ aiofiles==25.1.0
 aiogram==3.24.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.3
@@ -18,12 +18,7 @@ cffi==1.17.1
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
-cryptography==45.0.4
 distro==1.9.0
-Django==4.2.27
-django-rest-framework==0.1.0
-djangorestframework==3.16.1
-djangorestframework-simplejwt==5.3.1
 dnspython==2.6.1
 ecdsa==0.19.1
 email_validator==2.2.0
@@ -75,8 +70,6 @@ SQLAlchemy==2.0.31
 sqlparse==0.5.4
 starlette==0.37.2
 tqdm==4.67.3
-translate==3.6.1
-twikit==2.1.2
 typing_extensions==4.12.2
 urllib3==2.2.2
 uvicorn==0.30.5
