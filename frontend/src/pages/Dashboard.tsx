@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import Navbar from "../components/layout/Navbar"
+import { useAuth } from "../auth/useAuth"
+import EmployerDashboard from "./EmployerDashboard"
 import {
   createResume,
   deleteResume,
@@ -39,6 +41,7 @@ const emptyResume: ResumeBase = {
 }
 
 const Dashboard = () => {
+  const { role } = useAuth()
   const [resumes, setResumes] = useState<Resume[]>([])
   const [form, setForm] = useState<ResumeBase>(emptyResume)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -66,8 +69,12 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
+    if (role === "employer") {
+      setIsLoading(false)
+      return
+    }
     loadResumes()
-  }, [])
+  }, [role])
 
   const updateField = (field: keyof ResumeBase, value: ResumeBase[typeof field]) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -203,6 +210,10 @@ const Dashboard = () => {
     } finally {
       setActionLoading(false)
     }
+  }
+
+  if (role === "employer") {
+    return <EmployerDashboard />
   }
 
   return (

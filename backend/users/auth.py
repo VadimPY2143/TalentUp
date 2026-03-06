@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from jose.exceptions import ExpiredSignatureError
 import bcrypt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import users_table, get_session
@@ -25,8 +25,24 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
+bearer_scheme = HTTPBearer(auto_error=False)
 
+async def _authenticate_user(
+    session: AsyncSession,
+    email: str,
+    password: str,
+):
+    stmt = select(users_table).where(users_table.c.email == email)
+    result = await session.execute(stmt)
+    db_user = result.mappings().first()
+
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not verify_password(password, db_user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    return db_user
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
@@ -89,7 +105,18 @@ def verify_token(token: str) -> dict:
         )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)) -> dict:
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    if not credentials or not credentials.credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token = credentials.credentials
     payload = verify_token(token)
     email = payload.get("sub")
 

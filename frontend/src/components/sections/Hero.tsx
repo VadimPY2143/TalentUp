@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const Hero = () => {
   return (
-    <section className="bg-navy-700 pb-24 pt-20 text-white">
+    <section className="bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] pb-24 pt-20 text-white">
       <div className="mx-auto max-w-[1120px] px-4">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="animate-fade-up font-display text-4xl font-semibold md:text-6xl">

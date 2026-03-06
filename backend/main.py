@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from users.crud import router as user_router
 from worker.crud import router as worker_router
+from employer.company.crud import router as company_router
 import uvicorn
 import os
 
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(worker_router)
+app.include_router(company_router)
 
 if __name__ == "__main__":
     uvicorn.run(app)

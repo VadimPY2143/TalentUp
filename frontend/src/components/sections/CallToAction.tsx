@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const CallToAction = () => {
   return (
-    <section className="bg-navy-700 px-4 py-20">
+    <section className="bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] px-4 py-20">
       <div className="mx-auto flex max-w-[1120px] flex-col items-center gap-6 text-center text-white">
         <h2 className="animate-fade font-display text-4xl font-semibold md:text-5xl">
           Готові почати працювати?
@@ -15,7 +15,7 @@ const CallToAction = () => {
             Створити акаунт
           </Link>
           <button
-            className="rounded-2xl bg-navy-600 px-8 py-3 text-sm font-semibold text-white transition hover:bg-navy-800"
+            className="rounded-2xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] px-8 py-3 text-sm font-semibold text-white transition hover:brightness-110"
             type="button"
           >
             Дізнатися більше
