@@ -1,5 +1,4 @@
 import Navbar from "../components/layout/Navbar"
-import Footer from "../components/layout/Footer"
 import { useAuth } from "../auth/useAuth"
 import Hero from "../components/sections/Hero"
 import Categories from "../components/sections/Categories"
@@ -16,7 +15,6 @@ const Home = () => {
       <Categories />
       <TopFreelancers />
       {!isAuthenticated && <CallToAction />}
-      <Footer />
     </div>
   )
 }

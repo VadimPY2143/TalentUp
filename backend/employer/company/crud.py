@@ -5,7 +5,6 @@ from database import companies_table, get_session
 from users.define_roles import require_roles
 from .models import Company, CompanyResponse, CompanyUpdate
 
-
 router = APIRouter(tags=["companies"])
 
 
@@ -15,6 +14,17 @@ async def create_company(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
 ) -> CompanyResponse:
+    check_company_exists_stmt = select(companies_table.c.id).where(
+        companies_table.c.user_id == current_user["id"]
+    )
+    check_company_exists_result = await session.execute(check_company_exists_stmt)
+    check_company_exists = check_company_exists_result.first()
+    if check_company_exists:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Company already exists",
+        )
+
     stmt = (
         insert(companies_table)
         .values(user_id=current_user["id"], **company.model_dump(exclude_none=True))
