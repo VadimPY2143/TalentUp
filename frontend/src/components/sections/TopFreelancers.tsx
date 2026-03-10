@@ -1,4 +1,4 @@
-import { freelancers } from "../data/freelancers"
+import { freelancers } from "../../data/freelancers"
 
 const TopFreelancers = () => {
   return (

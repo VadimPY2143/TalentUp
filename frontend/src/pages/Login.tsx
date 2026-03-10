@@ -36,7 +36,7 @@ const Login = () => {
   return (
     <div className="min-h-screen w-full bg-[#e9edf4]">
       <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-2">
-        <div className="relative flex min-h-[42vh] flex-col justify-between gap-8 bg-navy-900 p-8 text-white md:p-12 lg:min-h-screen">
+        <div className="relative flex min-h-[42vh] flex-col justify-between gap-8 bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white md:p-12 lg:min-h-screen">
           <div className="text-xl font-semibold">
             Talent<span className="text-orange-500">Up</span>
           </div>
