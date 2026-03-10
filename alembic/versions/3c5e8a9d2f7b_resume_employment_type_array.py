@@ -1,4 +1,4 @@
-"""resume employment_type array
+"""vacancy_search employment_type array
 
 Revision ID: 3c5e8a9d2f7b
 Revises: 2d7b4c9e6a1f
