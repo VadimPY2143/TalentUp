@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.exceptions import ValidationException
+from pydantic import ValidationError
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from .ai_filling import generate_vacancy
@@ -56,7 +58,7 @@ async def fill_vacancy_with_ai(
     try:
         generated = await generate_vacancy(payload.description)
         return Vacancy.model_validate(generated)
-    except Exception as exc:
+    except ValidationError as exc:
         raise HTTPException(status_code=502, detail=f"Failed to parse AI vacancy response: {exc}") from exc
 
 
