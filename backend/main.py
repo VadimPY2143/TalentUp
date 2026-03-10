@@ -5,8 +5,10 @@ from users.crud import router as user_router
 from worker.crud import router as worker_router
 import uvicorn
 import os
+from pathlib import Path
 
-load_dotenv()
+# Load backend/.env regardless of current working directory.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
 

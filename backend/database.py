@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func
 from sqlalchemy.ext.asyncio import (
@@ -8,7 +9,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-load_dotenv()
+# Load backend/.env regardless of current working directory (e.g. running alembic from repo root).
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
