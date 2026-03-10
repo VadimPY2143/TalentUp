@@ -1,4 +1,4 @@
-"""add resume pdf fields
+"""add vacancy_search pdf fields
 
 Revision ID: 5a8c1d2e9f4b
 Revises: 4f2d7b1a8c3e

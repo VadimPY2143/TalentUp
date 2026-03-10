@@ -862,15 +862,28 @@ const EmployerDashboard = () => {
                       className={`relative rounded-2xl border p-5 transition ${
                         vacancy.id === editingVacancyId
                           ? "border-orange-400/60 bg-orange-50/70"
-                          : "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                          : vacancy.is_active
+                            ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                            : "border-slate-300 bg-slate-100 hover:bg-slate-100"
                       }`}
                     >
                       <div className="pr-36">
-                        <h3 className="text-base font-semibold text-slate-900">{vacancy.title}</h3>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <h3 className={`text-base font-semibold ${vacancy.is_active ? "text-slate-900" : "text-slate-700"}`}>
+                            {vacancy.title}
+                          </h3>
+                          {!vacancy.is_active && (
+                            <span className="rounded-full border border-slate-400 bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                              Неактивна
+                            </span>
+                          )}
+                        </div>
+                        <p className={`mt-1 text-sm ${vacancy.is_active ? "text-slate-600" : "text-slate-500"}`}>
                           {[vacancy.location, vacancy.salary_currency].filter(Boolean).join(" · ") || "Без деталей"}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">Оновлено: {formatDate(vacancy.updated_at)}</p>
+                        <p className={`mt-2 text-xs ${vacancy.is_active ? "text-slate-500" : "text-slate-400"}`}>
+                          Оновлено: {formatDate(vacancy.updated_at)}
+                        </p>
                       </div>
                       <div className="absolute right-4 top-4 flex items-center gap-1.5">
                         <button
