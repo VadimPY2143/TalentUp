@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
+import logo from "../../assets/talentup-logo.png"
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -20,9 +21,13 @@ const Navbar = () => {
       <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-cyan-300/15 blur-2xl" />
       <div className="pointer-events-none absolute -right-8 top-0 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
 
-      <div className="relative mx-auto flex max-w-[1120px] items-center justify-between px-4 py-4">
-        <Link to="/" className="font-display text-xl font-semibold text-white md:text-2xl">
-          Talent<span className="text-orange-500">Up</span>
+      <div className="relative mx-auto flex max-w-[1120px] items-center justify-between px-4 py-2">
+        <Link to="/" className="flex items-center gap-3">
+          <img
+            src={logo}
+            alt="TalentUp"
+            className="h-16 w-auto translate-y-0.4 scale-[1.5] origin-left md:h-20 md:translate-y-3"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-white/90 md:flex">
