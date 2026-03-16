@@ -1,0 +1,683 @@
+﻿import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react"
+import Navbar from "../components/layout/Navbar"
+import { openCandidateResume, searchCandidates } from "../api/candidates"
+import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
+
+interface FilterState {
+  city: string
+  remoteOnly: boolean
+  experience: string
+  skills: string[]
+  salaryMin: string
+  salaryMax: string
+  employmentTypes: string[]
+}
+
+interface SearchBarProps {
+  value: string
+  onChange: (value: string) => void
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  isLoading: boolean
+}
+
+interface FiltersPanelProps {
+  filters: FilterState
+  skillsInput: string
+  onSkillsInputChange: (value: string) => void
+  onAddSkills: () => void
+  onRemoveSkill: (skill: string) => void
+  onToggleEmployment: (value: string) => void
+  onUpdateField: (field: keyof FilterState, value: string | boolean) => void
+  onClear: () => void
+}
+
+interface ResultsHeaderProps {
+  total: number
+  sort: CandidateSort
+  onSortChange: (value: CandidateSort) => void
+  isLoading: boolean
+}
+
+interface CandidateCardProps {
+  candidate: CandidateSearchItem
+  isSaved: boolean
+  onToggleSave: () => void
+  onViewResume: () => void
+}
+
+interface PaginationProps {
+  page: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}
+
+const PAGE_SIZE = 6
+
+const employmentTypeOptions = [
+  { value: "Full-time", label: "Повна зайнятість" },
+  { value: "Part-time", label: "Часткова зайнятість" },
+  { value: "Contract", label: "Проєктна робота" },
+  { value: "Internship", label: "Стажування" },
+]
+
+const sortOptions: Array<{ value: CandidateSort; label: string }> = [
+  { value: "relevance", label: "За відповідністю" },
+  { value: "date", label: "За датою додавання" },
+  { value: "experience", label: "За досвідом" },
+]
+
+const initialFilters: FilterState = {
+  city: "",
+  remoteOnly: false,
+  experience: "",
+  skills: [],
+  salaryMin: "",
+  salaryMax: "",
+  employmentTypes: [],
+}
+
+const parseNumber = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return undefined
+  }
+  const numberValue = Number(trimmed)
+  return Number.isFinite(numberValue) ? numberValue : undefined
+}
+
+const formatSalary = (candidate: CandidateSearchItem) => {
+  const min = candidate.salary_min ?? undefined
+  const max = candidate.salary_max ?? undefined
+  const currency = candidate.salary_currency ?? "UAH"
+
+  if (min && max) {
+    return `${min}-${max} ${currency}`
+  }
+  if (min) {
+    return `від ${min} ${currency}`
+  }
+  if (max) {
+    return `до ${max} ${currency}`
+  }
+  return "Зарплата не вказана"
+}
+
+const formatExperience = (years?: number | null) => {
+  if (years === null || years === undefined) {
+    return "Досвід не вказано"
+  }
+  return `${years} років досвіду`
+}
+
+const formatLocation = (candidate: CandidateSearchItem) => {
+  if (candidate.city) {
+    return candidate.city
+  }
+  if (candidate.location) {
+    return candidate.location
+  }
+  if (candidate.is_remote) {
+    return "Віддалено"
+  }
+  return "Локація не вказана"
+}
+
+const SearchBar = ({ value, onChange, onSubmit, isLoading }: SearchBarProps) => (
+  <form className="mt-5 flex flex-col gap-3 md:flex-row" onSubmit={onSubmit}>
+    <div className="relative flex-1">
+      <input
+        className="w-full rounded-2xl border border-white/25 bg-white/95 px-5 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-400/70"
+        placeholder="Посада, навички, технології (наприклад: UX дизайнер, React, Node.js)"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+    <button
+      className="rounded-2xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+      type="submit"
+      disabled={isLoading}
+    >
+      {isLoading ? "Пошук..." : "Пошук кандидатів"}
+    </button>
+  </form>
+)
+
+const FiltersPanel = ({
+  filters,
+  skillsInput,
+  onSkillsInputChange,
+  onAddSkills,
+  onRemoveSkill,
+  onToggleEmployment,
+  onUpdateField,
+  onClear,
+}: FiltersPanelProps) => (
+  <aside className="h-full rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Фільтри</p>
+        <h2 className="mt-1 font-display text-lg font-semibold text-slate-900">Налаштування пошуку</h2>
+      </div>
+      <button
+        className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+        type="button"
+        onClick={onClear}
+      >
+        Очистити
+      </button>
+    </div>
+
+    <div className="mt-5 space-y-4 text-sm text-slate-700">
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Місто
+        </label>
+        <input
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+          placeholder="Київ, Львів, Одеса"
+          value={filters.city}
+          onChange={(event) => onUpdateField("city", event.target.value)}
+        />
+        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={filters.remoteOnly}
+            onChange={(event) => onUpdateField("remoteOnly", event.target.checked)}
+          />
+          Лише віддалена робота
+        </label>
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Досвід (роки)
+        </label>
+        <select
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          value={filters.experience}
+          onChange={(event) => onUpdateField("experience", event.target.value)}
+        >
+          <option value="">Будь-який</option>
+          <option value="0">До 1 року</option>
+          <option value="1">1 рік</option>
+          <option value="2">2 роки</option>
+          <option value="3">3 роки</option>
+          <option value="4">4 роки</option>
+          <option value="5">5 років</option>
+          <option value="6">6 років</option>
+          <option value="7">7 років</option>
+          <option value="8">8 років</option>
+          <option value="9">9 років</option>
+          <option value="10">10+ років</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Навички
+        </label>
+        <div className="mt-2 flex gap-2">
+          <input
+            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            placeholder="React, Figma, SQL"
+            value={skillsInput}
+            onChange={(event) => onSkillsInputChange(event.target.value)}
+            onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+              if (event.key === "Enter" || event.key === ",") {
+                event.preventDefault()
+                onAddSkills()
+              }
+            }}
+          />
+          <button
+            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+            type="button"
+            onClick={onAddSkills}
+          >
+            Додати
+          </button>
+        </div>
+        {filters.skills.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">
+            {filters.skills.map((skill) => (
+              <button
+                key={skill}
+                className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 transition hover:border-orange-300"
+                type="button"
+                onClick={() => onRemoveSkill(skill)}
+              >
+                {skill}
+                <span className="text-slate-400">×</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Зарплата
+        </label>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <input
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            placeholder="Від"
+            type="number"
+            value={filters.salaryMin}
+            onChange={(event) => onUpdateField("salaryMin", event.target.value)}
+          />
+          <input
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            placeholder="До"
+            type="number"
+            value={filters.salaryMax}
+            onChange={(event) => onUpdateField("salaryMax", event.target.value)}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Тип зайнятості
+        </label>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {employmentTypeOptions.map((option) => {
+            const active = filters.employmentTypes.includes(option.value)
+            return (
+              <button
+                key={option.value}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  active
+                    ? "border-orange-400 bg-orange-100 text-orange-700"
+                    : "border-slate-300 bg-white text-slate-700"
+                }`}
+                type="button"
+                onClick={() => onToggleEmployment(option.value)}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  </aside>
+)
+
+const ResultsHeader = ({
+  total,
+  sort,
+  onSortChange,
+  isLoading,
+}: ResultsHeaderProps) => (
+  <div className="flex flex-col gap-4 rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Результати</p>
+      <h2 className="mt-1 font-display text-lg font-semibold text-slate-900">
+        Знайдено {total} кандидатів
+      </h2>
+      {isLoading && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-orange-500" />
+          Завантаження результатів...
+        </div>
+      )}
+    </div>
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Сортування
+      </span>
+      <select
+        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+        value={sort}
+        onChange={(event) => onSortChange(event.target.value as CandidateSort)}
+      >
+        {sortOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+)
+
+const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: CandidateCardProps) => {
+  const name = candidate.name ?? "Кандидат"
+  const role = candidate.desired_role || candidate.title || "Позиція не вказана"
+  const skills = candidate.skills ?? []
+  const employment = candidate.employment_type ?? []
+
+  return (
+    <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">{name}</h3>
+            <p className="mt-1 text-sm text-slate-600">{role}</p>
+          </div>
+          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+            {formatExperience(candidate.years_experience)}
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-2 text-sm text-slate-600">
+          <div className="flex items-center justify-between">
+            <span>Локація</span>
+            <span className="font-semibold text-slate-800">{formatLocation(candidate)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Очікування</span>
+            <span className="font-semibold text-slate-800">{formatSalary(candidate)}</span>
+          </div>
+        </div>
+
+        {(skills.length > 0 || employment.length > 0) && (
+          <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
+            {skills.map((skill) => (
+              <span key={skill} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                {skill}
+              </span>
+            ))}
+            {employment.map((type) => (
+              <span key={type} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-orange-700">
+                {type}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          className="flex-1 rounded-xl bg-[#13244d] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0f1d3c]"
+          type="button"
+          onClick={onViewResume}
+        >
+          Переглянути резюме
+        </button>
+        <button
+          className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-semibold transition ${
+            isSaved
+              ? "border-orange-400 bg-orange-100 text-orange-700"
+              : "border-slate-300 text-slate-700 hover:border-orange-300"
+          }`}
+          type="button"
+          onClick={onToggleSave}
+        >
+          {isSaved ? "Збережено" : "Зберегти кандидата"}
+        </button>
+      </div>
+    </article>
+  )
+}
+
+const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
+  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+    <div className="flex items-center justify-between gap-3">
+      <button
+        className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+        type="button"
+        onClick={() => onPageChange(Math.max(1, page - 1))}
+        disabled={page === 1}
+      >
+        Попередня
+      </button>
+      <div className="text-xs font-semibold text-slate-600">
+        Сторінка {page} з {totalPages}
+      </div>
+      <button
+        className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+        type="button"
+        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        disabled={page === totalPages}
+      >
+        Наступна
+      </button>
+    </div>
+  </div>
+)
+
+const CandidateSearch = () => {
+  const [searchInput, setSearchInput] = useState("")
+  const [query, setQuery] = useState("")
+  const [searchTrigger, setSearchTrigger] = useState(0)
+  const [filters, setFilters] = useState<FilterState>(initialFilters)
+  const [skillsInput, setSkillsInput] = useState("")
+  const [sort, setSort] = useState<CandidateSort>("relevance")
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [candidates, setCandidates] = useState<CandidateSearchItem[]>([])
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set())
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  const searchParams = useMemo(
+    () => ({
+      query: query || undefined,
+      city: filters.city.trim() || undefined,
+      remote: filters.remoteOnly || undefined,
+      experience_min: parseNumber(filters.experience),
+      skills: filters.skills.length ? filters.skills : undefined,
+      salary_min: parseNumber(filters.salaryMin),
+      salary_max: parseNumber(filters.salaryMax),
+      employment_type: filters.employmentTypes.length ? filters.employmentTypes : undefined,
+      page,
+      page_size: PAGE_SIZE,
+      sort,
+    }),
+    [filters, page, query, sort],
+  )
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
+
+  useEffect(() => {
+    let mounted = true
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await searchCandidates(searchParams, controller.signal)
+        if (!mounted) {
+          return
+        }
+        setCandidates(response?.items ?? [])
+        setTotal(response?.total ?? 0)
+      } catch (err) {
+        if (!mounted) {
+          return
+        }
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return
+        }
+        const message = err instanceof Error ? err.message : "Помилка завантаження результатів"
+        setError(message)
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
+      }
+    }, 200)
+
+    return () => {
+      mounted = false
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [searchParams, searchTrigger])
+
+  const updateFilters = (field: keyof FilterState, value: string | boolean) => {
+    setFilters((prev) => ({ ...prev, [field]: value }))
+    setPage(1)
+  }
+
+  const toggleEmploymentType = (value: string) => {
+    setFilters((prev) => {
+      const exists = prev.employmentTypes.includes(value)
+      const next = exists
+        ? prev.employmentTypes.filter((item) => item !== value)
+        : [...prev.employmentTypes, value]
+      return { ...prev, employmentTypes: next }
+    })
+    setPage(1)
+  }
+
+  const addSkills = () => {
+    const tokens = skillsInput
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+    if (tokens.length === 0) {
+      return
+    }
+    setFilters((prev) => ({
+      ...prev,
+      skills: Array.from(new Set([...prev.skills, ...tokens])),
+    }))
+    setSkillsInput("")
+    setPage(1)
+  }
+
+  const removeSkill = (skill: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((item) => item !== skill),
+    }))
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setFilters(initialFilters)
+    setSkillsInput("")
+    setPage(1)
+  }
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setQuery(searchInput.trim())
+    setPage(1)
+    setSearchTrigger((prev) => prev + 1)
+  }
+
+  const toggleSave = (candidateId: number) => {
+    setSavedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(candidateId)) {
+        next.delete(candidateId)
+      } else {
+        next.add(candidateId)
+      }
+      return next
+    })
+  }
+
+  const handleViewResume = async (candidateId: number) => {
+    setActionError(null)
+    try {
+      await openCandidateResume(candidateId)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"
+      setActionError(message)
+    }
+  }
+
+  const showEmptyState = !isLoading && !error && candidates.length === 0
+
+  return (
+    <div className="min-h-screen bg-[#e9edf4]">
+      <Navbar />
+
+      <div className="mx-auto max-w-[1240px] px-4 pb-12 pt-8">
+        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium md:p-8">
+          <div className="pointer-events-none absolute -right-12 top-2 h-44 w-44 rounded-full bg-orange-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
+
+          <div className="relative">
+            <p className="text-xs uppercase tracking-[0.35em] text-white/60">
+              База резюме
+            </p>
+            <h1 className="mt-2 font-display text-2xl font-semibold md:text-3xl">
+              Пошук кандидатів за резюме
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm text-white/70">
+              Знайдіть релевантних кандидатів за ключовими словами, навичками та очікуваннями.
+            </p>
+            <SearchBar
+              value={searchInput}
+              onChange={setSearchInput}
+              onSubmit={handleSearchSubmit}
+              isLoading={isLoading}
+            />
+          </div>
+        </section>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-[320px,1fr]">
+          <FiltersPanel
+            filters={filters}
+            skillsInput={skillsInput}
+            onSkillsInputChange={setSkillsInput}
+            onAddSkills={addSkills}
+            onRemoveSkill={removeSkill}
+            onToggleEmployment={toggleEmploymentType}
+            onUpdateField={updateFilters}
+            onClear={clearFilters}
+          />
+
+          <div className="space-y-4">
+            <ResultsHeader total={total} sort={sort} onSortChange={setSort} isLoading={isLoading} />
+
+            {error && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+            {actionError && (
+              <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
+                {actionError}
+              </div>
+            )}
+            {showEmptyState && (
+              <div className="rounded-2xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500 shadow-soft">
+                Нічого не знайдено. Спробуйте змінити фільтри або уточнити запит.
+              </div>
+            )}
+
+            {candidates.length > 0 && (
+              <div className="grid gap-4 md:grid-cols-2">
+                {candidates.map((candidate) => (
+                  <CandidateCard
+                    key={candidate.id}
+                    candidate={candidate}
+                    isSaved={savedIds.has(candidate.id)}
+                    onToggleSave={() => toggleSave(candidate.id)}
+                    onViewResume={() => handleViewResume(candidate.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && !error && (
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CandidateSearch

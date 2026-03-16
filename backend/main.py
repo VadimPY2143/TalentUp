@@ -7,8 +7,10 @@ from employer.company.crud import router as company_router
 from employer.vacancy.crud import router as vacancy_router
 import uvicorn
 import os
+from pathlib import Path
 
-load_dotenv()
+# Load backend/.env regardless of current working directory.
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
 
