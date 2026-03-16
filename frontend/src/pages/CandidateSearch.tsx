@@ -6,7 +6,7 @@
   type KeyboardEvent,
 } from "react"
 import Navbar from "../components/layout/Navbar"
-import { openCandidateResume, searchCandidates } from "../api/candidates"
+import { fetchRecommendedCandidates, openCandidateResume, searchCandidates } from "../api/candidates"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 
 interface FilterState {
@@ -42,6 +42,7 @@ interface ResultsHeaderProps {
   sort: CandidateSort
   onSortChange: (value: CandidateSort) => void
   isLoading: boolean
+  isRecommendationMode: boolean
 }
 
 interface CandidateCardProps {
@@ -315,12 +316,15 @@ const ResultsHeader = ({
   sort,
   onSortChange,
   isLoading,
+  isRecommendationMode,
 }: ResultsHeaderProps) => (
   <div className="flex flex-col gap-4 rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Результати</p>
+      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+        {isRecommendationMode ? "Рекомендації" : "Результати"}
+      </p>
       <h2 className="mt-1 font-display text-lg font-semibold text-slate-900">
-        Знайдено {total} кандидатів
+        {isRecommendationMode ? "Рекомендовані резюме" : `Знайдено ${total} резюме`}
       </h2>
       {isLoading && (
         <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
@@ -349,23 +353,38 @@ const ResultsHeader = ({
 )
 
 const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: CandidateCardProps) => {
-  const name = candidate.name ?? "Кандидат"
-  const role = candidate.desired_role || candidate.title || "Позиція не вказана"
+  const title = candidate.title || candidate.desired_role || "Резюме"
+  const role = candidate.desired_role || "Позиція не вказана"
   const skills = candidate.skills ?? []
   const employment = candidate.employment_type ?? []
+  const hasPdf = Boolean(candidate.pdf_file_path)
+  const isActive = candidate.is_active !== false
 
   return (
     <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">{name}</h3>
+            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
             <p className="mt-1 text-sm text-slate-600">{role}</p>
           </div>
-          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
-            {formatExperience(candidate.years_experience)}
+          <div className="flex flex-col items-end gap-2">
+            <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+              {formatExperience(candidate.years_experience)}
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {isActive ? "Активне" : "Неактивне"}
+            </span>
           </div>
         </div>
+
+        {candidate.summary && (
+          <p className="mt-3 text-sm text-slate-600">{candidate.summary}</p>
+        )}
 
         <div className="mt-4 space-y-2 text-sm text-slate-600">
           <div className="flex items-center justify-between">
@@ -396,11 +415,12 @@ const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: Candi
 
       <div className="mt-5 flex flex-wrap gap-2">
         <button
-          className="flex-1 rounded-xl bg-[#13244d] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0f1d3c]"
+          className="flex-1 rounded-xl bg-[#13244d] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0f1d3c] disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
           onClick={onViewResume}
+          disabled={!hasPdf}
         >
-          Переглянути резюме
+          {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
         </button>
         <button
           className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-semibold transition ${
@@ -460,6 +480,7 @@ const CandidateSearch = () => {
   const [actionError, setActionError] = useState<string | null>(null)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const hasQuery = query.trim().length >= 2
 
   const searchParams = useMemo(
     () => ({
@@ -491,7 +512,9 @@ const CandidateSearch = () => {
       setIsLoading(true)
       setError(null)
       try {
-        const response = await searchCandidates(searchParams, controller.signal)
+        const response = hasQuery
+          ? await searchCandidates(searchParams, controller.signal)
+          : await fetchRecommendedCandidates(PAGE_SIZE, (page - 1) * PAGE_SIZE, controller.signal)
         if (!mounted) {
           return
         }
@@ -638,7 +661,13 @@ const CandidateSearch = () => {
           />
 
           <div className="space-y-4">
-            <ResultsHeader total={total} sort={sort} onSortChange={setSort} isLoading={isLoading} />
+            <ResultsHeader
+              total={total}
+              sort={sort}
+              onSortChange={setSort}
+              isLoading={isLoading}
+              isRecommendationMode={!hasQuery}
+            />
 
             {error && (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

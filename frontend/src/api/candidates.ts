@@ -1,8 +1,5 @@
 import { apiFetch, apiFetchBlob } from "./client"
-import type {
-  CandidateSearchParams,
-  CandidateSearchResponse,
-} from "../types/candidate"
+import type { CandidateSearchParams, CandidateSearchResponse } from "../types/candidate"
 
 const appendParam = (
   params: URLSearchParams,
@@ -17,34 +14,43 @@ const appendParam = (
 
 const buildSearchParams = (payload: CandidateSearchParams) => {
   const params = new URLSearchParams()
-  appendParam(params, "query", payload.query)
-  appendParam(params, "city", payload.city)
-  appendParam(params, "remote", payload.remote)
-  appendParam(params, "experience_min", payload.experience_min)
-  appendParam(params, "experience_max", payload.experience_max)
-  appendParam(params, "salary_min", payload.salary_min)
-  appendParam(params, "salary_max", payload.salary_max)
-  appendParam(params, "page", payload.page)
-  appendParam(params, "page_size", payload.page_size)
-  appendParam(params, "sort", payload.sort)
-
-  if (payload.skills?.length) {
-    params.set("skills", payload.skills.join(","))
+  appendParam(params, "resume_name", payload.query)
+  if (payload.page_size !== undefined) {
+    appendParam(params, "limit", payload.page_size)
   }
-  if (payload.employment_type?.length) {
-    params.set("employment_type", payload.employment_type.join(","))
+  if (payload.page !== undefined && payload.page_size !== undefined) {
+    const offset = Math.max(0, (payload.page - 1) * payload.page_size)
+    appendParam(params, "offset", offset)
   }
 
   return params.toString()
 }
 
-export const searchCandidates = (
+export const searchCandidates = async (
   payload: CandidateSearchParams,
   signal?: AbortSignal,
-) => {
+): Promise<CandidateSearchResponse> => {
   const query = buildSearchParams(payload)
-  const path = query ? `/resumes/search?${query}` : "/resumes/search"
-  return apiFetch<CandidateSearchResponse>(path, { signal })
+  const path = query ? `/resume_search?${query}` : "/resume_search"
+  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(path, { signal })
+  const items = data?.resumes ?? []
+  return { total: items.length, items }
+}
+
+export const fetchRecommendedCandidates = async (
+  limit: number,
+  offset: number,
+  signal?: AbortSignal,
+): Promise<CandidateSearchResponse> => {
+  const params = new URLSearchParams()
+  params.set("limit", String(limit))
+  params.set("offset", String(offset))
+  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(
+    `/resume_search/recommendations?${params.toString()}`,
+    { signal },
+  )
+  const items = data?.resumes ?? []
+  return { total: items.length, items }
 }
 
 export const openCandidateResume = async (resumeId: number): Promise<void> => {

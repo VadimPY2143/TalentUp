@@ -73,6 +73,14 @@ resumes_table = Table(
     ),
 )
 
+resume_search_history_table = Table(
+    'resume_search_history',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('search_text', String(255), nullable=False),
+)
+
 companies_table = Table(
     'companies',
     metadata,

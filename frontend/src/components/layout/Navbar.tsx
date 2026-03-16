@@ -25,6 +25,7 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-3">
           <img
             src={logo}
+
             alt="TalentUp"
             className="h-16 w-auto translate-y-0.4 scale-[1.5] origin-left md:h-20 md:translate-y-3"
           />
