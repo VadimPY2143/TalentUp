@@ -1,10 +1,11 @@
 from typing import Any
-from fastapi import Depends, APIRouter, Query
+from fastapi import Depends, APIRouter, Query, HTTPException
 from sqlalchemy import select, insert, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import resumes_table, resume_search_history_table, vacancies_table
 from users.define_roles import require_roles
 from database import get_session
+from search.resume_search.ai_summary import summarize_resume
 
 router = APIRouter(tags=["resume_search"])
 
@@ -96,3 +97,19 @@ async def resumes_recommendations(
     result = await session.execute(stmt)
     resumes = [dict(row) for row in result.mappings().all()]
     return {"resumes": resumes}
+
+
+@router.get("/resume_search/summary")
+async def resume_summary(
+        resume_id: int,
+        session: AsyncSession = Depends(get_session),
+):
+    stmt = select(resumes_table).where(resumes_table.c.id == resume_id)
+    result = await session.execute(stmt)
+    resume_row = result.mappings().first()
+    if not resume_row:
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    resume_summary = await summarize_resume(dict(resume_row))
+
+    return resume_summary

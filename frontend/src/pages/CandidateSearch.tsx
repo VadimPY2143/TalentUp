@@ -7,6 +7,7 @@
 } from "react"
 import Navbar from "../components/layout/Navbar"
 import { fetchRecommendedCandidates, openCandidateResume, searchCandidates } from "../api/candidates"
+import { apiFetch } from "../api/client"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 
 interface FilterState {
@@ -50,6 +51,7 @@ interface CandidateCardProps {
   isSaved: boolean
   onToggleSave: () => void
   onViewResume: () => void
+  onViewSummary: () => void
 }
 
 interface PaginationProps {
@@ -352,13 +354,21 @@ const ResultsHeader = ({
   </div>
 )
 
-const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: CandidateCardProps) => {
+const CandidateCard = ({
+  candidate,
+  isSaved,
+  onToggleSave,
+  onViewResume,
+  onViewSummary,
+}: CandidateCardProps) => {
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
   const skills = candidate.skills ?? []
   const employment = candidate.employment_type ?? []
   const hasPdf = Boolean(candidate.pdf_file_path)
   const isActive = candidate.is_active !== false
+  const summaryLength = candidate.summary?.trim().length ?? 0
+  const showAiSummary = summaryLength >= 120
 
   return (
     <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
@@ -369,6 +379,15 @@ const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: Candi
             <p className="mt-1 text-sm text-slate-600">{role}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
+            {showAiSummary && (
+              <button
+                className="rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f]"
+                type="button"
+                onClick={onViewSummary}
+              >
+                AI Summary
+              </button>
+            )}
             <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
               {formatExperience(candidate.years_experience)}
             </div>
@@ -415,7 +434,7 @@ const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: Candi
 
       <div className="mt-5 flex flex-wrap gap-2">
         <button
-          className="flex-1 rounded-xl bg-[#13244d] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0f1d3c] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex-1 rounded-lg bg-[#1f2f5e] px-4 py-2.5 text-xs font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
           onClick={onViewResume}
           disabled={!hasPdf}
@@ -423,10 +442,10 @@ const CandidateCard = ({ candidate, isSaved, onToggleSave, onViewResume }: Candi
           {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
         </button>
         <button
-          className={`flex-1 rounded-xl border px-4 py-2.5 text-xs font-semibold transition ${
+          className={`flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-700 ${
             isSaved
-              ? "border-orange-400 bg-orange-100 text-orange-700"
-              : "border-slate-300 text-slate-700 hover:border-orange-300"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300"
+              : ""
           }`}
           type="button"
           onClick={onToggleSave}
@@ -478,6 +497,14 @@ const CandidateSearch = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [summaryModal, setSummaryModal] = useState<{
+    candidateId: number
+    title: string
+    summary: string
+    strengths: string[]
+  } | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasQuery = query.trim().length >= 2
@@ -618,6 +645,27 @@ const CandidateSearch = () => {
     }
   }
 
+  const handleViewSummary = async (candidate: CandidateSearchItem) => {
+    setSummaryError(null)
+    setSummaryLoading(true)
+    try {
+      const data = await apiFetch<{ summary: string; strengths: string[] }>(
+        `/resume_search/summary?resume_id=${candidate.id}`,
+      )
+      setSummaryModal({
+        candidateId: candidate.id,
+        title: candidate.title || candidate.desired_role || "Резюме",
+        summary: data?.summary ?? "",
+        strengths: data?.strengths ?? [],
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося отримати вижимку"
+      setSummaryError(message)
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
   const showEmptyState = !isLoading && !error && candidates.length === 0
 
   return (
@@ -679,6 +727,11 @@ const CandidateSearch = () => {
                 {actionError}
               </div>
             )}
+            {summaryError && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {summaryError}
+              </div>
+            )}
             {showEmptyState && (
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500 shadow-soft">
                 Нічого не знайдено. Спробуйте змінити фільтри або уточнити запит.
@@ -694,6 +747,7 @@ const CandidateSearch = () => {
                     isSaved={savedIds.has(candidate.id)}
                     onToggleSave={() => toggleSave(candidate.id)}
                     onViewResume={() => handleViewResume(candidate.id)}
+                    onViewSummary={() => handleViewSummary(candidate)}
                   />
                 ))}
               </div>
@@ -705,6 +759,54 @@ const CandidateSearch = () => {
           </div>
         </div>
       </div>
+      {summaryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-strong">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Вижимка резюме
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-slate-900">
+                  {summaryModal.title}
+                </h3>
+              </div>
+              <button
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300"
+                type="button"
+                onClick={() => setSummaryModal(null)}
+              >
+                Закрити
+              </button>
+            </div>
+
+            {summaryLoading ? (
+              <div className="mt-4 text-sm text-slate-500">Генеруємо...</div>
+            ) : (
+              <>
+                <p className="mt-4 text-sm text-slate-700">{summaryModal.summary}</p>
+                {summaryModal.strengths.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Сильні сторони
+                    </p>
+                    <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                      {summaryModal.strengths.map((item, index) => (
+                        <li
+                          key={`${summaryModal.candidateId}-${index}`}
+                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
