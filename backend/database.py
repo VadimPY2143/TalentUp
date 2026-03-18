@@ -140,6 +140,14 @@ vacancies_table = Table(
     ),
 )
 
+saved_resumes_table = Table(
+    'saved_resumes',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('company_id', Integer, ForeignKey('companies.id'), nullable=False),
+    Column('saved_resume_id', Integer, ForeignKey('resumes.id'), nullable=False),
+)
+
 refresh_tokens_table = Table(
     'refresh_tokens',
     metadata,
@@ -150,6 +158,7 @@ refresh_tokens_table = Table(
     Column('revoked_at', DateTime(timezone=True)),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
+
 
 
 

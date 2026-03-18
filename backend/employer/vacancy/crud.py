@@ -1,170 +1,1 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.exceptions import ValidationException
-from pydantic import ValidationError
-from sqlalchemy import delete, insert, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-from .ai_filling import generate_vacancy
-from database import companies_table, get_session, vacancies_table
-from users.define_roles import require_roles
-from .models import Vacancy, VacancyAIFillRequest, VacancyResponse, VacancyUpdate
-
-router = APIRouter(tags=["vacancies"])
-
-async def _ensure_owned_company(
-    company_id: int,
-    session: AsyncSession,
-    current_user: dict,
-) -> None:
-    stmt = select(companies_table.c.id).where(
-        companies_table.c.id == company_id,
-        companies_table.c.user_id == current_user["id"],
-    )
-    result = await session.execute(stmt)
-    company = result.first()
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-
-
-
-@router.get("/companies/{company_id}/vacancies", response_model=list[VacancyResponse])
-async def list_company_vacancies(
-    company_id: int,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-) -> list[VacancyResponse]:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-
-    stmt = (
-        select(vacancies_table)
-        .where(vacancies_table.c.company_id == company_id)
-        .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())
-    )
-    result = await session.execute(stmt)
-    rows = result.mappings().all()
-    return [VacancyResponse(**row) for row in rows]
-
-
-@router.post(
-    "/companies/{company_id}/vacancies/ai-fill",
-    response_model=Vacancy,
-)
-async def fill_vacancy_with_ai(
-    company_id: int,
-    payload: VacancyAIFillRequest,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-) -> Vacancy:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-    try:
-        generated = await generate_vacancy(payload.description)
-        return Vacancy.model_validate(generated)
-    except ValidationError as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to parse AI vacancy response: {exc}") from exc
-
-
-@router.post(
-    "/companies/{company_id}/vacancies",
-    response_model=VacancyResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_vacancy(
-    company_id: int,
-    vacancy: Vacancy,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-) -> VacancyResponse:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-
-    stmt = (
-        insert(vacancies_table)
-        .values(
-            company_id=company_id,
-            created_by_user_id=current_user["id"],
-            **vacancy.model_dump(exclude_none=True),
-        )
-        .returning(*vacancies_table.c)
-    )
-    result = await session.execute(stmt)
-    await session.commit()
-    row = result.mappings().one()
-    return VacancyResponse(**row)
-
-
-@router.get("/companies/{company_id}/vacancies/{vacancy_id}", response_model=VacancyResponse)
-async def get_vacancy_by_id(
-    company_id: int,
-    vacancy_id: int,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-) -> VacancyResponse:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-
-    stmt = select(vacancies_table).where(
-        vacancies_table.c.id == vacancy_id,
-        vacancies_table.c.company_id == company_id,
-    )
-    result = await session.execute(stmt)
-    row = result.mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Vacancy not found")
-    return VacancyResponse(**row)
-
-
-@router.put("/companies/{company_id}/vacancies/{vacancy_id}", response_model=VacancyResponse)
-async def update_vacancy_by_id(
-    company_id: int,
-    vacancy_id: int,
-    payload: VacancyUpdate,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-) -> VacancyResponse:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-
-    values = payload.model_dump(exclude_unset=True, exclude_none=True)
-    if not values:
-        raise HTTPException(status_code=400, detail="No fields to update")
-
-    stmt = (
-        update(vacancies_table)
-        .where(
-            vacancies_table.c.id == vacancy_id,
-            vacancies_table.c.company_id == company_id,
-        )
-        .values(**values)
-        .returning(*vacancies_table.c)
-    )
-    result = await session.execute(stmt)
-    await session.commit()
-    row = result.mappings().first()
-
-    if not row:
-        raise HTTPException(status_code=404, detail="Vacancy not found")
-
-    return VacancyResponse(**row)
-
-
-@router.delete("/companies/{company_id}/vacancies/{vacancy_id}")
-async def delete_vacancy_by_id(
-    company_id: int,
-    vacancy_id: int,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
-):
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
-
-    stmt = (
-        delete(vacancies_table)
-        .where(
-            vacancies_table.c.id == vacancy_id,
-            vacancies_table.c.company_id == company_id,
-        )
-        .returning(vacancies_table.c.id)
-    )
-    result = await session.execute(stmt)
-    await session.commit()
-    deleted = result.first()
-
-    if not deleted:
-        raise HTTPException(status_code=404, detail="Vacancy not found")
-
-    return {"status": "ok"}
+from fastapi import APIRouter, Depends, HTTPException, statusfrom fastapi.exceptions import ValidationExceptionfrom pydantic import ValidationErrorfrom sqlalchemy import delete, insert, select, updatefrom sqlalchemy.ext.asyncio import AsyncSessionfrom .ai_filling import generate_vacancyfrom database import companies_table, get_session, vacancies_tablefrom users.define_roles import require_rolesfrom .models import Vacancy, VacancyAIFillRequest, VacancyResponse, VacancyUpdaterouter = APIRouter(tags=["vacancies"])async def _ensure_owned_company(    company_id: int,    session: AsyncSession,    current_user: dict,) -> None:    stmt = select(companies_table.c.id).where(        companies_table.c.id == company_id,        companies_table.c.user_id == current_user["id"],    )    result = await session.execute(stmt)    company = result.first()    if not company:        raise HTTPException(status_code=404, detail="Company not found")@router.get("/companies/{company_id}/vacancies", response_model=list[VacancyResponse])async def list_company_vacancies(    company_id: int,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),) -> list[VacancyResponse]:    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    stmt = (        select(vacancies_table)        .where(vacancies_table.c.company_id == company_id)        .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())    )    result = await session.execute(stmt)    rows = result.mappings().all()    return [VacancyResponse(**row) for row in rows]@router.post(    "/companies/{company_id}/vacancies/ai-fill",    response_model=Vacancy,)async def fill_vacancy_with_ai(    company_id: int,    payload: VacancyAIFillRequest,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),) -> Vacancy:    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    try:        generated = await generate_vacancy(payload.description)        return Vacancy.model_validate(generated)    except ValidationError as exc:        raise HTTPException(status_code=502, detail=f"Failed to parse AI vacancy response: {exc}") from exc@router.post(    "/companies/{company_id}/vacancies",    response_model=VacancyResponse,    status_code=status.HTTP_201_CREATED,)async def create_vacancy(    company_id: int,    vacancy: Vacancy,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),) -> VacancyResponse:    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    stmt = (        insert(vacancies_table)        .values(            company_id=company_id,            created_by_user_id=current_user["id"],            **vacancy.model_dump(exclude_none=True),        )        .returning(*vacancies_table.c)    )    result = await session.execute(stmt)    await session.commit()    row = result.mappings().one()    return VacancyResponse(**row)@router.get("/companies/{company_id}/vacancies/{vacancy_id}", response_model=VacancyResponse)async def get_vacancy_by_id(    company_id: int,    vacancy_id: int,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),) -> VacancyResponse:    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    stmt = select(vacancies_table).where(        vacancies_table.c.id == vacancy_id,        vacancies_table.c.company_id == company_id,    )    result = await session.execute(stmt)    row = result.mappings().first()    if not row:        raise HTTPException(status_code=404, detail="Vacancy not found")    return VacancyResponse(**row)@router.put("/companies/{company_id}/vacancies/{vacancy_id}", response_model=VacancyResponse)async def update_vacancy_by_id(    company_id: int,    vacancy_id: int,    payload: VacancyUpdate,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),) -> VacancyResponse:    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    values = payload.model_dump(exclude_unset=True, exclude_none=True)    if not values:        raise HTTPException(status_code=400, detail="No fields to update")    stmt = (        update(vacancies_table)        .where(            vacancies_table.c.id == vacancy_id,            vacancies_table.c.company_id == company_id,        )        .values(**values)        .returning(*vacancies_table.c)    )    result = await session.execute(stmt)    await session.commit()    row = result.mappings().first()    if not row:        raise HTTPException(status_code=404, detail="Vacancy not found")    return VacancyResponse(**row)@router.delete("/companies/{company_id}/vacancies/{vacancy_id}")async def delete_vacancy_by_id(    company_id: int,    vacancy_id: int,    session: AsyncSession = Depends(get_session),    current_user: dict = Depends(require_roles(["employer"])),):    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)    stmt = (        delete(vacancies_table)        .where(            vacancies_table.c.id == vacancy_id,            vacancies_table.c.company_id == company_id,        )        .returning(vacancies_table.c.id)    )    result = await session.execute(stmt)    await session.commit()    deleted = result.first()    if not deleted:        raise HTTPException(status_code=404, detail="Vacancy not found")    return {"status": "ok"}

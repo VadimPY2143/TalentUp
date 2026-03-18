@@ -1,5 +1,6 @@
 import { apiFetch, apiFetchBlob } from "./client"
 import type { CandidateSearchParams, CandidateSearchResponse } from "../types/candidate"
+import type { Resume } from "../types/resume"
 
 const appendParam = (
   params: URLSearchParams,
@@ -58,4 +59,14 @@ export const openCandidateResume = async (resumeId: number): Promise<void> => {
   const url = window.URL.createObjectURL(blob)
   window.open(url, "_blank", "noopener,noreferrer")
   window.setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+}
+
+export const saveCandidateResume = (companyId: number, resumeId: number) => {
+  return apiFetch<{ status: string }>(`/companies/${companyId}/resumes/${resumeId}`, {
+    method: "POST",
+  })
+}
+
+export const listSavedResumesByCompany = (companyId: number) => {
+  return apiFetch<Resume[]>(`/companies/${companyId}/saved-resumes`)
 }

@@ -34,8 +34,8 @@ const Navbar = () => {
         <nav className="hidden items-center gap-8 text-sm font-medium text-white/90 md:flex">
           {!isAuthenticated && (
             <>
-              <Link className="transition hover:text-orange-300" to="/">Знайти роботу</Link>
-              <Link className="transition hover:text-orange-300" to="/">Найняти фахівця</Link>
+              <Link className="transition hover:text-orange-300" to="/register?role=worker">Знайти роботу</Link>
+              <Link className="transition hover:text-orange-300" to="/register?role=employer">Найняти фахівця</Link>
             </>
           )}
           {isAuthenticated && role === "worker" && (
