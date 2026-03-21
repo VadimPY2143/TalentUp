@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import Navbar from "../components/layout/Navbar"
+import { listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
 import {
   aiFillCompanyVacancy,
@@ -9,6 +10,7 @@ import {
   updateCompanyVacancy,
 } from "../api/vacancies"
 import type { CompanyPayload, CompanyResponse } from "../types/company"
+import type { Resume } from "../types/resume"
 import type { VacancyPayload, VacancyResponse } from "../types/vacancy"
 
 interface CompanyFormState {
@@ -285,6 +287,20 @@ const getWebsiteUrl = (website?: string | null): string | null => {
   return /^https?:\/\//i.test(website) ? website : `https://${website}`
 }
 
+const formatResumeSalary = (resume: Resume): string => {
+  const currency = resume.salary_currency ?? "UAH"
+  if (resume.salary_min && resume.salary_max) {
+    return `${resume.salary_min}-${resume.salary_max} ${currency}`
+  }
+  if (resume.salary_min) {
+    return `від ${resume.salary_min} ${currency}`
+  }
+  if (resume.salary_max) {
+    return `до ${resume.salary_max} ${currency}`
+  }
+  return "Зарплата не вказана"
+}
+
 const EmployerDashboard = () => {
   const [company, setCompany] = useState<CompanyResponse | null>(null)
   const [extraCompaniesCount, setExtraCompaniesCount] = useState(0)
@@ -299,10 +315,14 @@ const EmployerDashboard = () => {
   const [vacancyPage, setVacancyPage] = useState(1)
   const [editingVacancyId, setEditingVacancyId] = useState<number | null>(null)
   const [vacancyForm, setVacancyForm] = useState<VacancyFormState>(emptyVacancyForm)
+  const [rightPanelView, setRightPanelView] = useState<"vacancies" | "saved">("vacancies")
   const [isVacancyLoading, setIsVacancyLoading] = useState(false)
   const [isVacancySaving, setIsVacancySaving] = useState(false)
   const [vacancyError, setVacancyError] = useState<string | null>(null)
   const [vacancySuccess, setVacancySuccess] = useState<string | null>(null)
+  const [savedResumes, setSavedResumes] = useState<Resume[]>([])
+  const [isSavedResumesLoading, setIsSavedResumesLoading] = useState(false)
+  const [savedResumesError, setSavedResumesError] = useState<string | null>(null)
   const [aiDescription, setAiDescription] = useState("")
   const [isAIFilling, setIsAIFilling] = useState(false)
   const [showAIPromptEditor, setShowAIPromptEditor] = useState(false)
@@ -346,6 +366,20 @@ const EmployerDashboard = () => {
     }
   }
 
+  const loadSavedResumes = async (companyId: number) => {
+    try {
+      setIsSavedResumesLoading(true)
+      setSavedResumesError(null)
+      const data = await listSavedResumesByCompany(companyId)
+      setSavedResumes(data)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося завантажити збережені резюме"
+      setSavedResumesError(message)
+    } finally {
+      setIsSavedResumesLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadCompany()
   }, [])
@@ -353,11 +387,13 @@ const EmployerDashboard = () => {
   useEffect(() => {
     if (!company) {
       setVacancies([])
+      setSavedResumes([])
       setEditingVacancyId(null)
       setVacancyForm(emptyVacancyForm)
       return
     }
     loadVacancies(company.id)
+    loadSavedResumes(company.id)
   }, [company?.id])
 
   useEffect(() => {
@@ -826,112 +862,178 @@ const EmployerDashboard = () => {
 
           <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-2xl font-semibold text-slate-900">Вакансії компанії</h2>
+              <h2 className="font-display text-2xl font-semibold text-slate-900">
+                {rightPanelView === "vacancies" ? "Вакансії компанії" : "Збережені кандидати"}
+              </h2>
               <button
                 className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
-                onClick={() => company && loadVacancies(company.id)}
-                disabled={!company || isVacancyLoading}
+                onClick={() => company && (rightPanelView === "vacancies" ? loadVacancies(company.id) : loadSavedResumes(company.id))}
+                disabled={!company || (rightPanelView === "vacancies" ? isVacancyLoading : isSavedResumesLoading)}
               >
                 Оновити
               </button>
             </div>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <div className="mt-3 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+              <button
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  rightPanelView === "vacancies" ? "bg-white text-slate-900 shadow-soft" : "text-slate-600 hover:text-slate-800"
+                }`}
+                type="button"
+                onClick={() => setRightPanelView("vacancies")}
+              >
+                Вакансії
+              </button>
+              <button
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  rightPanelView === "saved" ? "bg-white text-slate-900 shadow-soft" : "text-slate-600 hover:text-slate-800"
+                }`}
+                type="button"
+                onClick={() => setRightPanelView("saved")}
+              >
+                Збережені кандидати
+              </button>
+            </div>
+
+            <p className="mt-2 text-sm text-slate-500">
               {company
                 ? `Компанія: ${company.name}`
-                : "Створіть компанію, щоб додавати та керувати вакансіями"}
+                : "Створіть компанію, щоб керувати вакансіями та збереженими кандидатами"}
             </p>
 
-            {!company ? (
-              <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
-                Вакансії стануть доступні після створення компанії.
-              </div>
-            ) : isVacancyLoading ? (
-              <div className="mt-6 text-sm text-slate-500">Завантаження вакансій...</div>
-            ) : vacancies.length === 0 ? (
-              <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
-                Поки що вакансій немає. Створіть першу вакансію.
-              </div>
-            ) : (
-              <div className="mt-4 flex flex-1 flex-col">
-                <div className="space-y-3">
-                  {paginatedVacancies.map((vacancy) => (
-                    <article
-                      key={vacancy.id}
-                      className={`relative rounded-2xl border p-5 transition ${
-                        vacancy.id === editingVacancyId
-                          ? "border-orange-400/60 bg-orange-50/70"
-                          : vacancy.is_active
-                            ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
-                            : "border-slate-300 bg-slate-100 hover:bg-slate-100"
-                      }`}
-                    >
-                      <div className="pr-36">
-                        <div className="flex items-center gap-2">
-                          <h3 className={`text-base font-semibold ${vacancy.is_active ? "text-slate-900" : "text-slate-700"}`}>
-                            {vacancy.title}
-                          </h3>
-                          {!vacancy.is_active && (
-                            <span className="rounded-full border border-slate-400 bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                              Неактивна
-                            </span>
-                          )}
-                        </div>
-                        <p className={`mt-1 text-sm ${vacancy.is_active ? "text-slate-600" : "text-slate-500"}`}>
-                          {[vacancy.location, vacancy.salary_currency].filter(Boolean).join(" · ") || "Без деталей"}
-                        </p>
-                        <p className={`mt-2 text-xs ${vacancy.is_active ? "text-slate-500" : "text-slate-400"}`}>
-                          Оновлено: {formatDate(vacancy.updated_at)}
-                        </p>
-                      </div>
-                      <div className="absolute right-4 top-4 flex items-center gap-1.5">
-                        <button
-                          className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-orange-500/70"
-                          type="button"
-                          onClick={() => startEditVacancy(vacancy)}
-                        >
-                          Редагувати
-                        </button>
-                        <button
-                          className="rounded-xl border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
-                          type="button"
-                          onClick={() => handleDeleteVacancy(vacancy.id)}
-                          disabled={isVacancySaving}
-                        >
-                          Видалити
-                        </button>
-                      </div>
-                    </article>
-                  ))}
+            {rightPanelView === "vacancies" ? (
+              !company ? (
+                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                  Вакансії стануть доступні після створення компанії.
                 </div>
+              ) : isVacancyLoading ? (
+                <div className="mt-6 text-sm text-slate-500">Завантаження вакансій...</div>
+              ) : vacancies.length === 0 ? (
+                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                  Поки що вакансій немає. Створіть першу вакансію.
+                </div>
+              ) : (
+                <div className="mt-4 flex flex-1 flex-col">
+                  <div className="space-y-3">
+                    {paginatedVacancies.map((vacancy) => (
+                      <article
+                        key={vacancy.id}
+                        className={`relative rounded-2xl border p-5 transition ${
+                          vacancy.id === editingVacancyId
+                            ? "border-orange-400/60 bg-orange-50/70"
+                            : vacancy.is_active
+                              ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                              : "border-slate-300 bg-slate-100 hover:bg-slate-100"
+                        }`}
+                      >
+                        <div className="pr-36">
+                          <div className="flex items-center gap-2">
+                            <h3 className={`text-base font-semibold ${vacancy.is_active ? "text-slate-900" : "text-slate-700"}`}>
+                              {vacancy.title}
+                            </h3>
+                            {!vacancy.is_active && (
+                              <span className="rounded-full border border-slate-400 bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                                Неактивна
+                              </span>
+                            )}
+                          </div>
+                          <p className={`mt-1 text-sm ${vacancy.is_active ? "text-slate-600" : "text-slate-500"}`}>
+                            {[vacancy.location, vacancy.salary_currency].filter(Boolean).join(" · ") || "Без деталей"}
+                          </p>
+                          <p className={`mt-2 text-xs ${vacancy.is_active ? "text-slate-500" : "text-slate-400"}`}>
+                            Оновлено: {formatDate(vacancy.updated_at)}
+                          </p>
+                        </div>
+                        <div className="absolute right-4 top-4 flex items-center gap-1.5">
+                          <button
+                            className="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-orange-500/70"
+                            type="button"
+                            onClick={() => startEditVacancy(vacancy)}
+                          >
+                            Редагувати
+                          </button>
+                          <button
+                            className="rounded-xl border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                            type="button"
+                            onClick={() => handleDeleteVacancy(vacancy.id)}
+                            disabled={isVacancySaving}
+                          >
+                            Видалити
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
 
-                {totalVacancyPages > 1 && (
-                  <div className="mt-auto pt-3">
-                    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                    <button
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      type="button"
-                      onClick={() => setVacancyPage((prev) => Math.max(1, prev - 1))}
-                      disabled={vacancyPage === 1}
-                    >
-                      Попередня
-                    </button>
-                    <div className="text-xs font-semibold text-slate-600">
-                      Сторінка {vacancyPage} з {totalVacancyPages}
+                  {totalVacancyPages > 1 && (
+                    <div className="mt-auto pt-3">
+                      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                        <button
+                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          type="button"
+                          onClick={() => setVacancyPage((prev) => Math.max(1, prev - 1))}
+                          disabled={vacancyPage === 1}
+                        >
+                          Попередня
+                        </button>
+                        <div className="text-xs font-semibold text-slate-600">
+                          Сторінка {vacancyPage} з {totalVacancyPages}
+                        </div>
+                        <button
+                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          type="button"
+                          onClick={() => setVacancyPage((prev) => Math.min(totalVacancyPages, prev + 1))}
+                          disabled={vacancyPage === totalVacancyPages}
+                        >
+                          Наступна
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                      type="button"
-                      onClick={() => setVacancyPage((prev) => Math.min(totalVacancyPages, prev + 1))}
-                      disabled={vacancyPage === totalVacancyPages}
-                    >
-                      Наступна
-                    </button>
-                    </div>
+                  )}
+                </div>
+              )
+            ) : (
+              <>
+                {savedResumesError && (
+                  <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
+                    {savedResumesError}
                   </div>
                 )}
-              </div>
+
+                {!company ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                    Розділ активується після створення компанії.
+                  </div>
+                ) : isSavedResumesLoading ? (
+                  <div className="mt-6 text-sm text-slate-500">Завантаження збережених резюме...</div>
+                ) : savedResumes.length === 0 ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                    У вас поки немає збережених резюме.
+                  </div>
+                ) : (
+                  <div className="mt-4 grid gap-3 md:grid-cols-1">
+                    {savedResumes.map((resume) => (
+                      <article key={resume.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <h3 className="text-base font-semibold text-slate-900">{resume.title}</h3>
+                        <p className="mt-1 text-sm text-slate-600">{resume.desired_role || "Роль не вказана"}</p>
+                        {resume.summary && (
+                          <p className="mt-2 line-clamp-3 text-sm text-slate-600">{resume.summary}</p>
+                        )}
+                        <div className="mt-3 space-y-1 text-xs text-slate-500">
+                          <div>Локація: {resume.location || "Не вказана"}</div>
+                          <div>Зарплата: {formatResumeSalary(resume)}</div>
+                          <div>
+                            Досвід: {resume.years_experience !== undefined && resume.years_experience !== null
+                              ? `${resume.years_experience} років`
+                              : "Не вказано"}
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </section>
         </div>
