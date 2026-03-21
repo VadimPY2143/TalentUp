@@ -44,40 +44,11 @@ oauth.register(
 )
 
 
-def _frontend_origin() -> str:
-    return os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").rstrip("/")
-
-
-def _redirect_to_frontend_callback(access_token: str, refresh_token: str) -> RedirectResponse:
-    query = urlencode(
-        {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        }
-    )
-    return RedirectResponse(url=f"{_frontend_origin()}/oauth/callback?{query}")
-
-
-def _redirect_with_error(message: str) -> RedirectResponse:
-    query = urlencode({"oauth_error": message})
-    return RedirectResponse(url=f"{_frontend_origin()}/login?{query}")
-
-
-async def _generate_unique_username(session: AsyncSession, seed: str) -> str:
-    normalized = re.sub(r"[^a-zA-Z0-9_.-]", "", seed or "").strip("._-").lower()
-    base = (normalized or "user")[:40]
-    candidate = base
-    counter = 1
-
-    while True:
-        stmt = select(users_table.c.id).where(users_table.c.username == candidate)
-        exists = (await session.execute(stmt)).scalar_one_or_none()
-        if not exists:
-            return candidate
-
-        suffix = f"_{counter}"
-        candidate = f"{base[: max(1, 40 - len(suffix))]}{suffix}"
-        counter += 1
+def _redirect_frontend(path: str, **params: str) -> RedirectResponse:
+    frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").rstrip("/")
+    query = urlencode(params)
+    url = f"{frontend_origin}{path}"
+    return RedirectResponse(url=f"{url}?{query}" if query else url)
 
 
 async def _get_or_create_user(
@@ -90,7 +61,21 @@ async def _get_or_create_user(
     if existing:
         return dict(existing)
 
-    username = await _generate_unique_username(session, preferred_username)
+    normalized = re.sub(r"[^a-zA-Z0-9_.-]", "", preferred_username or "").strip("._-").lower()
+    base_username = (normalized or "user")[:40]
+    username = base_username
+    counter = 1
+
+    while True:
+        username_stmt = select(users_table.c.id).where(users_table.c.username == username)
+        username_exists = (await session.execute(username_stmt)).scalar_one_or_none()
+        if not username_exists:
+            break
+
+        suffix = f"_{counter}"
+        username = f"{base_username[: max(1, 40 - len(suffix))]}{suffix}"
+        counter += 1
+
     random_password = secrets.token_urlsafe(24)
     hashed_password = get_password_hash(random_password)
 
@@ -160,16 +145,20 @@ async def auth_google_callback(
             userinfo = user_resp.json()
     except Exception as e:
         print(f"Google OAuth error: {e}")
-        return _redirect_with_error("Google OAuth failed")
+        return _redirect_frontend("/login", oauth_error="Google OAuth failed")
 
     email = (userinfo or {}).get("email")
     if not email:
-        return _redirect_with_error("Google account has no email")
+        return _redirect_frontend("/login", oauth_error="Google account has no email")
 
     preferred_username = (userinfo or {}).get("name") or email.split("@", 1)[0]
     user = await _get_or_create_user(session, email=email, preferred_username=preferred_username)
     access_token, refresh_token = await _issue_tokens_for_user(session, user)
-    return _redirect_to_frontend_callback(access_token, refresh_token)
+    return _redirect_frontend(
+        "/oauth/callback",
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
 
 
 @router.get("/auth/linkedin/login")
@@ -189,7 +178,7 @@ async def auth_linkedin_callback(
         error_code = request.query_params.get("error", "")
         error_description = request.query_params.get("error_description", "")
         error_message = error_description or error_code or "LinkedIn OAuth denied"
-        return _redirect_with_error(f"LinkedIn: {error_message}")
+        return _redirect_frontend("/login", oauth_error=f"LinkedIn: {error_message}")
 
     try:
         token = await oauth.linkedin.authorize_access_token(request)
@@ -200,11 +189,11 @@ async def auth_linkedin_callback(
         userinfo = user_resp.json()
     except Exception as e:
         print(f"LinkedIn OAuth error: {e}")
-        return _redirect_with_error("LinkedIn OAuth failed")
+        return _redirect_frontend("/login", oauth_error="LinkedIn OAuth failed")
 
     email = (userinfo or {}).get("email")
     if not email:
-        return _redirect_with_error("LinkedIn account has no email")
+        return _redirect_frontend("/login", oauth_error="LinkedIn account has no email")
 
     preferred_username = (
         (userinfo or {}).get("name")
@@ -214,4 +203,8 @@ async def auth_linkedin_callback(
 
     user = await _get_or_create_user(session, email=email, preferred_username=preferred_username)
     access_token, refresh_token = await _issue_tokens_for_user(session, user)
-    return _redirect_to_frontend_callback(access_token, refresh_token)
+    return _redirect_frontend(
+        "/oauth/callback",
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
