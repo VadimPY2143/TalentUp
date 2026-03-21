@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func, Index
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, MetaData, String, Table, Text, func, Index
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -53,11 +53,32 @@ resumes_table = Table(
     Column('summary', Text),
     Column('desired_role', String(255)),
     Column('employment_type', ARRAY(String(50))),
+    # Full-time/Part-time/Contract/etc. (separate from Remote/Hybrid/Office stored in employment_type).
+    Column('employment_kind', ARRAY(String(50))),
     Column('location', String(255)),
+    Column('city', String(100)),
+    Column('country', String(100)),
+    Column('location_lat', Float),
+    Column('location_lng', Float),
     Column('salary_min', Integer),
     Column('salary_max', Integer),
     Column('salary_currency', String(10)),
+    Column('salary_period', String(10)),
     Column('years_experience', Integer),
+    Column('category', String(100)),
+    Column('tags', ARRAY(String(50))),
+    Column('education_level', String(20)),
+    Column('hard_skills', ARRAY(String(50))),
+    Column('soft_skills', ARRAY(String(50))),
+    Column('languages', ARRAY(String(30))),
+    Column('english_level', String(2)),
+    Column('company_types', ARRAY(String(50))),
+    Column('company_size', String(20)),
+    Column('work_schedule', ARRAY(String(20))),
+    Column('position_level', String(20)),
+    Column('contract_types', ARRAY(String(20))),
+    Column('benefits', ARRAY(String(50))),
+    Column('hire_speed', String(20)),
     Column('is_active', Boolean, nullable=False, server_default='true'),
     Column('pdf_file_path', String(500)),
     Column('pdf_original_name', String(255)),
@@ -140,6 +161,22 @@ vacancies_table = Table(
     ),
 )
 
+vacancies_search_history_table = Table(
+    'vacancies_search_history',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('search_text', String(255), nullable=False),
+)
+
+saved_resumes_table = Table(
+    'saved_resumes',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('company_id', Integer, ForeignKey('companies.id'), nullable=False),
+    Column('saved_resume_id', Integer, ForeignKey('resumes.id'), nullable=False),
+)
+
 refresh_tokens_table = Table(
     'refresh_tokens',
     metadata,
@@ -150,6 +187,7 @@ refresh_tokens_table = Table(
     Column('revoked_at', DateTime(timezone=True)),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
+
 
 
 

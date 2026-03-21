@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import get_session, resumes_table
+from database import companies_table, get_session, resumes_table, saved_resumes_table
 from users.auth import get_current_user
 from users.define_roles import require_roles
 from .models import EmploymentType, Resume, ResumeUpdate
@@ -188,4 +188,67 @@ async def delete_resume_pdf(
     return {"status": "ok"}
 
 
+@router.post('/companies/{company_id}/resumes/{resume_id}')
+async def save_resume(
+    company_id: int,
+    resume_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    if current_user["role"] != "employer":
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    company_stmt = select(companies_table.c.id).where(
+        companies_table.c.id == company_id,
+        companies_table.c.user_id == current_user["id"],
+    )
+    company_exists = (await session.execute(company_stmt)).scalar_one_or_none()
+    if not company_exists:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    resume_stmt = select(resumes_table.c.id).where(resumes_table.c.id == resume_id)
+    resume_exists = (await session.execute(resume_stmt)).scalar_one_or_none()
+    if not resume_exists:
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    duplicate_stmt = select(saved_resumes_table.c.id).where(
+        saved_resumes_table.c.company_id == company_id,
+        saved_resumes_table.c.saved_resume_id == resume_id,
+    )
+    is_saved = (await session.execute(duplicate_stmt)).scalar_one_or_none()
+    if is_saved:
+        return {"status": "ok"}
+
+    stmt = insert(saved_resumes_table).values(company_id=company_id, saved_resume_id=resume_id)
+    await session.execute(stmt)
+    await session.commit()
+
+    return {"status": "ok"}
+
+
+@router.get('/companies/{company_id}/saved-resumes')
+async def list_saved_resumes(
+    company_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> list[dict]:
+    if current_user["role"] != "employer":
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    company_stmt = select(companies_table.c.id).where(
+        companies_table.c.id == company_id,
+        companies_table.c.user_id == current_user["id"],
+    )
+    company_exists = (await session.execute(company_stmt)).scalar_one_or_none()
+    if not company_exists:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    stmt = (
+        select(resumes_table)
+        .join(saved_resumes_table, saved_resumes_table.c.saved_resume_id == resumes_table.c.id)
+        .where(saved_resumes_table.c.company_id == company_id)
+        .order_by(saved_resumes_table.c.id.desc())
+    )
+    result = await session.execute(stmt)
+    return [dict(row) for row in result.mappings().all()]
 

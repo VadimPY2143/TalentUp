@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { loginUser } from "../api/auth"
 import { useAuth } from "../auth/useAuth"
+import logo from "../assets/talentup-logo.png"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -37,9 +38,13 @@ const Login = () => {
     <div className="min-h-screen w-full bg-[#e9edf4]">
       <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-2">
         <div className="relative flex min-h-[42vh] flex-col justify-between gap-8 bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white md:p-12 lg:min-h-screen">
-          <div className="text-xl font-semibold">
-            Talent<span className="text-orange-500">Up</span>
-          </div>
+          <Link to="/" className="inline-flex items-center">
+            <img
+              src={logo}
+              alt="TalentUp"
+              className="h-16 w-auto origin-left scale-[1.35] md:h-20"
+            />
+          </Link>
           <div>
             <h1 className="font-display text-3xl font-semibold md:text-4xl">
               Працюй там, де тебе цінують

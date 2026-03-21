@@ -1,0 +1,139 @@
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Iterable
+
+from pydantic import BaseModel, Field, model_validator
+from sqlalchemy import Select, and_, func
+
+from database import vacancies_table
+
+
+class WorkFormat(str, Enum):
+    REMOTE = "Remote"
+    HYBRID = "Hybrid"
+    OFFICE = "Office"  # UI label: On-site
+
+
+class EmploymentKind(str, Enum):
+    FULL_TIME = "Full-time"
+    PART_TIME = "Part-time"
+    CONTRACT = "Contract"
+    INTERNSHIP = "Internship"
+    TEMPORARY = "Temporary"
+
+
+class PublishedWithin(str, Enum):
+    H24 = "24h"
+    D3 = "3d"
+    WEEK = "7d"
+    MONTH = "30d"
+
+
+class VacancySearchFilters(BaseModel):
+    # 1) Location
+    location: str | None = Field(default=None, max_length=255)
+
+    # 2) Company
+    company_id: int | None = Field(default=None, ge=1)
+
+    # 3) Employment
+    employment_kind: list[EmploymentKind] | None = None
+    work_format: list[WorkFormat] | None = None
+
+    # 4) Salary
+    salary_min: int | None = Field(default=None, ge=0)
+    salary_max: int | None = Field(default=None, ge=0)
+    salary_currency: str | None = Field(default=None, max_length=10)
+
+    # 5) Experience required by vacancy
+    experience_years_min: int | None = Field(default=None, ge=0, le=80)
+    experience_years_max: int | None = Field(default=None, ge=0, le=80)
+
+    # 6) Published date
+    published_within: PublishedWithin | None = None
+
+    # 7) Expires
+    exclude_expired: bool = False
+
+    @model_validator(mode="after")
+    def _validate_ranges(self) -> "VacancySearchFilters":
+        if (
+            self.salary_min is not None
+            and self.salary_max is not None
+            and self.salary_min > self.salary_max
+        ):
+            raise ValueError("salary_min must be <= salary_max")
+        if (
+            self.experience_years_min is not None
+            and self.experience_years_max is not None
+            and self.experience_years_min > self.experience_years_max
+        ):
+            raise ValueError("experience_years_min must be <= experience_years_max")
+        return self
+
+
+def _overlap(column, values: Iterable[str]):
+    # Postgres ARRAY overlap: column && ARRAY[...]
+    return column.op("&&")(list(values))
+
+
+def _published_since(v: PublishedWithin) -> datetime:
+    now = datetime.now(timezone.utc)
+    if v == PublishedWithin.H24:
+        return now - timedelta(hours=24)
+    if v == PublishedWithin.D3:
+        return now - timedelta(days=3)
+    if v == PublishedWithin.WEEK:
+        return now - timedelta(days=7)
+    return now - timedelta(days=30)
+
+
+def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Select:
+    conditions = []
+
+    if f.location:
+        conditions.append(vacancies_table.c.location.ilike(f"%{f.location.strip()}%"))
+
+    if f.company_id is not None:
+        conditions.append(vacancies_table.c.company_id == f.company_id)
+
+    if f.employment_kind:
+        conditions.append(_overlap(vacancies_table.c.employment_type, [e.value for e in f.employment_kind]))
+    if f.work_format:
+        conditions.append(_overlap(vacancies_table.c.work_format, [w.value for w in f.work_format]))
+
+    if f.salary_currency:
+        conditions.append(vacancies_table.c.salary_currency == f.salary_currency)
+
+    # Candidate-oriented salary filters:
+    # - salary_min: "I want at least X" -> vacancy_max >= X
+    # - salary_max: "I want at most Y"  -> vacancy_min <= Y
+    if f.salary_min is not None:
+        conditions.append(vacancies_table.c.salary_max.isnot(None))
+        conditions.append(vacancies_table.c.salary_max >= f.salary_min)
+    if f.salary_max is not None:
+        conditions.append(vacancies_table.c.salary_min.isnot(None))
+        conditions.append(vacancies_table.c.salary_min <= f.salary_max)
+
+    if f.experience_years_min is not None:
+        conditions.append(vacancies_table.c.experience_years_min.isnot(None))
+        conditions.append(vacancies_table.c.experience_years_min >= f.experience_years_min)
+    if f.experience_years_max is not None:
+        conditions.append(vacancies_table.c.experience_years_max.isnot(None))
+        conditions.append(vacancies_table.c.experience_years_max <= f.experience_years_max)
+
+    if f.published_within:
+        conditions.append(vacancies_table.c.created_at >= _published_since(f.published_within))
+
+    if f.exclude_expired:
+        now = datetime.now(timezone.utc)
+        conditions.append(
+            func.coalesce(vacancies_table.c.expires_at, now + timedelta(days=3650)) >= now
+        )
+
+    if conditions:
+        stmt = stmt.where(and_(*conditions))
+    return stmt
+

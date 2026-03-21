@@ -6,8 +6,15 @@
   type KeyboardEvent,
 } from "react"
 import Navbar from "../components/layout/Navbar"
-import { fetchRecommendedCandidates, openCandidateResume, searchCandidates } from "../api/candidates"
+import {
+  fetchRecommendedCandidates,
+  listSavedResumesByCompany,
+  openCandidateResume,
+  saveCandidateResume,
+  searchCandidates,
+} from "../api/candidates"
 import { apiFetch } from "../api/client"
+import { listCompanies } from "../api/companies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 
 interface FilterState {
@@ -49,6 +56,7 @@ interface ResultsHeaderProps {
 interface CandidateCardProps {
   candidate: CandidateSearchItem
   isSaved: boolean
+  isSaving: boolean
   onToggleSave: () => void
   onViewResume: () => void
   onViewSummary: () => void
@@ -357,6 +365,7 @@ const ResultsHeader = ({
 const CandidateCard = ({
   candidate,
   isSaved,
+  isSaving,
   onToggleSave,
   onViewResume,
   onViewSummary,
@@ -449,8 +458,9 @@ const CandidateCard = ({
           }`}
           type="button"
           onClick={onToggleSave}
+          disabled={isSaved || isSaving}
         >
-          {isSaved ? "Збережено" : "Зберегти кандидата"}
+          {isSaving ? "Збереження..." : isSaved ? "Збережено" : "Зберегти кандидата"}
         </button>
       </div>
     </article>
@@ -494,9 +504,11 @@ const CandidateSearch = () => {
   const [total, setTotal] = useState(0)
   const [candidates, setCandidates] = useState<CandidateSearchItem[]>([])
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set())
+  const [savingIds, setSavingIds] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [companyId, setCompanyId] = useState<number | null>(null)
   const [summaryModal, setSummaryModal] = useState<{
     candidateId: number
     title: string
@@ -534,6 +546,56 @@ const CandidateSearch = () => {
 
   useEffect(() => {
     let mounted = true
+
+    const loadPrimaryCompany = async () => {
+      try {
+        const companies = await listCompanies()
+        if (!mounted) {
+          return
+        }
+        setCompanyId(companies[0]?.id ?? null)
+      } catch {
+        if (mounted) {
+          setCompanyId(null)
+        }
+      }
+    }
+
+    loadPrimaryCompany()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!companyId) {
+      setSavedIds(new Set())
+      return
+    }
+
+    let mounted = true
+    const loadSavedResumes = async () => {
+      try {
+        const savedResumes = await listSavedResumesByCompany(companyId)
+        if (!mounted) {
+          return
+        }
+        setSavedIds(new Set(savedResumes.map((resume) => resume.id)))
+      } catch {
+        if (mounted) {
+          setSavedIds(new Set())
+        }
+      }
+    }
+
+    loadSavedResumes()
+    return () => {
+      mounted = false
+    }
+  }, [companyId])
+
+  useEffect(() => {
+    let mounted = true
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       setIsLoading(true)
@@ -541,7 +603,20 @@ const CandidateSearch = () => {
       try {
         const response = hasQuery
           ? await searchCandidates(searchParams, controller.signal)
-          : await fetchRecommendedCandidates(PAGE_SIZE, (page - 1) * PAGE_SIZE, controller.signal)
+          : await fetchRecommendedCandidates(
+              PAGE_SIZE,
+              (page - 1) * PAGE_SIZE,
+              {
+                city: searchParams.city,
+                remote: searchParams.remote,
+                experience_min: searchParams.experience_min,
+                skills: searchParams.skills,
+                salary_min: searchParams.salary_min,
+                salary_max: searchParams.salary_max,
+                employment_type: searchParams.employment_type,
+              },
+              controller.signal,
+            )
         if (!mounted) {
           return
         }
@@ -623,16 +698,30 @@ const CandidateSearch = () => {
     setSearchTrigger((prev) => prev + 1)
   }
 
-  const toggleSave = (candidateId: number) => {
-    setSavedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(candidateId)) {
+  const toggleSave = async (candidateId: number) => {
+    if (savedIds.has(candidateId) || savingIds.has(candidateId)) {
+      return
+    }
+    if (!companyId) {
+      setActionError("Спочатку створіть компанію в кабінеті роботодавця")
+      return
+    }
+
+    setActionError(null)
+    setSavingIds((prev) => new Set(prev).add(candidateId))
+    try {
+      await saveCandidateResume(companyId, candidateId)
+      setSavedIds((prev) => new Set(prev).add(candidateId))
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося зберегти кандидата"
+      setActionError(message)
+    } finally {
+      setSavingIds((prev) => {
+        const next = new Set(prev)
         next.delete(candidateId)
-      } else {
-        next.add(candidateId)
-      }
-      return next
-    })
+        return next
+      })
+    }
   }
 
   const handleViewResume = async (candidateId: number) => {
@@ -745,6 +834,7 @@ const CandidateSearch = () => {
                     key={candidate.id}
                     candidate={candidate}
                     isSaved={savedIds.has(candidate.id)}
+                    isSaving={savingIds.has(candidate.id)}
                     onToggleSave={() => toggleSave(candidate.id)}
                     onViewResume={() => handleViewResume(candidate.id)}
                     onViewSummary={() => handleViewSummary(candidate)}

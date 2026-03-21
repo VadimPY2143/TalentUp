@@ -5,6 +5,8 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import resumes_table
+from enum import Enum
+
 from .models import EmploymentType
 
 
@@ -25,6 +27,12 @@ def normalize_employment_type(value: Iterable[EmploymentType | str] | None) -> l
     if value is None:
         return None
     return [item.value if isinstance(item, EmploymentType) else item for item in value]
+
+
+def normalize_enum_list(value: Iterable[Enum | str] | None) -> list[str] | None:
+    if value is None:
+        return None
+    return [item.value if isinstance(item, Enum) else str(item) for item in value]
 
 
 async def get_owned_resume(

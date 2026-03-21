@@ -1,6 +1,19 @@
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../../auth/useAuth"
 import { freelancers } from "../../data/freelancers"
 
 const TopFreelancers = () => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+
+  const handleHire = () => {
+    if (!isAuthenticated) {
+      navigate("/register?role=employer")
+      return
+    }
+    navigate("/candidates")
+  }
+
   return (
     <section className="bg-[#e9edf4] pb-16 pt-4">
       <div className="mx-auto max-w-[1120px] px-4">
@@ -28,6 +41,7 @@ const TopFreelancers = () => {
               <button
                 className="mt-4 rounded-xl bg-orange-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
                 type="button"
+                onClick={handleHire}
               >
                 Найняти фахівця
               </button>

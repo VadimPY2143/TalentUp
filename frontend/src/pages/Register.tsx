@@ -1,16 +1,28 @@
-import { useState, type FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useEffect, useState, type FormEvent } from "react"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { registerUser } from "../api/auth"
 import type { UserRole } from "../types/auth"
+import logo from "../assets/talentup-logo.png"
 
 const Register = () => {
   const navigate = useNavigate()
-  const [role, setRole] = useState<UserRole>("worker")
+  const [searchParams] = useSearchParams()
+  const initialRole = searchParams.get("role")
+  const [role, setRole] = useState<UserRole>(
+    initialRole === "employer" ? "employer" : "worker",
+  )
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const roleParam = searchParams.get("role")
+    if (roleParam === "worker" || roleParam === "employer") {
+      setRole(roleParam)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -45,11 +57,13 @@ const Register = () => {
     <div className="min-h-screen w-full bg-[#e9edf4]">
       <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-2">
         <div className="relative flex min-h-[42vh] flex-col justify-between gap-8 bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white md:p-12 lg:min-h-screen">
-          <div className="text-xl font-semibold">
-            <Link to="/">
-              Talent<span className="text-orange-500">Up</span>
-            </Link>
-          </div>
+          <Link to="/" className="inline-flex items-center">
+            <img
+              src={logo}
+              alt="TalentUp"
+              className="h-16 w-auto origin-left scale-[1.35] md:h-20"
+            />
+          </Link>
           <div>
             <h1 className="font-display text-3xl font-semibold md:text-4xl">
               Створи профіль та знайди роботу швидше
