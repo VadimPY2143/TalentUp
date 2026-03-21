@@ -140,6 +140,14 @@ vacancies_table = Table(
     ),
 )
 
+vacancies_search_history_table = Table(
+    'vacancies_search_history',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
+    Column('search_text', String(255), nullable=False),
+)
+
 saved_resumes_table = Table(
     'saved_resumes',
     metadata,
