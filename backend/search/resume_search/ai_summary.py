@@ -1,76 +1,63 @@
-import json
 import os
+from pathlib import Path
 from typing import Any
-
 from dotenv import load_dotenv
-from openai import OpenAI
+from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
+from search.resume_search.models import ResumeSummary
 
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
-)
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 SYSTEM_PROMPT = """
 You are an HR assistant. Summarize the candidate resume and highlight key strengths.
-Return ONLY valid JSON in the following format:
-{
-  "summary": "2-3 short sentences",
-  "strengths": ["3-6 short bullet points"]
-}
 Language: Ukrainian.
 """.strip()
 
 
 def _format_resume(resume: dict[str, Any]) -> str:
-    def to_text(value: Any) -> str:
-        if value is None:
-            return ""
-        if isinstance(value, list):
-            return ", ".join(str(item) for item in value if item is not None)
-        return str(value)
-
-    fields = [
-        ("Title", resume.get("title")),
-        ("Desired role", resume.get("desired_role")),
-        ("Summary", resume.get("summary")),
-        ("Employment type", resume.get("employment_type")),
-        ("Location", resume.get("location")),
-        (
-            "Salary",
-            f"{resume.get('salary_min')}-{resume.get('salary_max')} {resume.get('salary_currency')}",
-        ),
-        ("Years of experience", resume.get("years_experience")),
-    ]
-    return "\n".join(
-        f"{label}: {to_text(value)}" for label, value in fields if to_text(value)
+    salary_min = resume.get("salary_min")
+    salary_max = resume.get("salary_max")
+    salary_currency = resume.get("salary_currency")
+    salary = (
+        f"{salary_min}-{salary_max} {salary_currency}".strip()
+        if salary_min is not None or salary_max is not None or salary_currency
+        else ""
     )
-
-
-def _extract_json_object(text: str) -> str:
-    start = text.find("{")
-    end = text.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        raise ValueError("AI response does not contain JSON")
-    return text[start : end + 1]
+    fields = {
+        "Title": resume.get("title"),
+        "Desired role": resume.get("desired_role"),
+        "Summary": resume.get("summary"),
+        "Employment type": resume.get("employment_type"),
+        "Location": resume.get("location"),
+        "Salary": salary,
+        "Years of experience": resume.get("years_experience"),
+    }
+    return "\n".join(
+        f"{label}: {', '.join(map(str, value)) if isinstance(value, list) else value}"
+        for label, value in fields.items()
+        if value not in (None, "", [])
+    )
 
 
 async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:
-    resume_text = _format_resume(resume)
-    response = client.chat.completions.create(
-        model="anthropic/claude-3-haiku",
-        temperature=0.4,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Resume data:\n{resume_text}"},
-        ],
-    )
-    content = response.choices[0].message.content or ""
-    if not content:
-        raise ValueError("AI response is empty")
+    api_key = os.getenv("OPENAI_API_KEY")
 
-    data = json.loads(_extract_json_object(content))
-    summary = str(data.get("summary", "")).strip()
-    strengths = data.get("strengths") or []
-    return {"summary": summary, "strengths": strengths}
+    provider = OpenAIProvider(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
+    agent = Agent(
+        model,
+        system_prompt=SYSTEM_PROMPT,
+    )
+
+    result = await agent.run(
+        f"Resume data:\n{_format_resume(resume)}",
+        output_type=ResumeSummary,
+    )
+    output = result.output
+    if isinstance(output, ResumeSummary):
+        return output.model_dump()
+    return ResumeSummary.model_validate(output).model_dump()
