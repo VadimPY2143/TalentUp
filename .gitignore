@@ -1,5 +1,7 @@
-__pycache__/
-*.py[cod]
+.venv/
+.idea
 .env
-.idea/
-logs/*.log
+__pycache__/
+*.pyc
+venv/
+node_modules/
