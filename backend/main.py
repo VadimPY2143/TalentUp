@@ -6,6 +6,7 @@ from worker.crud import router as worker_router
 from employer.company.crud import router as company_router
 from employer.vacancy.crud import router as vacancy_router
 from search.resume_search.views import router as search_router
+from search.vacancy_search.views import router as vacancy_search_router
 import uvicorn
 import os
 from pathlib import Path
@@ -27,6 +28,7 @@ app.include_router(worker_router)
 app.include_router(company_router)
 app.include_router(vacancy_router)
 app.include_router(search_router)
+app.include_router(vacancy_search_router)
 
 if __name__ == "__main__":
     uvicorn.run(app)
