@@ -32,3 +32,12 @@ app.include_router(vacancy_search_router)
 
 if __name__ == "__main__":
     uvicorn.run(app)
+from database import engine, metadata
+
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(metadata.create_all)
+
+@app.on_event("startup")
+async def startup():
+    await create_tables()
