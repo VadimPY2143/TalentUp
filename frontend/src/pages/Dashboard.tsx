@@ -12,7 +12,6 @@ import {
   uploadResumePdf,
 } from "../api/resumes"
 import type { CurrencyType, EmploymentType, Resume, ResumeBase } from "../types/resume"
-import { useSearchParams } from "react-router-dom"
 const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
 
@@ -42,7 +41,6 @@ const emptyResume: ResumeBase = {
 
 const Dashboard = () => {
   const { role } = useAuth()
-  const [params] = useSearchParams()
   const [resumes, setResumes] = useState<Resume[]>([])
   const [form, setForm] = useState<ResumeBase>(emptyResume)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -76,17 +74,6 @@ const Dashboard = () => {
     }
     loadResumes()
   }, [role])
-
-  useEffect(() => {
-  const token = params.get("token")
-
-  if (token) {
-    // тут ти логіниш юзера
-    // якщо в тебе login(token, token)
-    // або login(token) — залежить від useAuth
-    console.log("TOKEN FROM GOOGLE:", token)
-  }
-}, [])
 
   const updateField = (field: keyof ResumeBase, value: ResumeBase[typeof field]) => {
     setForm((prev) => ({ ...prev, [field]: value }))
