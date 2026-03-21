@@ -603,7 +603,20 @@ const CandidateSearch = () => {
       try {
         const response = hasQuery
           ? await searchCandidates(searchParams, controller.signal)
-          : await fetchRecommendedCandidates(PAGE_SIZE, (page - 1) * PAGE_SIZE, controller.signal)
+          : await fetchRecommendedCandidates(
+              PAGE_SIZE,
+              (page - 1) * PAGE_SIZE,
+              {
+                city: searchParams.city,
+                remote: searchParams.remote,
+                experience_min: searchParams.experience_min,
+                skills: searchParams.skills,
+                salary_min: searchParams.salary_min,
+                salary_max: searchParams.salary_max,
+                employment_type: searchParams.employment_type,
+              },
+              controller.signal,
+            )
         if (!mounted) {
           return
         }

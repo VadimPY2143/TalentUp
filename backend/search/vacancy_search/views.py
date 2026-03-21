@@ -11,6 +11,7 @@ from database import (
     vacancies_table,
 )
 from users.define_roles import require_roles
+from search.vacancy_search.filters import VacancySearchFilters, apply_vacancy_search_filters
 
 router = APIRouter(tags=["vacancy_search"])
 
@@ -32,6 +33,7 @@ async def search_vacancy(
     vacancy_name: str = Query(..., min_length=2, max_length=100),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    filters: VacancySearchFilters = Depends(),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:
@@ -48,9 +50,10 @@ async def search_vacancy(
     await session.commit()
 
     conditions = _build_vacancy_conditions(tokens)
+    stmt = select(vacancies_table)
+    stmt = apply_vacancy_search_filters(stmt, filters)
     stmt = (
-        select(vacancies_table)
-        .where(vacancies_table.c.is_active.is_(True))
+        stmt.where(vacancies_table.c.is_active.is_(True))
         .where(or_(*conditions))
         .order_by(vacancies_table.c.updated_at.desc())
         .limit(limit)
@@ -65,6 +68,7 @@ async def search_vacancy(
 async def vacancy_recommendations(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    filters: VacancySearchFilters = Depends(),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:
@@ -105,9 +109,10 @@ async def vacancy_recommendations(
         return {"vacancies": []}
 
     conditions = _build_vacancy_conditions(tokens)
+    stmt = select(vacancies_table)
+    stmt = apply_vacancy_search_filters(stmt, filters)
     stmt = (
-        select(vacancies_table)
-        .where(vacancies_table.c.is_active.is_(True))
+        stmt.where(vacancies_table.c.is_active.is_(True))
         .where(or_(*conditions))
         .order_by(vacancies_table.c.updated_at.desc())
         .limit(limit)
