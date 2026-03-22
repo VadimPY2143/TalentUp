@@ -10,18 +10,42 @@ interface SearchVacanciesFilters {
   search?: string
   location?: string
   salary_min?: number
-  employment_type?: string
+  salary_max?: number
+  salary_currency?: string
+  experience_years_min?: number
+  experience_years_max?: number
+  employment_type?: string[]
+  work_format?: string[]
+  page?: number
+  page_size?: number
 }
 
-export const searchVacancies = (filters: SearchVacanciesFilters) => {
+interface SearchVacanciesResponse {
+  items: VacancyResponse[]
+  total: number
+}
+
+export const searchVacancies = (filters: SearchVacanciesFilters, signal?: AbortSignal) => {
   const params = new URLSearchParams()
   if (filters.search) params.append('search', filters.search)
   if (filters.location) params.append('location', filters.location)
   if (filters.salary_min) params.append('salary_min', filters.salary_min.toString())
-  if (filters.employment_type) params.append('employment_type', filters.employment_type)
+  if (filters.salary_max) params.append('salary_max', filters.salary_max.toString())
+  if (filters.salary_currency) params.append('salary_currency', filters.salary_currency)
+  if (filters.experience_years_min) params.append('experience_years_min', filters.experience_years_min.toString())
+  if (filters.experience_years_max) params.append('experience_years_max', filters.experience_years_max.toString())
+  if (filters.employment_type) {
+    filters.employment_type.forEach(type => params.append('employment_type', type))
+  }
+  if (filters.work_format) {
+    filters.work_format.forEach(format => params.append('work_format', format))
+  }
+  if (filters.page) params.append('page', filters.page.toString())
+  if (filters.page_size) params.append('page_size', filters.page_size.toString())
   
-  return apiFetch<VacancyResponse[]>(`/vacancies/search?${params.toString()}`, {
+  return apiFetch<SearchVacanciesResponse>(`/vacancies/search?${params.toString()}`, {
     method: "GET",
+    signal,
   })
 }
 

@@ -1,0 +1,155 @@
+import type { VacancyResponse } from "../types/vacancy"
+
+interface VacancyModalProps {
+  vacancy: VacancyResponse | null
+  onClose: () => void
+  onApply: () => void
+}
+
+const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
+  if (!vacancy) return null
+
+  const formatSalary = (vacancy: VacancyResponse) => {
+    const min = vacancy.salary_min ?? undefined
+    const max = vacancy.salary_max ?? undefined
+    const currency = vacancy.salary_currency ?? "UAH"
+
+    if (min && max) {
+      return `${min}-${max} ${currency}`
+    }
+    if (min) {
+      return `від ${min} ${currency}`
+    }
+    if (max) {
+      return `до ${max} ${currency}`
+    }
+    return "Зарплата не вказана"
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("uk-UA", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
+      <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-strong">
+        <div className="sticky top-0 border-b border-slate-200 bg-white p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-slate-900">{vacancy.title}</h1>
+              <p className="mt-2 text-lg text-slate-600">Компанія</p>
+            </div>
+            <button
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300"
+              type="button"
+              onClick={onClose}
+            >
+              Закрити
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Основна інформація */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Локація</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">
+                {vacancy.location || "Локація не вказана"}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Зарплата</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">{formatSalary(vacancy)}</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Досвід</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">
+                {vacancy.experience_years_min || vacancy.experience_years_max
+                  ? `${vacancy.experience_years_min || "0"}-${vacancy.experience_years_max || "∞"} років`
+                  : "Досвід не вказано"}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Опубліковано</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">{formatDate(vacancy.created_at)}</p>
+            </div>
+          </div>
+
+          {/* Формати роботи та тип зайнятості */}
+          {(vacancy.employment_type?.length || vacancy.work_format?.length) && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Умови роботи</h3>
+              <div className="flex flex-wrap gap-2">
+                {vacancy.employment_type?.map((type) => (
+                  <span key={type} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-sm text-orange-700">
+                    {type}
+                  </span>
+                ))}
+                {vacancy.work_format?.map((format) => (
+                  <span key={format} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700">
+                    {format}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Опис */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">Опис вакансії</h3>
+            <div className="prose prose-sm max-w-none text-slate-700">
+              <p className="whitespace-pre-wrap">{vacancy.description}</p>
+            </div>
+          </div>
+
+          {/* Обов'язки */}
+          {vacancy.responsibilities && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Обов'язки</h3>
+              <div className="prose prose-sm max-w-none text-slate-700">
+                <p className="whitespace-pre-wrap">{vacancy.responsibilities}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Вимоги */}
+          {vacancy.requirements && (
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">Вимоги</h3>
+              <div className="prose prose-sm max-w-none text-slate-700">
+                <p className="whitespace-pre-wrap">{vacancy.requirements}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Дії */}
+        <div className="sticky bottom-0 border-t border-slate-200 bg-white p-6">
+          <div className="flex gap-3">
+            <button
+              className="flex-1 rounded-xl bg-[#1f2f5e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1b294f]"
+              type="button"
+              onClick={onApply}
+            >
+              Відгукнутися на вакансію
+            </button>
+            <button
+              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+              type="button"
+              onClick={onClose}
+            >
+              Закрити
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default VacancyModal
