@@ -3,7 +3,6 @@
   useMemo,
   useState,
   type FormEvent,
-  type KeyboardEvent,
 } from "react"
 import Navbar from "../components/layout/Navbar"
 import {
@@ -18,12 +17,11 @@ import { listCompanies } from "../api/companies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 
 interface FilterState {
-  city: string
-  remoteOnly: boolean
-  experience: string
-  skills: string[]
+  location: string
+  yearsExperience: string
   salaryMin: string
   salaryMax: string
+  salaryCurrency: string
   employmentTypes: string[]
 }
 
@@ -36,10 +34,6 @@ interface SearchBarProps {
 
 interface FiltersPanelProps {
   filters: FilterState
-  skillsInput: string
-  onSkillsInputChange: (value: string) => void
-  onAddSkills: () => void
-  onRemoveSkill: (skill: string) => void
   onToggleEmployment: (value: string) => void
   onUpdateField: (field: keyof FilterState, value: string | boolean) => void
   onClear: () => void
@@ -57,6 +51,7 @@ interface CandidateCardProps {
   candidate: CandidateSearchItem
   isSaved: boolean
   isSaving: boolean
+  isSummaryLoading: boolean
   onToggleSave: () => void
   onViewResume: () => void
   onViewSummary: () => void
@@ -71,11 +66,11 @@ interface PaginationProps {
 const PAGE_SIZE = 6
 
 const employmentTypeOptions = [
-  { value: "Full-time", label: "Повна зайнятість" },
-  { value: "Part-time", label: "Часткова зайнятість" },
-  { value: "Contract", label: "Проєктна робота" },
-  { value: "Internship", label: "Стажування" },
+  { value: "Remote", label: "Віддалено" },
+  { value: "Office", label: "Офіс" },
+  { value: "Hybrid", label: "Гібрид" },
 ]
+const currencyOptions = ["UAH", "USD", "EUR"] as const
 
 const sortOptions: Array<{ value: CandidateSort; label: string }> = [
   { value: "relevance", label: "За відповідністю" },
@@ -84,12 +79,11 @@ const sortOptions: Array<{ value: CandidateSort; label: string }> = [
 ]
 
 const initialFilters: FilterState = {
-  city: "",
-  remoteOnly: false,
-  experience: "",
-  skills: [],
+  location: "",
+  yearsExperience: "",
   salaryMin: "",
   salaryMax: "",
+  salaryCurrency: "",
   employmentTypes: [],
 }
 
@@ -127,14 +121,8 @@ const formatExperience = (years?: number | null) => {
 }
 
 const formatLocation = (candidate: CandidateSearchItem) => {
-  if (candidate.city) {
-    return candidate.city
-  }
   if (candidate.location) {
     return candidate.location
-  }
-  if (candidate.is_remote) {
-    return "Віддалено"
   }
   return "Локація не вказана"
 }
@@ -161,10 +149,6 @@ const SearchBar = ({ value, onChange, onSubmit, isLoading }: SearchBarProps) => 
 
 const FiltersPanel = ({
   filters,
-  skillsInput,
-  onSkillsInputChange,
-  onAddSkills,
-  onRemoveSkill,
   onToggleEmployment,
   onUpdateField,
   onClear,
@@ -187,22 +171,14 @@ const FiltersPanel = ({
     <div className="mt-5 space-y-4 text-sm text-slate-700">
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Місто
+          Локація
         </label>
         <input
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-          placeholder="Київ, Львів, Одеса"
-          value={filters.city}
-          onChange={(event) => onUpdateField("city", event.target.value)}
+          placeholder="Київ, Львів, Ukraine (Remote)"
+          value={filters.location}
+          onChange={(event) => onUpdateField("location", event.target.value)}
         />
-        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={filters.remoteOnly}
-            onChange={(event) => onUpdateField("remoteOnly", event.target.checked)}
-          />
-          Лише віддалена робота
-        </label>
       </div>
 
       <div>
@@ -211,8 +187,8 @@ const FiltersPanel = ({
         </label>
         <select
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
-          value={filters.experience}
-          onChange={(event) => onUpdateField("experience", event.target.value)}
+          value={filters.yearsExperience}
+          onChange={(event) => onUpdateField("yearsExperience", event.target.value)}
         >
           <option value="">Будь-який</option>
           <option value="0">До 1 року</option>
@@ -227,48 +203,6 @@ const FiltersPanel = ({
           <option value="9">9 років</option>
           <option value="10">10+ років</option>
         </select>
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Навички
-        </label>
-        <div className="mt-2 flex gap-2">
-          <input
-            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-            placeholder="React, Figma, SQL"
-            value={skillsInput}
-            onChange={(event) => onSkillsInputChange(event.target.value)}
-            onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-              if (event.key === "Enter" || event.key === ",") {
-                event.preventDefault()
-                onAddSkills()
-              }
-            }}
-          />
-          <button
-            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
-            type="button"
-            onClick={onAddSkills}
-          >
-            Додати
-          </button>
-        </div>
-        {filters.skills.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">
-            {filters.skills.map((skill) => (
-              <button
-                key={skill}
-                className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 transition hover:border-orange-300"
-                type="button"
-                onClick={() => onRemoveSkill(skill)}
-              >
-                {skill}
-                <span className="text-slate-400">×</span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div>
@@ -291,11 +225,23 @@ const FiltersPanel = ({
             onChange={(event) => onUpdateField("salaryMax", event.target.value)}
           />
         </div>
+        <select
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          value={filters.salaryCurrency}
+          onChange={(event) => onUpdateField("salaryCurrency", event.target.value)}
+        >
+          <option value="">Будь-яка валюта</option>
+          {currencyOptions.map((currency) => (
+            <option key={currency} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Тип зайнятості
+          Формат роботи
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
           {employmentTypeOptions.map((option) => {
@@ -366,16 +312,15 @@ const CandidateCard = ({
   candidate,
   isSaved,
   isSaving,
+  isSummaryLoading,
   onToggleSave,
   onViewResume,
   onViewSummary,
 }: CandidateCardProps) => {
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
-  const skills = candidate.skills ?? []
   const employment = candidate.employment_type ?? []
   const hasPdf = Boolean(candidate.pdf_file_path)
-  const isActive = candidate.is_active !== false
   const summaryLength = candidate.summary?.trim().length ?? 0
   const showAiSummary = summaryLength >= 120
 
@@ -390,23 +335,20 @@ const CandidateCard = ({
           <div className="flex flex-col items-end gap-2">
             {showAiSummary && (
               <button
-                className="rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f]"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
                 type="button"
                 onClick={onViewSummary}
+                disabled={isSummaryLoading}
               >
-                AI Summary
+                {isSummaryLoading && (
+                  <span className="h-3 w-3 animate-spin rounded-full border border-white/40 border-t-white" />
+                )}
+                {isSummaryLoading ? "Loading" : "AI Summary"}
               </button>
             )}
             <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
               {formatExperience(candidate.years_experience)}
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {isActive ? "Активне" : "Неактивне"}
-            </span>
           </div>
         </div>
 
@@ -425,13 +367,8 @@ const CandidateCard = ({
           </div>
         </div>
 
-        {(skills.length > 0 || employment.length > 0) && (
+        {employment.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
-            {skills.map((skill) => (
-              <span key={skill} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
-                {skill}
-              </span>
-            ))}
             {employment.map((type) => (
               <span key={type} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-orange-700">
                 {type}
@@ -498,7 +435,6 @@ const CandidateSearch = () => {
   const [query, setQuery] = useState("")
   const [searchTrigger, setSearchTrigger] = useState(0)
   const [filters, setFilters] = useState<FilterState>(initialFilters)
-  const [skillsInput, setSkillsInput] = useState("")
   const [sort, setSort] = useState<CandidateSort>("relevance")
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -515,6 +451,7 @@ const CandidateSearch = () => {
     summary: string
     strengths: string[]
   } | null>(null)
+  const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
 
@@ -524,12 +461,11 @@ const CandidateSearch = () => {
   const searchParams = useMemo(
     () => ({
       query: query || undefined,
-      city: filters.city.trim() || undefined,
-      remote: filters.remoteOnly || undefined,
-      experience_min: parseNumber(filters.experience),
-      skills: filters.skills.length ? filters.skills : undefined,
+      location: filters.location.trim() || undefined,
+      years_experience: parseNumber(filters.yearsExperience),
       salary_min: parseNumber(filters.salaryMin),
       salary_max: parseNumber(filters.salaryMax),
+      salary_currency: filters.salaryCurrency || undefined,
       employment_type: filters.employmentTypes.length ? filters.employmentTypes : undefined,
       page,
       page_size: PAGE_SIZE,
@@ -537,6 +473,22 @@ const CandidateSearch = () => {
     }),
     [filters, page, query, sort],
   )
+
+  useEffect(() => {
+    if (!summaryModal) {
+      return
+    }
+
+    const previousBodyOverflow = document.body.style.overflow
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    document.body.style.overflow = "hidden"
+    document.documentElement.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow
+      document.documentElement.style.overflow = previousHtmlOverflow
+    }
+  }, [summaryModal])
 
   useEffect(() => {
     if (page > totalPages) {
@@ -607,12 +559,11 @@ const CandidateSearch = () => {
               PAGE_SIZE,
               (page - 1) * PAGE_SIZE,
               {
-                city: searchParams.city,
-                remote: searchParams.remote,
-                experience_min: searchParams.experience_min,
-                skills: searchParams.skills,
+                location: searchParams.location,
+                years_experience: searchParams.years_experience,
                 salary_min: searchParams.salary_min,
                 salary_max: searchParams.salary_max,
+                salary_currency: searchParams.salary_currency,
                 employment_type: searchParams.employment_type,
               },
               controller.signal,
@@ -661,33 +612,8 @@ const CandidateSearch = () => {
     setPage(1)
   }
 
-  const addSkills = () => {
-    const tokens = skillsInput
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean)
-    if (tokens.length === 0) {
-      return
-    }
-    setFilters((prev) => ({
-      ...prev,
-      skills: Array.from(new Set([...prev.skills, ...tokens])),
-    }))
-    setSkillsInput("")
-    setPage(1)
-  }
-
-  const removeSkill = (skill: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((item) => item !== skill),
-    }))
-    setPage(1)
-  }
-
   const clearFilters = () => {
     setFilters(initialFilters)
-    setSkillsInput("")
     setPage(1)
   }
 
@@ -737,6 +663,7 @@ const CandidateSearch = () => {
   const handleViewSummary = async (candidate: CandidateSearchItem) => {
     setSummaryError(null)
     setSummaryLoading(true)
+    setSummaryLoadingId(candidate.id)
     try {
       const data = await apiFetch<{ summary: string; strengths: string[] }>(
         `/resume_search/summary?resume_id=${candidate.id}`,
@@ -752,6 +679,7 @@ const CandidateSearch = () => {
       setSummaryError(message)
     } finally {
       setSummaryLoading(false)
+      setSummaryLoadingId(null)
     }
   }
 
@@ -788,10 +716,6 @@ const CandidateSearch = () => {
         <div className="mt-6 grid gap-6 lg:grid-cols-[320px,1fr]">
           <FiltersPanel
             filters={filters}
-            skillsInput={skillsInput}
-            onSkillsInputChange={setSkillsInput}
-            onAddSkills={addSkills}
-            onRemoveSkill={removeSkill}
             onToggleEmployment={toggleEmploymentType}
             onUpdateField={updateFilters}
             onClear={clearFilters}
@@ -835,6 +759,7 @@ const CandidateSearch = () => {
                     candidate={candidate}
                     isSaved={savedIds.has(candidate.id)}
                     isSaving={savingIds.has(candidate.id)}
+                    isSummaryLoading={summaryLoadingId === candidate.id}
                     onToggleSave={() => toggleSave(candidate.id)}
                     onViewResume={() => handleViewResume(candidate.id)}
                     onViewSummary={() => handleViewSummary(candidate)}
@@ -850,7 +775,7 @@ const CandidateSearch = () => {
         </div>
       </div>
       {summaryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
           <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-strong">
             <div className="flex items-start justify-between gap-4">
               <div>

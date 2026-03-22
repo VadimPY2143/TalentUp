@@ -26,16 +26,13 @@ const appendArray = (params: URLSearchParams, key: string, values: string[] | un
 const buildSearchParams = (payload: CandidateSearchParams) => {
   const params = new URLSearchParams()
 
-  // Backend expects these names (see backend/search/resume_search/views.py):
-  // resume_name, city, remote_only, experience_years, skills, salary_from, salary_to, employment_kind
   appendParam(params, "resume_name", payload.query)
-  appendParam(params, "city", payload.city)
-  appendParam(params, "remote_only", payload.remote)
-  appendParam(params, "experience_years", payload.experience_min)
+  appendParam(params, "location", payload.location)
+  appendParam(params, "years_experience", payload.years_experience)
   appendParam(params, "salary_from", payload.salary_min)
   appendParam(params, "salary_to", payload.salary_max)
-  appendArray(params, "skills", payload.skills)
-  appendArray(params, "employment_kind", payload.employment_type)
+  appendParam(params, "salary_currency", payload.salary_currency)
+  appendArray(params, "employment_type", payload.employment_type)
 
   if (payload.page_size !== undefined) {
     appendParam(params, "limit", payload.page_size)
@@ -72,18 +69,16 @@ export const fetchRecommendedCandidates = async (
   if (filters) {
     const filterQuery = buildSearchParams({
       ...filters,
-      // ensure pagination doesn't override provided limit/offset
       page: undefined,
       page_size: undefined,
       query: undefined,
       sort: undefined,
     })
     if (filterQuery) {
-      // buildSearchParams includes pagination/query; we stripped it above.
-      // Merge resulting params.
       new URLSearchParams(filterQuery).forEach((value, key) => params.append(key, value))
     }
   }
+
   const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(
     `/resume_search/recommendations?${params.toString()}`,
     { signal },

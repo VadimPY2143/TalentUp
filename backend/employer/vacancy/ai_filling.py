@@ -15,7 +15,7 @@ Generate one complete vacancy JSON from user description.
 
 Hard rules:
 1) Market: Ukraine only.
-2) Language: same as user request (except enum-like fields).
+2) Language: same as user request Ukrainian/English (except enum-like fields).
 3) Return only one valid JSON object. No markdown, no comments, no extra text.
 4) All fields must be filled with meaningful values. Never use null, empty strings, or empty arrays.
 5) If some details are missing, infer realistic values from the role and context.
