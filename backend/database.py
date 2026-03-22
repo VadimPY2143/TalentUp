@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func, Index
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,

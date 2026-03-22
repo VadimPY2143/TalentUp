@@ -1,57 +1,71 @@
 from typing import Any
-from fastapi import Depends, APIRouter, Query, HTTPException
-from sqlalchemy import select, insert, or_
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import resumes_table, resume_search_history_table, vacancies_table
-from users.define_roles import require_roles
-from database import get_session
+
+from database import get_session, resume_search_history_table, resumes_table, vacancies_table
 from search.resume_search.ai_summary import summarize_resume
+from search.resume_search.filters import ResumeSearchFilters, apply_resume_search_filters
+from users.define_roles import require_roles
 
 router = APIRouter(tags=["resume_search"])
 
-@router.get('/resume_search')
-async def search_resume(
-    resume_name: str = Query(..., min_length=2, max_length=100),
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"]))
-) -> dict[str, Any]:
-    term = resume_name.strip()
+
+def _build_token_conditions(term: str) -> list[Any]:
     tokens = [token for token in term.split() if len(token) >= 2]
-    if not tokens:
-        return {"resumes": []}
-
-    stmt = insert(resume_search_history_table).values(
-        user_id=current_user["id"],
-        search_text=term,
-    )
-    await session.execute(stmt)
-    await session.commit()
-
-    conditions = []
+    conditions: list[Any] = []
     for token in tokens:
         pattern = f"%{token}%"
         conditions.append(resumes_table.c.title.ilike(pattern))
         conditions.append(resumes_table.c.desired_role.ilike(pattern))
         conditions.append(resumes_table.c.summary.ilike(pattern))
+        conditions.append(resumes_table.c.location.ilike(pattern))
+        conditions.append(
+            func.coalesce(func.array_to_string(resumes_table.c.employment_type, " "), "").ilike(pattern)
+        )
+    return conditions
 
+
+@router.get("/resume_search")
+async def search_resume(
+    resume_name: str = Query(..., min_length=2, max_length=100),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    filters: ResumeSearchFilters = Depends(),
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["employer"])),
+) -> dict[str, Any]:
+    term = resume_name.strip()
+    conditions = _build_token_conditions(term)
+    if not conditions:
+        return {"resumes": []}
+
+    await session.execute(
+        insert(resume_search_history_table).values(
+            user_id=current_user["id"],
+            search_text=term,
+        )
+    )
+    await session.commit()
+
+    stmt = select(resumes_table)
+    stmt = apply_resume_search_filters(stmt, filters)
     stmt = (
-        select(resumes_table)
-        .where(or_(*conditions))
+        stmt.where(or_(*conditions))
         .order_by(resumes_table.c.updated_at.desc())
         .limit(limit)
         .offset(offset)
     )
     result = await session.execute(stmt)
-    resumes = [dict(row) for row in result.mappings().all()]
-    return {"resumes": resumes}
+    return {"resumes": [dict(row) for row in result.mappings().all()]}
 
 
 @router.get("/resume_search/recommendations")
 async def resumes_recommendations(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    filters: ResumeSearchFilters = Depends(),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
 ) -> dict[str, Any]:
@@ -61,8 +75,7 @@ async def resumes_recommendations(
         .order_by(resume_search_history_table.c.id.desc())
         .limit(1)
     )
-    history_result = await session.execute(history_stmt)
-    last_search = history_result.scalar_one_or_none()
+    last_search = (await session.execute(history_stmt)).scalar_one_or_none()
 
     if last_search:
         term = last_search
@@ -73,36 +86,28 @@ async def resumes_recommendations(
             .order_by(vacancies_table.c.id.desc())
             .limit(1)
         )
-        vacancy_result = await session.execute(vacancy_stmt)
-        term = vacancy_result.scalar_one_or_none()
+        term = (await session.execute(vacancy_stmt)).scalar_one_or_none()
 
-    tokens = [token for token in str(term).split() if len(token) >= 2]
-    if not tokens:
+    conditions = _build_token_conditions(str(term or ""))
+    if not conditions:
         return {"resumes": []}
 
-    conditions = []
-    for token in tokens:
-        pattern = f"%{token}%"
-        conditions.append(resumes_table.c.title.ilike(pattern))
-        conditions.append(resumes_table.c.desired_role.ilike(pattern))
-        conditions.append(resumes_table.c.summary.ilike(pattern))
-
+    stmt = select(resumes_table)
+    stmt = apply_resume_search_filters(stmt, filters)
     stmt = (
-        select(resumes_table)
-        .where(or_(*conditions))
+        stmt.where(or_(*conditions))
         .order_by(resumes_table.c.updated_at.desc())
         .limit(limit)
         .offset(offset)
     )
     result = await session.execute(stmt)
-    resumes = [dict(row) for row in result.mappings().all()]
-    return {"resumes": resumes}
+    return {"resumes": [dict(row) for row in result.mappings().all()]}
 
 
 @router.get("/resume_search/summary")
 async def resume_summary(
-        resume_id: int,
-        session: AsyncSession = Depends(get_session),
+    resume_id: int,
+    session: AsyncSession = Depends(get_session),
 ):
     stmt = select(resumes_table).where(resumes_table.c.id == resume_id)
     result = await session.execute(stmt)
@@ -110,6 +115,4 @@ async def resume_summary(
     if not resume_row:
         raise HTTPException(status_code=404, detail="Resume not found")
 
-    resume_summary = await summarize_resume(dict(resume_row))
-
-    return resume_summary
+    return await summarize_resume(dict(resume_row))

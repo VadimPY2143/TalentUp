@@ -13,7 +13,6 @@ import {
   uploadResumePdf,
 } from "../api/resumes"
 import type { CurrencyType, EmploymentType, Resume, ResumeBase } from "../types/resume"
-
 const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
 

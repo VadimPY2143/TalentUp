@@ -13,9 +13,27 @@ const appendParam = (
   params.set(key, String(value))
 }
 
+const appendArray = (params: URLSearchParams, key: string, values: string[] | undefined) => {
+  if (!values || values.length === 0) {
+    return
+  }
+  values
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .forEach((value) => params.append(key, value))
+}
+
 const buildSearchParams = (payload: CandidateSearchParams) => {
   const params = new URLSearchParams()
+
   appendParam(params, "resume_name", payload.query)
+  appendParam(params, "location", payload.location)
+  appendParam(params, "years_experience", payload.years_experience)
+  appendParam(params, "salary_from", payload.salary_min)
+  appendParam(params, "salary_to", payload.salary_max)
+  appendParam(params, "salary_currency", payload.salary_currency)
+  appendArray(params, "employment_type", payload.employment_type)
+
   if (payload.page_size !== undefined) {
     appendParam(params, "limit", payload.page_size)
   }
@@ -41,11 +59,26 @@ export const searchCandidates = async (
 export const fetchRecommendedCandidates = async (
   limit: number,
   offset: number,
+  filters?: Omit<CandidateSearchParams, "page" | "page_size" | "query" | "sort">,
   signal?: AbortSignal,
 ): Promise<CandidateSearchResponse> => {
   const params = new URLSearchParams()
   params.set("limit", String(limit))
   params.set("offset", String(offset))
+
+  if (filters) {
+    const filterQuery = buildSearchParams({
+      ...filters,
+      page: undefined,
+      page_size: undefined,
+      query: undefined,
+      sort: undefined,
+    })
+    if (filterQuery) {
+      new URLSearchParams(filterQuery).forEach((value, key) => params.append(key, value))
+    }
+  }
+
   const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(
     `/resume_search/recommendations?${params.toString()}`,
     { signal },
