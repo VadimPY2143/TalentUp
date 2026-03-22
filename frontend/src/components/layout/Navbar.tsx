@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
 
@@ -39,7 +39,10 @@ const Navbar = () => {
             </>
           )}
           {isAuthenticated && role === "worker" && (
-            <Link className="transition hover:text-orange-300" to="/">Знайти роботу</Link>
+            <>
+              <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
+              <Link className="transition hover:text-orange-300" to="/dashboard">Кабінет</Link>
+            </>
           )}
           {isAuthenticated && role === "employer" && (
             <>
