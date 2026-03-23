@@ -6,8 +6,8 @@ import type {
   VacancyUpdatePayload,
 } from "../types/vacancy"
 
-interface SearchVacanciesFilters {
-  search?: string
+interface VacancySearchParams {
+  query?: string
   location?: string
   salary_min?: number
   salary_max?: number
@@ -20,33 +20,95 @@ interface SearchVacanciesFilters {
   page_size?: number
 }
 
-interface SearchVacanciesResponse {
+interface VacancySearchResponse {
   items: VacancyResponse[]
   total: number
 }
 
-export const searchVacancies = (filters: SearchVacanciesFilters, signal?: AbortSignal) => {
+const appendParam = (
+  params: URLSearchParams,
+  key: string,
+  value: string | number | boolean | undefined,
+) => {
+  if (value === undefined || value === null || value === "") {
+    return
+  }
+  params.set(key, String(value))
+}
+
+const appendArray = (params: URLSearchParams, key: string, values: string[] | undefined) => {
+  if (!values?.length) {
+    return
+  }
+  values
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .forEach((value) => params.append(key, value))
+}
+
+const buildVacancySearchParams = (payload: VacancySearchParams) => {
   const params = new URLSearchParams()
-  if (filters.search) params.append('search', filters.search)
-  if (filters.location) params.append('location', filters.location)
-  if (filters.salary_min) params.append('salary_min', filters.salary_min.toString())
-  if (filters.salary_max) params.append('salary_max', filters.salary_max.toString())
-  if (filters.salary_currency) params.append('salary_currency', filters.salary_currency)
-  if (filters.experience_years_min) params.append('experience_years_min', filters.experience_years_min.toString())
-  if (filters.experience_years_max) params.append('experience_years_max', filters.experience_years_max.toString())
-  if (filters.employment_type) {
-    filters.employment_type.forEach(type => params.append('employment_type', type))
+
+  appendParam(params, "vacancy_name", payload.query)
+  appendParam(params, "location", payload.location)
+  appendParam(params, "salary_min", payload.salary_min)
+  appendParam(params, "salary_max", payload.salary_max)
+  appendParam(params, "salary_currency", payload.salary_currency)
+  appendParam(params, "experience_years_min", payload.experience_years_min)
+  appendParam(params, "experience_years_max", payload.experience_years_max)
+  appendArray(params, "employment_kind", payload.employment_type)
+  appendArray(params, "work_format", payload.work_format)
+
+  if (payload.page_size !== undefined) {
+    appendParam(params, "limit", payload.page_size)
   }
-  if (filters.work_format) {
-    filters.work_format.forEach(format => params.append('work_format', format))
+  if (payload.page !== undefined && payload.page_size !== undefined) {
+    const offset = Math.max(0, (payload.page - 1) * payload.page_size)
+    appendParam(params, "offset", offset)
   }
-  if (filters.page) params.append('page', filters.page.toString())
-  if (filters.page_size) params.append('page_size', filters.page_size.toString())
-  
-  return apiFetch<SearchVacanciesResponse>(`/vacancies/search?${params.toString()}`, {
-    method: "GET",
-    signal,
-  })
+
+  return params.toString()
+}
+
+export const searchVacancies = async (
+  payload: VacancySearchParams,
+  signal?: AbortSignal,
+): Promise<VacancySearchResponse> => {
+  const query = buildVacancySearchParams(payload)
+  const path = query ? `/vacancy_search?${query}` : "/vacancy_search"
+  const data = await apiFetch<{ vacancies: VacancyResponse[] }>(path, { signal })
+  const items = data?.vacancies ?? []
+  return { total: items.length, items }
+}
+
+export const fetchRecommendedVacancies = async (
+  limit: number,
+  offset: number,
+  filters?: Omit<VacancySearchParams, "page" | "page_size" | "query">,
+  signal?: AbortSignal,
+): Promise<VacancySearchResponse> => {
+  const params = new URLSearchParams()
+  params.set("limit", String(limit))
+  params.set("offset", String(offset))
+
+  if (filters) {
+    const filterQuery = buildVacancySearchParams({
+      ...filters,
+      page: undefined,
+      page_size: undefined,
+      query: undefined,
+    })
+    if (filterQuery) {
+      new URLSearchParams(filterQuery).forEach((value, key) => params.append(key, value))
+    }
+  }
+
+  const data = await apiFetch<{ vacancies: VacancyResponse[] }>(
+    `/vacancy_search/recommendations?${params.toString()}`,
+    { signal },
+  )
+  const items = data?.vacancies ?? []
+  return { total: items.length, items }
 }
 
 export const listCompanyVacancies = (companyId: number) => {

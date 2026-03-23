@@ -9,6 +9,69 @@ interface VacancyModalProps {
 const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
   if (!vacancy) return null
 
+  const normalizeBadgeList = (
+    value: string[] | string | null | undefined,
+    allowedValues: readonly string[],
+  ): string[] => {
+    if (!value) {
+      return []
+    }
+    const allowedMap = new Map(allowedValues.map((item) => [item.toLowerCase(), item]))
+    const normalized = new Set<string>()
+
+    const addFromText = (text: string) => {
+      const parts = text
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+
+      for (const part of parts) {
+        const exact = allowedMap.get(part.toLowerCase())
+        if (exact) {
+          normalized.add(exact)
+        }
+      }
+
+      const lowered = text.toLowerCase()
+      for (const allowedValue of allowedValues) {
+        if (lowered.includes(allowedValue.toLowerCase())) {
+          normalized.add(allowedValue)
+        }
+      }
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item === "string" && item.trim()) {
+          addFromText(item)
+        }
+      }
+      addFromText(value.join(""))
+    } else {
+      addFromText(value)
+    }
+
+    return Array.from(normalized)
+  }
+
+  const employmentTypes = normalizeBadgeList([
+    ...(vacancy.employment_type ?? []),
+    ...(vacancy.work_format ?? []),
+  ], [
+    "Full-time",
+    "Part-time",
+    "Contract",
+    "Internship",
+  ])
+  const workFormats = normalizeBadgeList([
+    ...(vacancy.work_format ?? []),
+    ...(vacancy.employment_type ?? []),
+  ], [
+    "Remote",
+    "Office",
+    "Hybrid",
+  ])
+
   const formatSalary = (vacancy: VacancyResponse) => {
     const min = vacancy.salary_min ?? undefined
     const max = vacancy.salary_max ?? undefined
@@ -81,16 +144,16 @@ const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
           </div>
 
           {/* Формати роботи та тип зайнятості */}
-          {(vacancy.employment_type?.length || vacancy.work_format?.length) && (
+          {(employmentTypes.length > 0 || workFormats.length > 0) && (
             <div>
               <h3 className="text-lg font-semibold text-slate-900 mb-3">Умови роботи</h3>
               <div className="flex flex-wrap gap-2">
-                {vacancy.employment_type?.map((type) => (
+                {employmentTypes.map((type) => (
                   <span key={type} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-sm text-orange-700">
                     {type}
                   </span>
                 ))}
-                {vacancy.work_format?.map((format) => (
+                {workFormats.map((format) => (
                   <span key={format} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-700">
                     {format}
                   </span>

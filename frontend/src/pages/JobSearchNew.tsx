@@ -6,9 +6,9 @@ import {
 } from "react"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
-import { searchVacancies } from "../api/vacancies"
+import { fetchRecommendedVacancies, searchVacancies } from "../api/vacancies"
 import type { VacancyResponse } from "../types/vacancy"
-import { apiFetch } from "../api/client"
+import { useAuth } from "../auth/useAuth"
 
 interface FilterState {
   location: string
@@ -39,6 +39,7 @@ interface FiltersPanelProps {
 interface ResultsHeaderProps {
   total: number
   isLoading: boolean
+  isRecommendationMode: boolean
 }
 
 interface VacancyCardProps {
@@ -56,16 +57,16 @@ interface PaginationProps {
 const PAGE_SIZE = 6
 
 const employmentTypeOptions = [
-  { value: "Full-time", label: "Повна зайнятість" },
-  { value: "Part-time", label: "Часткова зайнятість" },
-  { value: "Contract", label: "Контракт" },
-  { value: "Internship", label: "Стажування" },
+  { value: "Full-time", label: "Full-time" },
+  { value: "Part-time", label: "Part-time" },
+  { value: "Contract", label: "Contract" },
+  { value: "Internship", label: "Internship" },
 ]
 
 const workFormatOptions = [
-  { value: "Remote", label: "Віддалено" },
-  { value: "Office", label: "Офіс" },
-  { value: "Hybrid", label: "Гібрид" },
+  { value: "Remote", label: "Remote" },
+  { value: "Office", label: "Office" },
+  { value: "Hybrid", label: "Hybrid" },
 ]
 
 const currencyOptions = ["UAH", "USD", "EUR"] as const
@@ -128,6 +129,51 @@ const formatLocation = (vacancy: VacancyResponse) => {
     return vacancy.location
   }
   return "Локація не вказана"
+}
+
+const normalizeBadgeList = (
+  value: string[] | string | null | undefined,
+  allowedValues: readonly string[],
+): string[] => {
+  if (!value) {
+    return []
+  }
+  const allowedMap = new Map(allowedValues.map((item) => [item.toLowerCase(), item]))
+  const normalized = new Set<string>()
+
+  const addFromText = (text: string) => {
+    const parts = text
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+    for (const part of parts) {
+      const exact = allowedMap.get(part.toLowerCase())
+      if (exact) {
+        normalized.add(exact)
+      }
+    }
+
+    const lowered = text.toLowerCase()
+    for (const allowedValue of allowedValues) {
+      if (lowered.includes(allowedValue.toLowerCase())) {
+        normalized.add(allowedValue)
+      }
+    }
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (typeof item === "string" && item.trim()) {
+        addFromText(item)
+      }
+    }
+    addFromText(value.join(""))
+  } else {
+    addFromText(value)
+  }
+
+  return Array.from(normalized)
 }
 
 const formatDate = (dateString: string) => {
@@ -305,14 +351,15 @@ const FiltersPanel = ({
 const ResultsHeader = ({
   total,
   isLoading,
+  isRecommendationMode,
 }: ResultsHeaderProps) => (
   <div className="flex flex-col gap-4 rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium sm:flex-row sm:items-center sm:justify-between">
     <div>
       <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-        Результати
+        {isRecommendationMode ? "Рекомендації" : "Результати"}
       </p>
       <h2 className="mt-1 font-display text-lg font-semibold text-slate-900">
-        Знайдено {total} вакансій
+        {isRecommendationMode ? "Рекомендовані вакансії" : `Знайдено ${total} вакансій`}
       </h2>
       {isLoading && (
         <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
@@ -329,8 +376,14 @@ const VacancyCard = ({
   onViewDetails,
   onApply,
 }: VacancyCardProps) => {
-  const employment = vacancy.employment_type ?? []
-  const workFormats = vacancy.work_format ?? []
+  const employment = normalizeBadgeList(
+    [...(vacancy.employment_type ?? []), ...(vacancy.work_format ?? [])],
+    employmentTypeOptions.map((option) => option.value),
+  )
+  const workFormats = normalizeBadgeList(
+    [...(vacancy.work_format ?? []), ...(vacancy.employment_type ?? [])],
+    workFormatOptions.map((option) => option.value),
+  )
 
   return (
     <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
@@ -446,6 +499,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const JobSearchNew = () => {
+  const { isAuthenticated, role } = useAuth()
   const [searchInput, setSearchInput] = useState("")
   const [query, setQuery] = useState("")
   const [searchTrigger, setSearchTrigger] = useState(0)
@@ -463,7 +517,7 @@ const JobSearchNew = () => {
 
   const searchParams = useMemo(
     () => ({
-      search: query || undefined,
+      query: query || undefined,
       location: filters.location.trim() || undefined,
       experience_years_min: parseNumber(filters.yearsExperienceMin),
       experience_years_max: parseNumber(filters.yearsExperienceMax),
@@ -485,13 +539,45 @@ const JobSearchNew = () => {
   }, [page, totalPages])
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setVacancies([])
+      setTotal(0)
+      setError("Увійдіть у акаунт, щоб шукати вакансії.")
+      setIsLoading(false)
+      return
+    }
+
+    if (role !== "worker") {
+      setVacancies([])
+      setTotal(0)
+      setError("Пошук вакансій доступний лише для шукачів роботи.")
+      setIsLoading(false)
+      return
+    }
+
     let mounted = true
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const response = await searchVacancies(searchParams, controller.signal)
+        const response = hasQuery
+          ? await searchVacancies(searchParams, controller.signal)
+          : await fetchRecommendedVacancies(
+              PAGE_SIZE,
+              (page - 1) * PAGE_SIZE,
+              {
+                location: searchParams.location,
+                experience_years_min: searchParams.experience_years_min,
+                experience_years_max: searchParams.experience_years_max,
+                salary_min: searchParams.salary_min,
+                salary_max: searchParams.salary_max,
+                salary_currency: searchParams.salary_currency,
+                employment_type: searchParams.employment_type,
+                work_format: searchParams.work_format,
+              },
+              controller.signal,
+            )
         if (!mounted) {
           return
         }
@@ -518,7 +604,7 @@ const JobSearchNew = () => {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [searchParams, searchTrigger])
+  }, [hasQuery, isAuthenticated, page, role, searchParams, searchTrigger])
 
   const updateFilters = (field: keyof FilterState, value: string | boolean) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
@@ -618,6 +704,7 @@ const JobSearchNew = () => {
             <ResultsHeader
               total={total}
               isLoading={isLoading}
+              isRecommendationMode={!hasQuery}
             />
 
             {error && (

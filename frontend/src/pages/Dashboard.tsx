@@ -17,9 +17,9 @@ const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
 
 const employmentLabels: Record<EmploymentType, string> = {
-  Remote: "Віддалено",
-  Office: "Офіс",
-  Hybrid: "Гібрид",
+  Remote: "Remote",
+  Office: "Office",
+  Hybrid: "Hybrid",
 }
 const currencyLabels: Record<CurrencyType, string> = {
   UAH: "UAH (грн)",

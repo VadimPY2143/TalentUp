@@ -11,7 +11,13 @@ from database import (
     vacancies_table,
 )
 from users.define_roles import require_roles
-from search.vacancy_search.filters import VacancySearchFilters, apply_vacancy_search_filters
+from search.vacancy_search.filters import (
+    EmploymentKind,
+    PublishedWithin,
+    VacancySearchFilters,
+    WorkFormat,
+    apply_vacancy_search_filters,
+)
 
 router = APIRouter(tags=["vacancy_search"])
 
@@ -28,12 +34,40 @@ def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
     return conditions
 
 
+def get_vacancy_search_filters(
+    location: str | None = Query(None, max_length=255),
+    company_id: int | None = Query(None, ge=1),
+    employment_kind: list[EmploymentKind] | None = Query(None),
+    work_format: list[WorkFormat] | None = Query(None),
+    salary_min: int | None = Query(None, ge=0),
+    salary_max: int | None = Query(None, ge=0),
+    salary_currency: str | None = Query(None, max_length=10),
+    experience_years_min: int | None = Query(None, ge=0, le=80),
+    experience_years_max: int | None = Query(None, ge=0, le=80),
+    published_within: PublishedWithin | None = Query(None),
+    exclude_expired: bool = Query(False),
+) -> VacancySearchFilters:
+    return VacancySearchFilters(
+        location=location,
+        company_id=company_id,
+        employment_kind=employment_kind,
+        work_format=work_format,
+        salary_min=salary_min,
+        salary_max=salary_max,
+        salary_currency=salary_currency,
+        experience_years_min=experience_years_min,
+        experience_years_max=experience_years_max,
+        published_within=published_within,
+        exclude_expired=exclude_expired,
+    )
+
+
 @router.get("/vacancy_search")
 async def search_vacancy(
     vacancy_name: str = Query(..., min_length=2, max_length=100),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: VacancySearchFilters = Depends(),
+    filters: VacancySearchFilters = Depends(get_vacancy_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:
@@ -68,7 +102,7 @@ async def search_vacancy(
 async def vacancy_recommendations(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: VacancySearchFilters = Depends(),
+    filters: VacancySearchFilters = Depends(get_vacancy_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:

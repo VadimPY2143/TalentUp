@@ -38,15 +38,15 @@ Field quality requirements:
 
 
 async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
-    api_key = os.getenv("API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise RuntimeError("Set API_KEY or OPENAI_API_KEY for AI vacancy fill")
+        raise RuntimeError("Set OPENAI_API_KEY in requirements.txt")
 
     provider = OpenAIProvider(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model = OpenAIModel("anthropic/claude-3-haiku", provider=provider)
+    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
     agent = Agent(model, system_prompt=SYSTEM_PROMPT)
 
     result = await agent.run(

@@ -253,3 +253,36 @@ async def list_saved_resumes(
     )
     result = await session.execute(stmt)
     return [dict(row) for row in result.mappings().all()]
+
+
+@router.delete('/companies/{company_id}/saved-resumes')
+async def delete_saved_resume(
+    company_id: int,
+    resume_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    if current_user["role"] != "employer":
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    company_stmt = select(companies_table.c.id).where(
+        companies_table.c.id == company_id,
+        companies_table.c.user_id == current_user["id"],
+    )
+    company_exists = (await session.execute(company_stmt)).scalar_one_or_none()
+    if not company_exists:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    saved_stmt = select(saved_resumes_table.c.id).where(
+        saved_resumes_table.c.company_id == company_id,
+        saved_resumes_table.c.saved_resume_id == resume_id,
+    )
+    saved_id = (await session.execute(saved_stmt)).scalar_one_or_none()
+    if not saved_id:
+        raise HTTPException(status_code=404, detail="Saved resume not found")
+
+    await session.execute(
+        delete(saved_resumes_table).where(saved_resumes_table.c.id == saved_id)
+    )
+    await session.commit()
+    return {"status": "ok"}

@@ -103,3 +103,12 @@ export const saveCandidateResume = (companyId: number, resumeId: number) => {
 export const listSavedResumesByCompany = (companyId: number) => {
   return apiFetch<Resume[]>(`/companies/${companyId}/saved-resumes`)
 }
+
+export const deleteSavedResumeByCompany = (companyId: number, resumeId: number) => {
+  return apiFetch<{ status: string }>(
+    `/companies/${companyId}/saved-resumes?resume_id=${resumeId}`,
+    {
+      method: "DELETE",
+    },
+  )
+}

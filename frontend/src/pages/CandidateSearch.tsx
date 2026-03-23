@@ -66,9 +66,9 @@ interface PaginationProps {
 const PAGE_SIZE = 6
 
 const employmentTypeOptions = [
-  { value: "Remote", label: "Віддалено" },
-  { value: "Office", label: "Офіс" },
-  { value: "Hybrid", label: "Гібрид" },
+  { value: "Remote", label: "Remote" },
+  { value: "Office", label: "Office" },
+  { value: "Hybrid", label: "Hybrid" },
 ]
 const currencyOptions = ["UAH", "USD", "EUR"] as const
 
@@ -94,6 +94,26 @@ const parseNumber = (value: string) => {
   }
   const numberValue = Number(trimmed)
   return Number.isFinite(numberValue) ? numberValue : undefined
+}
+
+const normalizeEmploymentTypes = (value: string[] | null | undefined): string[] => {
+  if (!value?.length) {
+    return []
+  }
+
+  const normalized = new Set<string>()
+  for (const item of value) {
+    const token = item.trim().toLowerCase().replace(/[\s_-]/g, "")
+    if (token === "remote") {
+      normalized.add("Remote")
+    } else if (token === "hybrid") {
+      normalized.add("Hybrid")
+    } else if (token === "office" || token === "onsite" || token === "offline") {
+      normalized.add("Office")
+    }
+  }
+
+  return Array.from(normalized)
 }
 
 const formatSalary = (candidate: CandidateSearchItem) => {
@@ -319,7 +339,7 @@ const CandidateCard = ({
 }: CandidateCardProps) => {
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
-  const employment = candidate.employment_type ?? []
+  const employment = normalizeEmploymentTypes(candidate.employment_type)
   const hasPdf = Boolean(candidate.pdf_file_path)
   const summaryLength = candidate.summary?.trim().length ?? 0
   const showAiSummary = summaryLength >= 120

@@ -17,13 +17,13 @@ const JobSearch = () => {
       setIsLoading(true)
       setError(null)
       const filters = {
-        search: searchQuery || undefined,
+        query: searchQuery || undefined,
         location: location || undefined,
         salary_min: salaryMin ? Number(salaryMin) : undefined,
-        employment_type: employmentType || undefined,
+        employment_type: employmentType ? [employmentType] : undefined,
       }
       const data = await searchVacancies(filters)
-      setVacancies(data)
+      setVacancies(data.items)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося завантажити вакансії"
       setError(message)
@@ -125,7 +125,7 @@ const JobSearch = () => {
                       <div>
                         <h3 className="text-lg font-semibold text-slate-900">{vacancy.title}</h3>
                         <div className="text-sm text-slate-600">
-                          {vacancy.company_name || "Компанія"} · {vacancy.location || "Локація"}
+                          {vacancy.location || "Локація"}
                         </div>
                       </div>
                       
@@ -198,11 +198,11 @@ const JobSearch = () => {
                 onChange={(e) => setEmploymentType(e.target.value)}
               >
                 <option value="">Всі типи зайнятості</option>
-                <option value="Full-time">Повна зайнятість</option>
-                <option value="Part-time">Часткова зайнятість</option>
-                <option value="Remote">Віддалено</option>
-                <option value="Office">В офісі</option>
-                <option value="Hybrid">Гібрид</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Remote">Remote</option>
+                <option value="Office">Office</option>
+                <option value="Hybrid">Hybrid</option>
               </select>
 
               <button

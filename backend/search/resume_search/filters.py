@@ -6,6 +6,22 @@ from sqlalchemy import Select, and_, func
 from database import resumes_table
 
 
+EMPLOYMENT_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
+    "remote": ("Remote", "remote"),
+    "hybrid": ("Hybrid", "hybrid"),
+    "office": (
+        "Office",
+        "office",
+        "Onsite",
+        "onsite",
+        "On-site",
+        "on-site",
+        "Offline",
+        "offline",
+    ),
+}
+
+
 class ResumeSearchFilters(BaseModel):
     location: str | None = Field(default=None, max_length=255)
     employment_type: list[str] | None = None
@@ -29,6 +45,18 @@ def _overlap(column, values: Iterable[str]):
     return column.op("&&")(list(values))
 
 
+def _expand_employment_values(values: Iterable[str]) -> list[str]:
+    expanded: list[str] = []
+    for value in values:
+        token = value.strip().lower().replace("-", "").replace("_", "").replace(" ", "")
+        aliases = EMPLOYMENT_TYPE_ALIASES.get(token)
+        if aliases:
+            expanded.extend(aliases)
+        elif value.strip():
+            expanded.append(value.strip())
+    return list(dict.fromkeys(expanded))
+
+
 def apply_resume_search_filters(stmt: Select, filters: ResumeSearchFilters) -> Select:
     conditions = [resumes_table.c.is_active.is_(True)]
 
@@ -38,7 +66,7 @@ def apply_resume_search_filters(stmt: Select, filters: ResumeSearchFilters) -> S
     if filters.employment_type:
         values = [value.strip() for value in filters.employment_type if value.strip()]
         if values:
-            conditions.append(_overlap(resumes_table.c.employment_type, values))
+            conditions.append(_overlap(resumes_table.c.employment_type, _expand_employment_values(values)))
 
     if filters.salary_currency:
         conditions.append(resumes_table.c.salary_currency == filters.salary_currency)

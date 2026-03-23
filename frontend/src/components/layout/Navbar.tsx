@@ -67,9 +67,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/jobs" className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40">
-                Знайти роботу
-              </Link>
               <Link to="/register" className={primaryButton}>
                 Зареєструватися
               </Link>

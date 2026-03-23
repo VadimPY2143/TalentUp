@@ -27,12 +27,30 @@ def _build_token_conditions(term: str) -> list[Any]:
     return conditions
 
 
+def get_resume_search_filters(
+    location: str | None = Query(None, max_length=255),
+    employment_type: list[str] | None = Query(None),
+    salary_from: int | None = Query(None, ge=0),
+    salary_to: int | None = Query(None, ge=0),
+    salary_currency: str | None = Query(None, max_length=10),
+    years_experience: int | None = Query(None, ge=0, le=80),
+) -> ResumeSearchFilters:
+    return ResumeSearchFilters(
+        location=location,
+        employment_type=employment_type,
+        salary_from=salary_from,
+        salary_to=salary_to,
+        salary_currency=salary_currency,
+        years_experience=years_experience,
+    )
+
+
 @router.get("/resume_search")
 async def search_resume(
     resume_name: str = Query(..., min_length=2, max_length=100),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: ResumeSearchFilters = Depends(),
+    filters: ResumeSearchFilters = Depends(get_resume_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
 ) -> dict[str, Any]:
@@ -65,7 +83,7 @@ async def search_resume(
 async def resumes_recommendations(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: ResumeSearchFilters = Depends(),
+    filters: ResumeSearchFilters = Depends(get_resume_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
 ) -> dict[str, Any]:
