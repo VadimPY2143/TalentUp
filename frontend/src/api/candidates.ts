@@ -2,6 +2,12 @@ import { apiFetch, apiFetchBlob } from "./client"
 import type { CandidateSearchParams, CandidateSearchResponse } from "../types/candidate"
 import type { Resume } from "../types/resume"
 
+export interface CandidateResumeSummary {
+  summary: string
+  strengths: string[]
+  cached: boolean
+}
+
 const appendParam = (
   params: URLSearchParams,
   key: string,
@@ -111,4 +117,8 @@ export const deleteSavedResumeByCompany = (companyId: number, resumeId: number) 
       method: "DELETE",
     },
   )
+}
+
+export const fetchCandidateResumeSummary = (resumeId: number) => {
+  return apiFetch<CandidateResumeSummary>(`/resume_search/summary?resume_id=${resumeId}`)
 }

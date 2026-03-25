@@ -6,13 +6,13 @@
 } from "react"
 import Navbar from "../components/layout/Navbar"
 import {
+  fetchCandidateResumeSummary,
   fetchRecommendedCandidates,
   listSavedResumesByCompany,
   openCandidateResume,
   saveCandidateResume,
   searchCandidates,
 } from "../api/candidates"
-import { apiFetch } from "../api/client"
 import { listCompanies } from "../api/companies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 
@@ -470,6 +470,7 @@ const CandidateSearch = () => {
     title: string
     summary: string
     strengths: string[]
+    cached: boolean
   } | null>(null)
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
@@ -685,14 +686,13 @@ const CandidateSearch = () => {
     setSummaryLoading(true)
     setSummaryLoadingId(candidate.id)
     try {
-      const data = await apiFetch<{ summary: string; strengths: string[] }>(
-        `/resume_search/summary?resume_id=${candidate.id}`,
-      )
+      const data = await fetchCandidateResumeSummary(candidate.id)
       setSummaryModal({
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
         strengths: data?.strengths ?? [],
+        cached: Boolean(data?.cached),
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося отримати вижимку"
@@ -805,6 +805,9 @@ const CandidateSearch = () => {
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">
                   {summaryModal.title}
                 </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {summaryModal.cached ? "Відповідь з кешу" : "Згенеровано AI"}
+                </p>
               </div>
               <button
                 className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300"

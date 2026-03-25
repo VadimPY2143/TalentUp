@@ -60,8 +60,6 @@ const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
   ], [
     "Full-time",
     "Part-time",
-    "Contract",
-    "Internship",
   ])
   const workFormats = normalizeBadgeList([
     ...(vacancy.work_format ?? []),

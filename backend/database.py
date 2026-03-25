@@ -1,6 +1,21 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, ForeignKey, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -167,6 +182,47 @@ refresh_tokens_table = Table(
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
 
+chat_table = Table(
+    'chat',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('vacancy_id', Integer, ForeignKey('vacancies.id', ondelete='CASCADE'), nullable=False),
+    Column('employer_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('worker_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('last_message_at', DateTime(timezone=True)),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    UniqueConstraint('vacancy_id', 'worker_user_id', name='uq_chat_vacancy_worker'),
+)
+
+chat_members_table = Table(
+    'chat_members',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('chat_id', Integer, ForeignKey('chat.id', ondelete='CASCADE'), nullable=False),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('role', String(20), nullable=False),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint('chat_id', 'user_id', name='uq_chat_members_chat_user'),
+    CheckConstraint("role IN ('employer', 'worker')", name='ck_chat_members_role'),
+)
+
+messages_table = Table(
+    'messages',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('chat_id', Integer, ForeignKey('chat.id', ondelete='CASCADE'), nullable=False),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('message', Text, nullable=False),
+    Column('is_read', Boolean, nullable=False, server_default='false'),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
 
 
 

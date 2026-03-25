@@ -1,10 +1,14 @@
 import os
+import json
 from pathlib import Path
 from typing import Any
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
+import redis.asyncio as redis
+from pydantic import ValidationError
+from redis.exceptions import RedisError
 from search.resume_search.models import ResumeSummary
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -13,6 +17,10 @@ SYSTEM_PROMPT = """
 You are an HR assistant. Summarize the candidate resume and highlight key strengths.
 Language: Ukrainian.
 """.strip()
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+AI_SUMMARY_CACHE_TTL_SECONDS = int(os.getenv("AI_SUMMARY_CACHE_TTL_SECONDS", "86400"))
+redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 
 def _format_resume(resume: dict[str, Any]) -> str:
@@ -38,6 +46,41 @@ def _format_resume(resume: dict[str, Any]) -> str:
         for label, value in fields.items()
         if value not in (None, "", [])
     )
+
+
+def build_resume_summary_cache_key(
+    resume_id: int,
+    resume_updated_at: Any,
+) -> str:
+    version = (
+        resume_updated_at.isoformat()
+        if hasattr(resume_updated_at, "isoformat")
+        else str(resume_updated_at or "none")
+    )
+    return f"resume:summary:{resume_id}:{version}"
+
+
+async def get_cached_resume_summary(cache_key: str) -> dict[str, Any] | None:
+    try:
+        raw = await redis_client.get(cache_key)
+        if not raw:
+            return None
+        parsed = json.loads(raw)
+        validated = ResumeSummary.model_validate(parsed)
+        return validated.model_dump()
+    except (RedisError, json.JSONDecodeError, ValidationError, TypeError, ValueError):
+        return None
+
+
+async def set_cached_resume_summary(cache_key: str, summary: dict[str, Any]) -> None:
+    try:
+        await redis_client.set(
+            cache_key,
+            json.dumps(summary, ensure_ascii=False),
+            ex=AI_SUMMARY_CACHE_TTL_SECONDS,
+        )
+    except RedisError:
+        return
 
 
 async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:

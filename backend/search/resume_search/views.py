@@ -5,8 +5,14 @@ from sqlalchemy import func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_session, resume_search_history_table, resumes_table, vacancies_table
-from search.resume_search.ai_summary import summarize_resume
+from search.resume_search.ai_summary import (
+    build_resume_summary_cache_key,
+    get_cached_resume_summary,
+    set_cached_resume_summary,
+    summarize_resume,
+)
 from search.resume_search.filters import ResumeSearchFilters, apply_resume_search_filters
+from search.resume_search.models import ResumeSummaryResponse
 from users.define_roles import require_roles
 
 router = APIRouter(tags=["resume_search"])
@@ -122,7 +128,7 @@ async def resumes_recommendations(
     return {"resumes": [dict(row) for row in result.mappings().all()]}
 
 
-@router.get("/resume_search/summary")
+@router.get("/resume_search/summary", response_model=ResumeSummaryResponse)
 async def resume_summary(
     resume_id: int,
     session: AsyncSession = Depends(get_session),
@@ -133,4 +139,14 @@ async def resume_summary(
     if not resume_row:
         raise HTTPException(status_code=404, detail="Resume not found")
 
-    return await summarize_resume(dict(resume_row))
+    cache_key = build_resume_summary_cache_key(
+        resume_id=resume_id,
+        resume_updated_at=resume_row.get("updated_at"),
+    )
+    cached_summary = await get_cached_resume_summary(cache_key)
+    if cached_summary is not None:
+        return ResumeSummaryResponse(**cached_summary, cached=True)
+
+    summary = await summarize_resume(dict(resume_row))
+    await set_cached_resume_summary(cache_key, summary)
+    return ResumeSummaryResponse(**summary, cached=False)

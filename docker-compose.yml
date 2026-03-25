@@ -17,6 +17,20 @@ services:
       timeout: 3s
       retries: 20
 
+  redis:
+    image: redis:7-alpine
+    container_name: talentup-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   backend:
     build:
       context: .
@@ -26,12 +40,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       POSTGRES_DB: talentup
       POSTGRES_USER: talentup
       POSTGRES_PASSWORD: talentup
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379/0
       JWT_SECRET_KEY: change-me-in-production
       FRONTEND_ORIGIN: http://localhost:5173
       RESUME_UPLOAD_DIR: uploads/resumes
@@ -65,5 +84,6 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   backend_uploads:
   frontend_node_modules:
