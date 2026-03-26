@@ -1,8 +1,17 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, or_, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import RefreshRequest, TokenPair, User, UserLogin, UserResponse
+from .models import (
+    RefreshRequest,
+    TokenPair,
+    User,
+    UserLogin,
+    UserProfileResponse,
+    UserProfileUpdate,
+    UserResponse,
+)
 from database import get_session, refresh_tokens_table, users_table
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -11,6 +20,7 @@ from .auth import (
     get_password_hash,
     get_refresh_token_expiry,
     hash_refresh_token,
+    get_current_user,
     verify_password,
     _authenticate_user
 )
@@ -22,12 +32,17 @@ async def user_register(
     user: User,
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
-    stmt = select(users_table).where(users_table.c.username == user.username)
+    stmt = select(users_table.c.id).where(
+        or_(
+            users_table.c.username == user.username,
+            users_table.c.email == user.email,
+        )
+    )
     result = await session.execute(stmt)
     user_exists = result.fetchone()
 
     if user_exists:
-        raise HTTPException(status_code=400, detail="Username already exists")
+        raise HTTPException(status_code=400, detail="Username or email already exists")
 
     hashed_password = get_password_hash(user.password.get_secret_value())
     stmt = insert(users_table).values(
@@ -132,3 +147,92 @@ async def refresh_token(
         refresh_token=new_refresh_token,
         token_type="bearer",
     )
+
+
+@router.get("/user/profile", response_model=UserProfileResponse)
+async def get_user_profile(
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> UserProfileResponse:
+    stmt = select(users_table).where(users_table.c.id == current_user["id"])
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserProfileResponse(**row)
+
+
+@router.put("/user/profile", response_model=UserProfileResponse)
+async def update_user_profile(
+    payload: UserProfileUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> UserProfileResponse:
+    values = payload.model_dump(exclude_unset=True, exclude_none=True)
+    if not values:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    new_username = values.get("username")
+    if new_username:
+        stmt = select(users_table.c.id).where(
+            users_table.c.username == new_username,
+            users_table.c.id != current_user["id"],
+        )
+        exists = (await session.execute(stmt)).scalar_one_or_none()
+        if exists:
+            raise HTTPException(status_code=400, detail="Username already exists")
+
+    new_email = values.get("email")
+    if new_email:
+        stmt = select(users_table.c.id).where(
+            users_table.c.email == new_email,
+            users_table.c.id != current_user["id"],
+        )
+        exists = (await session.execute(stmt)).scalar_one_or_none()
+        if exists:
+            raise HTTPException(status_code=400, detail="Email already exists")
+
+    new_password = values.pop("password", None)
+    if new_password is not None:
+        values["password"] = get_password_hash(new_password.get_secret_value())
+
+    stmt = (
+        update(users_table)
+        .where(users_table.c.id == current_user["id"])
+        .values(**values)
+        .returning(*users_table.c)
+    )
+    result = await session.execute(stmt)
+    await session.commit()
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserProfileResponse(**row)
+
+
+@router.delete("/user/profile")
+async def delete_user_profile(
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    try:
+        await session.execute(
+            delete(refresh_tokens_table).where(
+                refresh_tokens_table.c.user_id == current_user["id"]
+            )
+        )
+        result = await session.execute(
+            delete(users_table).where(users_table.c.id == current_user["id"])
+        )
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="User has related records and cannot be deleted",
+        )
+
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"status": "ok"}

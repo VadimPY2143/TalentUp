@@ -30,6 +30,13 @@ class UserResponse(BaseModel):
     role: UserRole
 
 
+class UserProfileResponse(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    role: UserRole
+
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: SecretStr
@@ -37,3 +44,9 @@ class UserLogin(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class UserProfileUpdate(BaseModel):
+    username: str | None = None
+    email: EmailStr | None = None
+    password: SecretStr | None = None
