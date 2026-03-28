@@ -1,6 +1,5 @@
-from enum import Enum
-
 from pydantic import BaseModel, Field, model_validator
+from enum import Enum
 
 
 class EmploymentType(str, Enum):

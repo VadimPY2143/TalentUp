@@ -1,6 +1,6 @@
 """create job applications and application history
 
-Revision ID: d1a2b3c4d5e6
+Revision ID: d1a2b3c4d5e7
 Revises: f7c3e9a1b6d2
 Create Date: 2026-03-28 00:00:00.000000
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
-revision = "d1a2b3c4d5e6"
+revision = "d1a2b3c4d5e7"
 down_revision = "f7c3e9a1b6d2"
 branch_labels = None
 depends_on = None

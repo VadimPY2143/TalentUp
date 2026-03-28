@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useNavigate } from "react-router-dom"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import { getApplicationResume, listEmployerApplications, openApplicationResumePdf } from "../api/applications"
 import { deleteSavedResumeByCompany, listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
 import {
@@ -11,6 +13,7 @@ import {
   updateCompanyVacancy,
 } from "../api/vacancies"
 import type { CompanyPayload, CompanyResponse } from "../types/company"
+import type { ApplicationResume, ApplicationStatus, JobApplication } from "../types/application"
 import type { Resume } from "../types/resume"
 import type { VacancyPayload, VacancyResponse } from "../types/vacancy"
 
@@ -255,6 +258,34 @@ const formatDate = (value: string) => {
   }).format(date)
 }
 
+const formatDateTime = (value: string) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return "-"
+  }
+  return new Intl.DateTimeFormat("uk-UA", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)
+}
+
+const applicationStatusLabel: Record<ApplicationStatus, string> = {
+  applied: "Подано",
+  viewed: "Переглянуто",
+  accepted: "Прийнято",
+  rejected: "Відхилено",
+}
+
+const applicationStatusClassName: Record<ApplicationStatus, string> = {
+  applied: "border-sky-200 bg-sky-50 text-sky-700",
+  viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+}
+
 const hasValue = (value: unknown): boolean => {
   if (typeof value === "number") {
     return true
@@ -302,7 +333,22 @@ const formatResumeSalary = (resume: Resume): string => {
   return "Зарплата не вказана"
 }
 
+const formatApplicationResumeSalary = (resume: ApplicationResume): string => {
+  const currency = resume.salary_currency ?? "UAH"
+  if (resume.salary_min && resume.salary_max) {
+    return `${resume.salary_min}-${resume.salary_max} ${currency}`
+  }
+  if (resume.salary_min) {
+    return `від ${resume.salary_min} ${currency}`
+  }
+  if (resume.salary_max) {
+    return `до ${resume.salary_max} ${currency}`
+  }
+  return "Зарплата не вказана"
+}
+
 const EmployerDashboard = () => {
+  const navigate = useNavigate()
   const [company, setCompany] = useState<CompanyResponse | null>(null)
   const [extraCompaniesCount, setExtraCompaniesCount] = useState(0)
   const [showCompanyEditor, setShowCompanyEditor] = useState(false)
@@ -316,7 +362,7 @@ const EmployerDashboard = () => {
   const [vacancyPage, setVacancyPage] = useState(1)
   const [editingVacancyId, setEditingVacancyId] = useState<number | null>(null)
   const [vacancyForm, setVacancyForm] = useState<VacancyFormState>(emptyVacancyForm)
-  const [rightPanelView, setRightPanelView] = useState<"vacancies" | "saved">("vacancies")
+  const [rightPanelView, setRightPanelView] = useState<"vacancies" | "saved" | "applications">("vacancies")
   const [isVacancyLoading, setIsVacancyLoading] = useState(false)
   const [isVacancySaving, setIsVacancySaving] = useState(false)
   const [vacancyError, setVacancyError] = useState<string | null>(null)
@@ -325,10 +371,33 @@ const EmployerDashboard = () => {
   const [isSavedResumesLoading, setIsSavedResumesLoading] = useState(false)
   const [savedResumesError, setSavedResumesError] = useState<string | null>(null)
   const [deletingSavedResumeId, setDeletingSavedResumeId] = useState<number | null>(null)
+  const [employerApplications, setEmployerApplications] = useState<JobApplication[]>([])
+  const [isEmployerApplicationsLoading, setIsEmployerApplicationsLoading] = useState(false)
+  const [employerApplicationsError, setEmployerApplicationsError] = useState<string | null>(null)
+  const [applicationsVacancyFilter, setApplicationsVacancyFilter] = useState<number | null>(null)
+  const [expandedApplicationId, setExpandedApplicationId] = useState<number | null>(null)
+  const [applicationResumeLoadingId, setApplicationResumeLoadingId] = useState<number | null>(null)
+  const [selectedApplicationResume, setSelectedApplicationResume] = useState<{
+    resume: ApplicationResume
+    vacancyTitle: string
+    candidateId: number
+  } | null>(null)
+  const [applicationResumeError, setApplicationResumeError] = useState<string | null>(null)
   const [aiDescription, setAiDescription] = useState("")
   const [isAIFilling, setIsAIFilling] = useState(false)
   const [showAIPromptEditor, setShowAIPromptEditor] = useState(false)
   const aiTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    if (!selectedApplicationResume) {
+      return
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [selectedApplicationResume])
 
   const loadCompany = async () => {
     try {
@@ -382,6 +451,20 @@ const EmployerDashboard = () => {
     }
   }
 
+  const loadEmployerApplications = async (vacancyId?: number) => {
+    try {
+      setIsEmployerApplicationsLoading(true)
+      setEmployerApplicationsError(null)
+      const data = await listEmployerApplications(vacancyId)
+      setEmployerApplications(data)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося завантажити відгуки"
+      setEmployerApplicationsError(message)
+    } finally {
+      setIsEmployerApplicationsLoading(false)
+    }
+  }
+
   const handleDeleteSavedResume = async (resumeId: number) => {
     if (!company) {
       return
@@ -400,6 +483,51 @@ const EmployerDashboard = () => {
     }
   }
 
+  const handleOpenApplicationResume = async (application: JobApplication) => {
+    setApplicationResumeError(null)
+    try {
+      setApplicationResumeLoadingId(application.id)
+      const resume = await getApplicationResume(application.id)
+      setSelectedApplicationResume({
+        resume,
+        vacancyTitle: application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`,
+        candidateId: application.user_id,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося відкрити повне резюме"
+      setApplicationResumeError(message)
+    } finally {
+      setApplicationResumeLoadingId(null)
+    }
+  }
+
+  const handleWriteToCandidate = (application: JobApplication) => {
+    if (!application.resume_id) {
+      setApplicationResumeError("Для цього відгуку не знайдено резюме")
+      return
+    }
+    const params = new URLSearchParams({
+      resumeId: String(application.resume_id),
+      vacancyId: String(application.vacancy_id),
+    })
+    navigate(`/messages?${params.toString()}`)
+  }
+
+  const handleOpenApplicationResumePdf = async (resumeId?: number | null) => {
+    if (!resumeId) {
+      setApplicationResumeError("PDF для цього резюме недоступний")
+      return
+    }
+
+    setApplicationResumeError(null)
+    try {
+      await openApplicationResumePdf(resumeId)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося відкрити PDF резюме"
+      setApplicationResumeError(message)
+    }
+  }
+
   useEffect(() => {
     loadCompany()
   }, [])
@@ -408,6 +536,11 @@ const EmployerDashboard = () => {
     if (!company) {
       setVacancies([])
       setSavedResumes([])
+      setEmployerApplications([])
+      setApplicationsVacancyFilter(null)
+      setExpandedApplicationId(null)
+      setSelectedApplicationResume(null)
+      setApplicationResumeError(null)
       setEditingVacancyId(null)
       setVacancyForm(emptyVacancyForm)
       return
@@ -428,6 +561,25 @@ const EmployerDashboard = () => {
       setVacancyPage(totalPages)
     }
   }, [vacancies.length, vacancyPage])
+
+  useEffect(() => {
+    if (!company) {
+      return
+    }
+    if (
+      applicationsVacancyFilter !== null
+      && !vacancies.some((vacancy) => vacancy.id === applicationsVacancyFilter)
+    ) {
+      setApplicationsVacancyFilter(null)
+    }
+  }, [company, applicationsVacancyFilter, vacancies])
+
+  useEffect(() => {
+    if (!company) {
+      return
+    }
+    void loadEmployerApplications(applicationsVacancyFilter ?? undefined)
+  }, [company, applicationsVacancyFilter])
 
   const setCompanyField = (key: keyof CompanyFormState, value: string) => {
     setCompanyForm((prev) => ({ ...prev, [key]: value }))
@@ -883,13 +1035,37 @@ const EmployerDashboard = () => {
           <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-display text-2xl font-semibold text-slate-900">
-                {rightPanelView === "vacancies" ? "Вакансії компанії" : "Збережені кандидати"}
+                {rightPanelView === "vacancies"
+                  ? "Вакансії компанії"
+                  : rightPanelView === "saved"
+                    ? "Збережені кандидати"
+                    : "Відгуки кандидатів"}
               </h2>
               <button
                 className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
-                onClick={() => company && (rightPanelView === "vacancies" ? loadVacancies(company.id) : loadSavedResumes(company.id))}
-                disabled={!company || (rightPanelView === "vacancies" ? isVacancyLoading : isSavedResumesLoading)}
+                onClick={() => {
+                  if (!company) {
+                    return
+                  }
+                  if (rightPanelView === "vacancies") {
+                    void loadVacancies(company.id)
+                    return
+                  }
+                  if (rightPanelView === "saved") {
+                    void loadSavedResumes(company.id)
+                    return
+                  }
+                  void loadEmployerApplications(applicationsVacancyFilter ?? undefined)
+                }}
+                disabled={
+                  !company
+                  || (rightPanelView === "vacancies"
+                    ? isVacancyLoading
+                    : rightPanelView === "saved"
+                      ? isSavedResumesLoading
+                      : isEmployerApplicationsLoading)
+                }
               >
                 Оновити
               </button>
@@ -913,6 +1089,17 @@ const EmployerDashboard = () => {
                 onClick={() => setRightPanelView("saved")}
               >
                 Збережені кандидати
+              </button>
+              <button
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  rightPanelView === "applications"
+                    ? "bg-white text-slate-900 shadow-soft"
+                    : "text-slate-600 hover:text-slate-800"
+                }`}
+                type="button"
+                onClick={() => setRightPanelView("applications")}
+              >
+                Відгуки
               </button>
             </div>
 
@@ -1013,7 +1200,7 @@ const EmployerDashboard = () => {
                   )}
                 </div>
               )
-            ) : (
+            ) : rightPanelView === "saved" ? (
               <>
                 {savedResumesError && (
                   <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
@@ -1064,6 +1251,151 @@ const EmployerDashboard = () => {
                       </article>
                     ))}
                   </div>
+                )}
+              </>
+            ) : (
+              <>
+                {employerApplicationsError && (
+                  <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
+                    {employerApplicationsError}
+                  </div>
+                )}
+                {applicationResumeError && (
+                  <div className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-700">
+                    {applicationResumeError}
+                  </div>
+                )}
+
+                {!company ? (
+                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                    Розділ активується після створення компанії.
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Фільтр по вакансії
+                      </label>
+                      <select
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-orange-500/60"
+                        value={applicationsVacancyFilter ?? ""}
+                        onChange={(event) => {
+                          const raw = event.target.value
+                          setApplicationsVacancyFilter(raw ? Number(raw) : null)
+                          setExpandedApplicationId(null)
+                        }}
+                      >
+                        <option value="">Усі вакансії</option>
+                        {vacancies.map((vacancy) => (
+                          <option key={vacancy.id} value={vacancy.id}>
+                            {vacancy.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {isEmployerApplicationsLoading ? (
+                      <div className="mt-6 text-sm text-slate-500">Завантаження відгуків...</div>
+                    ) : employerApplications.length === 0 ? (
+                      <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                        По обраній вакансії поки немає відгуків.
+                      </div>
+                    ) : (
+                      <div className="mt-4 space-y-3">
+                        {employerApplications.map((application) => {
+                          const isExpanded = expandedApplicationId === application.id
+                          const sortedHistory = [...(application.history ?? [])].sort(
+                            (a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime(),
+                          )
+                          return (
+                            <article
+                              key={application.id}
+                              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft"
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                  <h3 className="text-base font-semibold text-slate-900">
+                                    {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
+                                  </h3>
+                                  <p className="mt-1 text-sm text-slate-600">
+                                    Кандидат #{application.user_id}
+                                  </p>
+                                  <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+                                    <span>Резюме: {application.resume_title ?? "Без назви"}</span>
+                                    <span>Подано: {formatDateTime(application.created_at)}</span>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+                                >
+                                  {applicationStatusLabel[application.status]}
+                                </span>
+                              </div>
+
+                              {application.cover_letter && (
+                                <p className="mt-3 text-sm text-slate-600">
+                                  {application.cover_letter}
+                                </p>
+                              )}
+
+                              <div className="mt-4 flex flex-wrap items-center gap-2">
+                                <button
+                                  className="rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
+                                  type="button"
+                                  onClick={() => handleWriteToCandidate(application)}
+                                  disabled={!application.resume_id}
+                                >
+                                  Написати кандидату
+                                </button>
+                                <button
+                                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                  type="button"
+                                  onClick={() => void handleOpenApplicationResume(application)}
+                                  disabled={applicationResumeLoadingId === application.id}
+                                >
+                                  {applicationResumeLoadingId === application.id ? "Відкриваємо..." : "Відкрити резюме"}
+                                </button>
+                                <button
+                                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                                  type="button"
+                                  onClick={() => setExpandedApplicationId(isExpanded ? null : application.id)}
+                                >
+                                  {isExpanded ? "Сховати історію" : "Історія статусів"}
+                                </button>
+                              </div>
+
+                              {isExpanded && (
+                                <ol className="mt-4 space-y-3 border-l border-slate-200 pl-4">
+                                  {sortedHistory.map((item) => (
+                                    <li key={item.id} className="relative">
+                                      <span className="absolute -left-[22px] mt-1.5 h-2.5 w-2.5 rounded-full bg-slate-500" />
+                                      <div className="rounded-xl border border-slate-200 bg-white p-3">
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                          <span
+                                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[item.status]}`}
+                                          >
+                                            {applicationStatusLabel[item.status]}
+                                          </span>
+                                          <span className="text-xs text-slate-500">
+                                            {formatDateTime(item.changed_at)}
+                                          </span>
+                                        </div>
+                                        {item.comment && (
+                                          <p className="mt-2 text-sm text-slate-600">
+                                            {item.comment}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ol>
+                              )}
+                            </article>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -1367,6 +1699,104 @@ const EmployerDashboard = () => {
             </button>
           </form>
           </section>
+        )}
+
+        {selectedApplicationResume && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
+            <div className="w-full max-h-[92vh] max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Повне резюме</p>
+                  <h3 className="mt-1 text-xl font-semibold text-slate-900">
+                    {selectedApplicationResume.resume.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {selectedApplicationResume.vacancyTitle} · Кандидат #{selectedApplicationResume.candidateId}
+                  </p>
+                </div>
+                <button
+                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+                  type="button"
+                  onClick={() => setSelectedApplicationResume(null)}
+                >
+                  Закрити
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 text-sm text-slate-700">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <span className="text-xs uppercase tracking-wide text-slate-500">Бажана роль</span>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {selectedApplicationResume.resume.desired_role || "Не вказано"}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <span className="text-xs uppercase tracking-wide text-slate-500">Локація</span>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {selectedApplicationResume.resume.location || "Не вказано"}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <span className="text-xs uppercase tracking-wide text-slate-500">Досвід</span>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {selectedApplicationResume.resume.years_experience !== null
+                      && selectedApplicationResume.resume.years_experience !== undefined
+                      ? `${selectedApplicationResume.resume.years_experience} років`
+                      : "Не вказано"}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <span className="text-xs uppercase tracking-wide text-slate-500">Зарплата</span>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {formatApplicationResumeSalary(selectedApplicationResume.resume)}
+                  </div>
+                </div>
+              </div>
+
+              {selectedApplicationResume.resume.employment_type?.length ? (
+                <div className="mt-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Тип зайнятості</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {selectedApplicationResume.resume.employment_type.map((item) => (
+                      <span
+                        key={`${selectedApplicationResume.resume.id}-${item}`}
+                        className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {selectedApplicationResume.resume.summary && (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Про кандидата</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                    {selectedApplicationResume.resume.summary}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                <button
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                  type="button"
+                  onClick={() => setSelectedApplicationResume(null)}
+                >
+                  Закрити
+                </button>
+                <button
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  onClick={() => void handleOpenApplicationResumePdf(selectedApplicationResume.resume.id)}
+                  disabled={!selectedApplicationResume.resume.pdf_file_path}
+                >
+                  Відкрити PDF
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -119,3 +119,71 @@
 2026-03-28 10:46:13 - moodshare - INFO - User 4 connected to chat 2
 2026-03-28 10:46:26 - moodshare - INFO - User 7 disconnected from chat 2
 2026-03-28 10:47:24 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:54:07 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:54:12 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:54:15 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:54:15 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:54:22 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:54:24 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:58:45 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 11:07:16 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 11:07:21 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:07:14 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:07:25 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:08:05 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:30:10 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 14:30:15 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:17:33 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:34 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:35 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:36 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:37 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:38 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:39 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:40 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:41 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:42 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:17:43 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:05 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:08 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:34:28 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 20:52:37 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 21:19:04 - moodshare - INFO - User 6 connected to chat 3
+2026-03-28 21:19:05 - moodshare - INFO - User 6 disconnected from chat 3
+2026-03-28 21:20:53 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 21:20:53 - moodshare - INFO - User 4 connected to chat 4
+2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:21:31 - moodshare - INFO - User 6 connected to chat 4
+2026-03-28 21:22:03 - moodshare - INFO - User 4 disconnected from chat 4
+2026-03-28 21:22:37 - moodshare - INFO - User 6 disconnected from chat 4
+2026-03-28 21:22:45 - moodshare - INFO - User 6 connected to chat 4
+2026-03-28 21:22:46 - moodshare - INFO - User 6 disconnected from chat 4
+2026-03-28 21:25:29 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:26:27 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:26:30 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:31 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:33 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:41 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:43 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:44 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:46 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:27:47 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:29:41 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:29:43 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:30:06 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 21:30:27 - moodshare - INFO - User 4 connected to chat 4
+2026-03-28 21:30:29 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 21:30:46 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 21:31:31 - moodshare - INFO - User 6 connected to chat 4
+2026-03-28 21:31:32 - moodshare - INFO - User 6 disconnected from chat 4

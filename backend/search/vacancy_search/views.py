@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -23,6 +24,19 @@ from search.vacancy_search.filters import (
 router = APIRouter(tags=["vacancy_search"])
 
 
+def _is_open_vacancy_for_worker(vacancy: dict[str, Any]) -> bool:
+    if vacancy.get("is_active") is not True:
+        return False
+
+    expires_at = vacancy.get("expires_at")
+    if not isinstance(expires_at, datetime):
+        return True
+
+    now_utc = datetime.now(timezone.utc)
+    expires_at_utc = expires_at if expires_at.tzinfo else expires_at.replace(tzinfo=timezone.utc)
+    return expires_at_utc > now_utc
+
+
 def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
     conditions: list[Any] = []
     for token in tokens:
@@ -46,7 +60,7 @@ def get_vacancy_search_filters(
     experience_years_min: int | None = Query(None, ge=0, le=80),
     experience_years_max: int | None = Query(None, ge=0, le=80),
     published_within: PublishedWithin | None = Query(None),
-    exclude_expired: bool = Query(False),
+    exclude_expired: bool = Query(True),
 ) -> VacancySearchFilters:
     return VacancySearchFilters(
         location=location,
@@ -110,10 +124,11 @@ async def get_vacancy_by_id_for_chat(
     row = result.mappings().first()
     if not row:
         raise HTTPException(status_code=404, detail="Vacancy not found")
+    vacancy = dict(row)
 
     if current_user["role"] == "worker":
-        if row["is_active"] is True:
-            return dict(row)
+        if _is_open_vacancy_for_worker(vacancy):
+            return vacancy
 
         access_stmt = (
             select(chat_table.c.id)
@@ -126,10 +141,10 @@ async def get_vacancy_by_id_for_chat(
         has_access = (await session.execute(access_stmt)).scalar_one_or_none()
         if has_access is None:
             raise HTTPException(status_code=404, detail="Vacancy not found")
-        return dict(row)
+        return vacancy
 
-    if row["created_by_user_id"] == current_user["id"]:
-        return dict(row)
+    if vacancy["created_by_user_id"] == current_user["id"]:
+        return vacancy
 
     access_stmt = (
         select(chat_table.c.id)
@@ -142,7 +157,7 @@ async def get_vacancy_by_id_for_chat(
     has_access = (await session.execute(access_stmt)).scalar_one_or_none()
     if has_access is None:
         raise HTTPException(status_code=404, detail="Vacancy not found")
-    return dict(row)
+    return vacancy
 
 
 @router.get("/vacancy_search/recommendations")

@@ -16,6 +16,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    Index,
 )
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -251,6 +252,7 @@ job_applications_table = Table(
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
     Column("vacancy_id", Integer, ForeignKey("vacancies.id"), nullable=False),
+    Column("resume_id", Integer, ForeignKey("resumes.id"), nullable=True),
     Column("cover_letter", Text),
     Column(
         "status",
@@ -269,6 +271,7 @@ job_applications_table = Table(
     Index("uq_job_applications_user_vacancy", "user_id", "vacancy_id", unique=True),
     Index("ix_job_applications_user_id", "user_id"),
     Index("ix_job_applications_vacancy_id", "vacancy_id"),
+    Index("ix_job_applications_resume_id", "resume_id"),
 )
 
 

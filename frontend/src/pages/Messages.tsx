@@ -659,6 +659,7 @@ const Messages = () => {
                 onChange={(event) => setSelectedVacancyId(event.target.value ? Number(event.target.value) : null)}
                 disabled={isVacanciesLoading}
               >
+                <option value="">Всі вакансії</option>
                 {!vacancies.length && <option value="">Немає доступних вакансій</option>}
                 {vacancies.map((vacancy) => (
                   <option key={vacancy.id} value={vacancy.id}>

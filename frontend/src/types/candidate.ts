@@ -27,7 +27,11 @@ export interface CandidateSearchItem {
   salary_max?: number | null
   salary_currency?: string | null
   employment_type?: string[] | null
+  created_at?: string | null
   pdf_file_path?: string | null
+  pdf_original_name?: string | null
+  pdf_size?: number | null
+  pdf_uploaded_at?: string | null
   updated_at?: string | null
 }
 

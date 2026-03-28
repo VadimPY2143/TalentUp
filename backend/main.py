@@ -12,14 +12,15 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
 
-from employer.company.crud import router as company_router
-from employer.vacancy.crud import router as vacancy_router
+from employer.company.views import router as company_router
+from employer.vacancy.views import router as vacancy_router
 from chat.views import router as chat_router
 from search.resume_search.views import router as search_router
 from search.vacancy_search.views import router as vacancy_search_router
 from users.crud import router as user_router
 from users.oauth import router as oauth_router
-from worker.crud import router as worker_router
+from worker.applications.views import router as worker_applications_router
+from worker.resumes.views import router as worker_resumes_router
 
 
 app.add_middleware(
@@ -39,7 +40,8 @@ app.add_middleware(
 
 # 🔹 Роути
 app.include_router(user_router)
-app.include_router(worker_router)
+app.include_router(worker_resumes_router)
+app.include_router(worker_applications_router)
 app.include_router(company_router)
 app.include_router(vacancy_router)
 app.include_router(chat_router)

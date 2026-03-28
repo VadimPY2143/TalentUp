@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { Link } from "react-router-dom"
 import Navbar from "../components/layout/Navbar"
 import { useAuth } from "../auth/useAuth"
+import { listMyApplications } from "../api/applications"
+import ApplicationHistoryPanel from "../components/applications/ApplicationHistoryPanel"
 import EmployerDashboard from "./EmployerDashboard"
 import {
   createResume,
@@ -12,6 +14,7 @@ import {
   updateResume,
   uploadResumePdf,
 } from "../api/resumes"
+import type { JobApplication } from "../types/application"
 import type { CurrencyType, EmploymentType, Resume, ResumeBase } from "../types/resume"
 const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
@@ -42,13 +45,15 @@ const emptyResume: ResumeBase = {
 
 const Dashboard = () => {
   const { role } = useAuth()
-  console.log('Current role:', role) // Дебагінг
   const [resumes, setResumes] = useState<Resume[]>([])
   const [form, setForm] = useState<ResumeBase>(emptyResume)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [applications, setApplications] = useState<JobApplication[]>([])
+  const [applicationsLoading, setApplicationsLoading] = useState(false)
+  const [applicationsError, setApplicationsError] = useState<string | null>(null)
 
   const heading = useMemo(() => (editingId ? "Редагувати резюме" : "Нове резюме"), [editingId])
   const editingResume = useMemo(
@@ -69,12 +74,26 @@ const Dashboard = () => {
     }
   }
 
+  const loadApplications = async () => {
+    try {
+      setApplicationsLoading(true)
+      const data = await listMyApplications()
+      setApplications(data)
+      setApplicationsError(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Помилка завантаження відгуків"
+      setApplicationsError(message)
+    } finally {
+      setApplicationsLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (role === "employer") {
       setIsLoading(false)
       return
     }
-    loadResumes()
+    void Promise.all([loadResumes(), loadApplications()])
   }, [role])
 
   const updateField = (field: keyof ResumeBase, value: ResumeBase[typeof field]) => {
@@ -238,6 +257,9 @@ const Dashboard = () => {
               </div>
               <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white/85">
                 Активні: <span className="font-semibold text-white">{resumes.filter(r => r.is_active).length}</span>
+              </div>
+              <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white/85">
+                Відгуки: <span className="font-semibold text-white">{applications.length}</span>
               </div>
               <Link
                 to="/jobs"
@@ -510,6 +532,15 @@ const Dashboard = () => {
               </button>
             </form>
           </section>
+        </div>
+
+        <div className="mt-6">
+          <ApplicationHistoryPanel
+            applications={applications}
+            isLoading={applicationsLoading}
+            error={applicationsError}
+            onRefresh={loadApplications}
+          />
         </div>
       </div>
     </div>

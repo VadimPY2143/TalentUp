@@ -6,9 +6,13 @@ import {
   type FormEvent,
 } from "react"
 import { useSearchParams } from "react-router-dom"
+import { createApplication, listMyApplications } from "../api/applications"
+import { listResumes } from "../api/resumes"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
 import { fetchRecommendedVacancies, getVacancyById, searchVacancies } from "../api/vacancies"
+import type { ApplicationStatus, JobApplication } from "../types/application"
+import type { Resume } from "../types/resume"
 import type { VacancyResponse } from "../types/vacancy"
 import { useAuth } from "../auth/useAuth"
 
@@ -48,12 +52,27 @@ interface VacancyCardProps {
   vacancy: VacancyResponse
   onViewDetails: () => void
   onApply: () => void
+  isApplyDisabled: boolean
+  applicationStatus?: ApplicationStatus
+  isApplying?: boolean
 }
 
 interface PaginationProps {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
+}
+
+interface ApplyModalProps {
+  vacancy: VacancyResponse | null
+  resumes: Resume[]
+  selectedResumeId: number | null
+  coverLetter: string
+  isSubmitting: boolean
+  onResumeChange: (resumeId: number) => void
+  onCoverLetterChange: (value: string) => void
+  onClose: () => void
+  onSubmit: () => void
 }
 
 const PAGE_SIZE = 6
@@ -80,6 +99,20 @@ const initialFilters: FilterState = {
   salaryCurrency: "",
   employmentTypes: [],
   workFormats: [],
+}
+
+const applicationStatusBadge: Record<ApplicationStatus, string> = {
+  applied: "border-sky-200 bg-sky-50 text-sky-700",
+  viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+}
+
+const applicationStatusLabel: Record<ApplicationStatus, string> = {
+  applied: "Подано",
+  viewed: "Переглянуто",
+  accepted: "Прийнято",
+  rejected: "Відхилено",
 }
 
 const parseNumber = (value: string) => {
@@ -375,6 +408,9 @@ const VacancyCard = ({
   vacancy,
   onViewDetails,
   onApply,
+  isApplyDisabled,
+  applicationStatus,
+  isApplying = false,
 }: VacancyCardProps) => {
   const employment = normalizeBadgeList(
     [...(vacancy.employment_type ?? []), ...(vacancy.work_format ?? [])],
@@ -457,13 +493,24 @@ const VacancyCard = ({
           Детальніше
         </button>
         <button
-          className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-700"
+          className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
           onClick={onApply}
+          disabled={isApplyDisabled || isApplying}
         >
-          Відгукнутися
+          {isApplying ? "Надсилаємо..." : isApplyDisabled ? "Вже подано" : "Відгукнутися"}
         </button>
       </div>
+
+      {applicationStatus && (
+        <div className="mt-3">
+          <span
+            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusBadge[applicationStatus]}`}
+          >
+            Статус відгуку: {applicationStatusLabel[applicationStatus]}
+          </span>
+        </div>
+      )}
 
       <div className="mt-3 text-xs text-slate-500">
         Опубліковано: {formatDate(vacancy.created_at)}
@@ -498,6 +545,91 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
   </div>
 )
 
+const ApplyModal = ({
+  vacancy,
+  resumes,
+  selectedResumeId,
+  coverLetter,
+  isSubmitting,
+  onResumeChange,
+  onCoverLetterChange,
+  onClose,
+  onSubmit,
+}: ApplyModalProps) => {
+  if (!vacancy) {
+    return null
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Application</p>
+            <h2 className="mt-1 font-display text-xl font-semibold text-slate-900">Відгук на вакансію</h2>
+            <p className="mt-1 text-sm text-slate-600">{vacancy.title}</p>
+          </div>
+          <button
+            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+          >
+            Закрити
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Оберіть резюме</label>
+            <select
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+              value={selectedResumeId ?? ""}
+              onChange={(event) => onResumeChange(Number(event.target.value))}
+            >
+              {resumes.map((resume) => (
+                <option key={resume.id} value={resume.id}>
+                  {resume.title} {resume.is_active ? "• активне" : "• неактивне"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Супровідний лист (опціонально)
+            </label>
+            <textarea
+              className="mt-2 min-h-[110px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-400/70"
+              placeholder="Коротко розкажіть, чому ви підходите на цю вакансію"
+              value={coverLetter}
+              onChange={(event) => onCoverLetterChange(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <button
+            className="flex-1 rounded-xl bg-[#1f2f5e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
+            type="button"
+            disabled={isSubmitting || !selectedResumeId}
+            onClick={onSubmit}
+          >
+            {isSubmitting ? "Надсилаємо..." : "Надіслати відгук"}
+          </button>
+          <button
+            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const JobSearchNew = () => {
   const { isAuthenticated, role } = useAuth()
   const [urlSearchParams] = useSearchParams()
@@ -515,10 +647,30 @@ const JobSearchNew = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null)
   const [selectedVacancy, setSelectedVacancy] = useState<VacancyResponse | null>(null)
+  const [applyVacancy, setApplyVacancy] = useState<VacancyResponse | null>(null)
+  const [workerResumes, setWorkerResumes] = useState<Resume[]>([])
+  const [myApplications, setMyApplications] = useState<JobApplication[]>([])
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
+  const [coverLetter, setCoverLetter] = useState("")
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasQuery = query.trim().length >= 2
+
+  const applicationByVacancyId = useMemo(() => {
+    const next = new Map<number, JobApplication>()
+    for (const application of myApplications) {
+      next.set(application.vacancy_id, application)
+    }
+    return next
+  }, [myApplications])
+
+  const availableResumes = useMemo(
+    () => workerResumes.filter((resume) => resume.is_active),
+    [workerResumes],
+  )
 
   const searchParams = useMemo(
     () => ({
@@ -565,6 +717,39 @@ const JobSearchNew = () => {
       }
     })()
   }, [isAuthenticated, normalizedVacancyFromQuery, role])
+
+  useEffect(() => {
+    if (!isAuthenticated || role !== "worker") {
+      setWorkerResumes([])
+      setMyApplications([])
+      return
+    }
+
+    let mounted = true
+    void (async () => {
+      try {
+        const [resumes, applications] = await Promise.all([
+          listResumes(),
+          listMyApplications(),
+        ])
+        if (!mounted) {
+          return
+        }
+        setWorkerResumes(resumes)
+        setMyApplications(applications)
+      } catch (err) {
+        if (!mounted) {
+          return
+        }
+        const message = err instanceof Error ? err.message : "Не вдалося завантажити дані відгуків"
+        setActionError(message)
+      }
+    })()
+
+    return () => {
+      mounted = false
+    }
+  }, [isAuthenticated, role])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -675,14 +860,74 @@ const JobSearchNew = () => {
 
   const handleViewDetails = (vacancy: VacancyResponse) => {
     setActionError(null)
+    setActionSuccess(null)
     setSelectedVacancy(vacancy)
   }
 
-  const handleApply = (vacancyId: number) => {
+  const openApplyModal = (vacancy: VacancyResponse) => {
     setActionError(null)
-    // TODO: Implement application functionality
-    console.log("Apply to vacancy:", vacancyId)
-    setSelectedVacancy(null) // Close modal after applying
+    setActionSuccess(null)
+
+    if (!isAuthenticated || role !== "worker") {
+      setActionError("Щоб відгукнутися, увійдіть як шукач роботи.")
+      return
+    }
+
+    if (applicationByVacancyId.has(vacancy.id)) {
+      setActionError("Ви вже відгукнулися на цю вакансію.")
+      return
+    }
+
+    if (workerResumes.length === 0) {
+      setActionError("Спочатку створіть хоча б одне резюме в Dashboard.")
+      return
+    }
+
+    if (availableResumes.length === 0) {
+      setActionError("Потрібно мати активне резюме, щоб відгукнутися.")
+      return
+    }
+
+    const preferredResume = availableResumes[0]
+    setSelectedResumeId(preferredResume?.id ?? null)
+    setCoverLetter("")
+    setApplyVacancy(vacancy)
+    setSelectedVacancy(null)
+  }
+
+  const closeApplyModal = () => {
+    if (isSubmittingApplication) {
+      return
+    }
+    setApplyVacancy(null)
+    setCoverLetter("")
+    setSelectedResumeId(null)
+  }
+
+  const submitApplication = async () => {
+    if (!applyVacancy || !selectedResumeId) {
+      return
+    }
+
+    try {
+      setIsSubmittingApplication(true)
+      setActionError(null)
+      const created = await createApplication({
+        vacancy_id: applyVacancy.id,
+        resume_id: selectedResumeId,
+        cover_letter: coverLetter.trim() || undefined,
+      })
+      setMyApplications((prev) => [created, ...prev])
+      setActionSuccess("Відгук успішно надіслано.")
+      setApplyVacancy(null)
+      setCoverLetter("")
+      setSelectedResumeId(null)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося надіслати відгук"
+      setActionError(message)
+    } finally {
+      setIsSubmittingApplication(false)
+    }
   }
 
   const handleModalClose = () => {
@@ -745,6 +990,11 @@ const JobSearchNew = () => {
                 {actionError}
               </div>
             )}
+            {actionSuccess && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {actionSuccess}
+              </div>
+            )}
             {showEmptyState && (
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500 shadow-soft">
                 Нічого не знайдено. Спробуйте змінити фільтри або уточнити запит.
@@ -753,14 +1003,20 @@ const JobSearchNew = () => {
 
             {vacancies.length > 0 && (
               <div className="grid gap-4 md:grid-cols-2">
-                {vacancies.map((vacancy) => (
+                {vacancies.map((vacancy) => {
+                  const existingApplication = applicationByVacancyId.get(vacancy.id)
+                  return (
                   <VacancyCard
                     key={vacancy.id}
                     vacancy={vacancy}
                     onViewDetails={() => handleViewDetails(vacancy)}
-                    onApply={() => handleApply(vacancy.id)}
+                    onApply={() => openApplyModal(vacancy)}
+                    isApplyDisabled={Boolean(existingApplication)}
+                    applicationStatus={existingApplication?.status}
+                    isApplying={isSubmittingApplication && applyVacancy?.id === vacancy.id}
                   />
-                ))}
+                  )
+                })}
               </div>
             )}
 
@@ -774,7 +1030,19 @@ const JobSearchNew = () => {
       <VacancyModal
         vacancy={selectedVacancy}
         onClose={handleModalClose}
-        onApply={() => selectedVacancy && handleApply(selectedVacancy.id)}
+        onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
+      />
+
+      <ApplyModal
+        vacancy={applyVacancy}
+        resumes={availableResumes}
+        selectedResumeId={selectedResumeId}
+        coverLetter={coverLetter}
+        isSubmitting={isSubmittingApplication}
+        onResumeChange={setSelectedResumeId}
+        onCoverLetterChange={setCoverLetter}
+        onClose={closeApplyModal}
+        onSubmit={submitApplication}
       />
     </div>
   )

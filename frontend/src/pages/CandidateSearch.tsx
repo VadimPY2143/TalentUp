@@ -7,6 +7,7 @@
 import { useNavigate } from "react-router-dom"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import ResumeModal from "../components/ResumeModal"
 import {
   fetchCandidateResumeSummary,
   fetchRecommendedCandidates,
@@ -17,6 +18,7 @@ import {
 } from "../api/candidates"
 import { listCompanies } from "../api/companies"
 import { listCompanyVacancies } from "../api/vacancies"
+import type { ChatResumeResponse } from "../types/chat"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 import type { VacancyResponse } from "../types/vacancy"
 
@@ -57,7 +59,7 @@ interface CandidateCardProps {
   isSaving: boolean
   isSummaryLoading: boolean
   onToggleSave: () => void
-  onViewResume: () => void
+  onViewResume: (candidate: CandidateSearchItem) => void
   onViewSummary: () => void
   onStartChat: () => void
 }
@@ -346,17 +348,16 @@ const CandidateCard = ({
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
   const employment = normalizeEmploymentTypes(candidate.employment_type)
-  const hasPdf = Boolean(candidate.pdf_file_path)
   const summaryLength = candidate.summary?.trim().length ?? 0
   const showAiSummary = summaryLength >= 120
 
   return (
-    <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
-      <div>
+    <article className="flex h-[430px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
+      <div className="min-h-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-            <p className="mt-1 text-sm text-slate-600">{role}</p>
+            <h3 className="line-clamp-2 text-base font-semibold text-slate-900">{title}</h3>
+            <p className="mt-1 line-clamp-1 text-sm text-slate-600">{role}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {showAiSummary && (
@@ -386,7 +387,7 @@ const CandidateCard = ({
         </div>
 
         {candidate.summary && (
-          <p className="mt-3 text-sm text-slate-600">{candidate.summary}</p>
+          <p className="mt-3 line-clamp-6 text-sm text-slate-600">{candidate.summary}</p>
         )}
 
         <div className="mt-4 space-y-2 text-sm text-slate-600">
@@ -415,10 +416,9 @@ const CandidateCard = ({
         <button
           className="flex-1 rounded-lg bg-[#1f2f5e] px-4 py-2.5 text-xs font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
-          onClick={onViewResume}
-          disabled={!hasPdf}
+          onClick={() => onViewResume(candidate)}
         >
-          {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
+          Відкрити резюме
         </button>
         <button
           className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
@@ -503,6 +503,7 @@ const CandidateSearch = () => {
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [openedResume, setOpenedResume] = useState<ChatResumeResponse | null>(null)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasQuery = query.trim().length >= 2
@@ -734,10 +735,37 @@ const CandidateSearch = () => {
     }
   }
 
-  const handleViewResume = async (candidateId: number) => {
+  const handleViewResume = (candidate: CandidateSearchItem) => {
+    const resume: ChatResumeResponse = {
+      id: candidate.id,
+      user_id: candidate.user_id ?? 0,
+      title: candidate.title || candidate.desired_role || "Резюме",
+      summary: candidate.summary ?? null,
+      desired_role: candidate.desired_role ?? null,
+      employment_type: candidate.employment_type ?? null,
+      location: candidate.location ?? null,
+      salary_min: candidate.salary_min ?? null,
+      salary_max: candidate.salary_max ?? null,
+      salary_currency: candidate.salary_currency ?? null,
+      years_experience: candidate.years_experience ?? null,
+      is_active: Boolean(candidate.is_active),
+      pdf_file_path: candidate.pdf_file_path ?? null,
+      pdf_original_name: candidate.pdf_original_name ?? null,
+      pdf_size: candidate.pdf_size ?? null,
+      pdf_uploaded_at: candidate.pdf_uploaded_at ?? null,
+      created_at: candidate.created_at ?? candidate.updated_at ?? new Date().toISOString(),
+      updated_at: candidate.updated_at ?? candidate.created_at ?? new Date().toISOString(),
+    }
+    setOpenedResume(resume)
+  }
+
+  const handleOpenResumePdf = async () => {
+    if (!openedResume?.pdf_file_path) {
+      return
+    }
     setActionError(null)
     try {
-      await openCandidateResume(candidateId)
+      await openCandidateResume(openedResume.id)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"
       setActionError(message)
@@ -877,7 +905,7 @@ const CandidateSearch = () => {
                     isSaving={savingIds.has(candidate.id)}
                     isSummaryLoading={summaryLoadingId === candidate.id}
                     onToggleSave={() => toggleSave(candidate.id)}
-                    onViewResume={() => handleViewResume(candidate.id)}
+                    onViewResume={handleViewResume}
                     onViewSummary={() => handleViewSummary(candidate)}
                     onStartChat={() => handleStartChat(candidate)}
                   />
@@ -1003,6 +1031,11 @@ const CandidateSearch = () => {
           </div>
         </div>
       )}
+      <ResumeModal
+        resume={openedResume}
+        onClose={() => setOpenedResume(null)}
+        onOpenPdf={() => void handleOpenResumePdf()}
+      />
     </div>
   )
 }
