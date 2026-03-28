@@ -4,6 +4,8 @@
   useState,
   type FormEvent,
 } from "react"
+import { useNavigate } from "react-router-dom"
+import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import {
   fetchCandidateResumeSummary,
@@ -14,7 +16,9 @@ import {
   searchCandidates,
 } from "../api/candidates"
 import { listCompanies } from "../api/companies"
+import { listCompanyVacancies } from "../api/vacancies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
+import type { VacancyResponse } from "../types/vacancy"
 
 interface FilterState {
   location: string
@@ -55,6 +59,7 @@ interface CandidateCardProps {
   onToggleSave: () => void
   onViewResume: () => void
   onViewSummary: () => void
+  onStartChat: () => void
 }
 
 interface PaginationProps {
@@ -336,6 +341,7 @@ const CandidateCard = ({
   onToggleSave,
   onViewResume,
   onViewSummary,
+  onStartChat,
 }: CandidateCardProps) => {
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
@@ -355,15 +361,22 @@ const CandidateCard = ({
           <div className="flex flex-col items-end gap-2">
             {showAiSummary && (
               <button
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
                 type="button"
                 onClick={onViewSummary}
                 disabled={isSummaryLoading}
               >
-                {isSummaryLoading && (
-                  <span className="h-3 w-3 animate-spin rounded-full border border-white/40 border-t-white" />
+                {isSummaryLoading ? (
+                  <>
+                    <span className="h-3 w-3 animate-spin rounded-full border border-white/40 border-t-white" />
+                    Loading
+                  </>
+                ) : (
+                  <>
+                    <AISparkleIcon className="h-5 w-5 text-cyan-200" />
+                    AI Summary
+                  </>
                 )}
-                {isSummaryLoading ? "Loading" : "AI Summary"}
               </button>
             )}
             <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
@@ -406,6 +419,13 @@ const CandidateCard = ({
           disabled={!hasPdf}
         >
           {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
+        </button>
+        <button
+          className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
+          type="button"
+          onClick={onStartChat}
+        >
+          Написати кандидату
         </button>
         <button
           className={`flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-700 ${
@@ -451,6 +471,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const CandidateSearch = () => {
+  const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState("")
   const [query, setQuery] = useState("")
   const [searchTrigger, setSearchTrigger] = useState(0)
@@ -462,9 +483,16 @@ const CandidateSearch = () => {
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set())
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
+  const [isVacanciesLoading, setIsVacanciesLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [companyId, setCompanyId] = useState<number | null>(null)
+  const [vacancies, setVacancies] = useState<VacancyResponse[]>([])
+  const [chatVacancyId, setChatVacancyId] = useState<string>("")
+  const [chatModal, setChatModal] = useState<{
+    candidateResumeId: number
+    candidateTitle: string
+  } | null>(null)
   const [summaryModal, setSummaryModal] = useState<{
     candidateId: number
     title: string
@@ -496,7 +524,7 @@ const CandidateSearch = () => {
   )
 
   useEffect(() => {
-    if (!summaryModal) {
+    if (!summaryModal && !chatModal) {
       return
     }
 
@@ -509,7 +537,7 @@ const CandidateSearch = () => {
       document.body.style.overflow = previousBodyOverflow
       document.documentElement.style.overflow = previousHtmlOverflow
     }
-  }, [summaryModal])
+  }, [chatModal, summaryModal])
 
   useEffect(() => {
     if (page > totalPages) {
@@ -562,6 +590,41 @@ const CandidateSearch = () => {
     }
 
     loadSavedResumes()
+    return () => {
+      mounted = false
+    }
+  }, [companyId])
+
+  useEffect(() => {
+    if (!companyId) {
+      setVacancies([])
+      setChatVacancyId("")
+      return
+    }
+
+    let mounted = true
+    const loadVacancies = async () => {
+      setIsVacanciesLoading(true)
+      try {
+        const companyVacancies = await listCompanyVacancies(companyId)
+        if (!mounted) {
+          return
+        }
+        setVacancies(companyVacancies)
+        setChatVacancyId(companyVacancies[0] ? String(companyVacancies[0].id) : "")
+      } catch {
+        if (mounted) {
+          setVacancies([])
+          setChatVacancyId("")
+        }
+      } finally {
+        if (mounted) {
+          setIsVacanciesLoading(false)
+        }
+      }
+    }
+
+    void loadVacancies()
     return () => {
       mounted = false
     }
@@ -703,6 +766,39 @@ const CandidateSearch = () => {
     }
   }
 
+  const handleStartChat = (candidate: CandidateSearchItem) => {
+    if (!candidate.id || candidate.id <= 0) {
+      setActionError("Для цього резюме недоступний ідентифікатор резюме")
+      return
+    }
+    if (isVacanciesLoading) {
+      setActionError("Зачекайте, завантажуються вакансії")
+      return
+    }
+    if (!vacancies.length) {
+      setActionError("Щоб почати чат, спочатку створіть хоча б одну вакансію")
+      return
+    }
+    setActionError(null)
+    setChatVacancyId(String(vacancies[0].id))
+    setChatModal({
+      candidateResumeId: candidate.id,
+      candidateTitle: candidate.title || candidate.desired_role || "Кандидат",
+    })
+  }
+
+  const handleConfirmStartChat = () => {
+    if (!chatModal || !chatVacancyId) {
+      return
+    }
+    const params = new URLSearchParams({
+      resumeId: String(chatModal.candidateResumeId),
+      vacancyId: chatVacancyId,
+    })
+    setChatModal(null)
+    navigate(`/messages?${params.toString()}`)
+  }
+
   const showEmptyState = !isLoading && !error && candidates.length === 0
 
   return (
@@ -783,6 +879,7 @@ const CandidateSearch = () => {
                     onToggleSave={() => toggleSave(candidate.id)}
                     onViewResume={() => handleViewResume(candidate.id)}
                     onViewSummary={() => handleViewSummary(candidate)}
+                    onStartChat={() => handleStartChat(candidate)}
                   />
                 ))}
               </div>
@@ -794,6 +891,67 @@ const CandidateSearch = () => {
           </div>
         </div>
       </div>
+      {chatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-strong">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Новий діалог
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-slate-900">
+                  {chatModal.candidateTitle}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Оберіть вакансію, від імені якої буде відкрито переписку.
+                </p>
+              </div>
+              <button
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300"
+                type="button"
+                onClick={() => setChatModal(null)}
+              >
+                Закрити
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Вакансія
+              </label>
+              <select
+                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+                value={chatVacancyId}
+                onChange={(event) => setChatVacancyId(event.target.value)}
+              >
+                {vacancies.map((vacancy) => (
+                  <option key={vacancy.id} value={vacancy.id}>
+                    {vacancy.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                type="button"
+                onClick={() => setChatModal(null)}
+              >
+                Скасувати
+              </button>
+              <button
+                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                onClick={handleConfirmStartChat}
+                disabled={!chatVacancyId}
+              >
+                Почати чат
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {summaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
           <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-strong">

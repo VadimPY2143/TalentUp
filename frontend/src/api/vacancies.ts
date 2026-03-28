@@ -81,6 +81,10 @@ export const searchVacancies = async (
   return { total: items.length, items }
 }
 
+export const getVacancyById = (vacancyId: number) => {
+  return apiFetch<VacancyResponse>(`/vacancy_search/vacancy/${vacancyId}`)
+}
+
 export const fetchRecommendedVacancies = async (
   limit: number,
   offset: number,

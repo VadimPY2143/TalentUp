@@ -6,3 +6,116 @@
 2026-03-24 08:02:49 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-25 19:15:26 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-25 19:15:26 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 09:15:51 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 09:15:51 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 09:49:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
+2026-03-28 09:59:01 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 10:00:28 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
+2026-03-28 10:03:59 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:04:02 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:04:03 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:04:06 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:04:27 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:05:10 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:05:12 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:05:17 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:05:20 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:05:53 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:05:54 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:05:56 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:06:29 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:09:04 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:09:04 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:09:39 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:09:41 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:10:01 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:10:04 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:12:30 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:12:30 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:12:35 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:12:35 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:12:41 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:12:41 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:12:55 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:13:10 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:13:10 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:13:10 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:13:22 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:13:37 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:13:42 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:13:43 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:14:01 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:14:01 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:14:01 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:16:21 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:16:21 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:16:25 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:16:25 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:17:03 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:17:03 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:17:03 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:17:03 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:17:03 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:17:03 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:17:03 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:17:03 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:17:15 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:17:15 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:17:15 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:17:15 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:18:05 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:18:05 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:18:09 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:18:09 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:18:30 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:18:40 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:18:54 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:18:56 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:19:04 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:19:07 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:19:09 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:19:34 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:19:34 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:19:36 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:19:36 - moodshare - INFO - User 4 connected to chat 1
+2026-03-28 10:19:38 - moodshare - INFO - User 4 disconnected from chat 1
+2026-03-28 10:19:38 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:19:40 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:19:40 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:19:44 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:19:48 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:19:48 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:19:50 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:21:27 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:21:27 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:21:50 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:22:46 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:22:46 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:25:59 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:25:59 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:27:06 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:27:06 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:27:07 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:27:07 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:28:05 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:28:05 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:37:15 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-28 10:43:06 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:43:31 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:45:50 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:45:50 - moodshare - INFO - User 7 connected to chat 2
+2026-03-28 10:45:50 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:45:50 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:45:51 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:46:06 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:46:09 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:46:09 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:46:10 - moodshare - INFO - User 4 disconnected from chat 2
+2026-03-28 10:46:10 - moodshare - INFO - User 4 connected to chat 3
+2026-03-28 10:46:13 - moodshare - INFO - User 4 disconnected from chat 3
+2026-03-28 10:46:13 - moodshare - INFO - User 4 connected to chat 2
+2026-03-28 10:46:26 - moodshare - INFO - User 7 disconnected from chat 2
+2026-03-28 10:47:24 - moodshare - INFO - User 4 disconnected from chat 2

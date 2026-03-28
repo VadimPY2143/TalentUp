@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard"
 import CandidateSearch from "./pages/CandidateSearch"
 import JobSearch from "./pages/JobSearch"
 import JobSearchNew from "./pages/JobSearchNew"
+import Messages from "./pages/Messages"
 import OAuthCallback from "./pages/OAuthCallback"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import Footer from "./components/layout/Footer"
@@ -26,6 +27,7 @@ const App = () => {
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/candidates" element={<CandidateSearch />} />
+                <Route path="/messages" element={<Messages />} />
                 <Route path="/jobs-old" element={<JobSearch />} />
               </Route>
             </Routes>

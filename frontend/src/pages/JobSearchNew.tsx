@@ -1,12 +1,14 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from "react"
+import { useSearchParams } from "react-router-dom"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
-import { fetchRecommendedVacancies, searchVacancies } from "../api/vacancies"
+import { fetchRecommendedVacancies, getVacancyById, searchVacancies } from "../api/vacancies"
 import type { VacancyResponse } from "../types/vacancy"
 import { useAuth } from "../auth/useAuth"
 
@@ -498,6 +500,11 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 
 const JobSearchNew = () => {
   const { isAuthenticated, role } = useAuth()
+  const [urlSearchParams] = useSearchParams()
+  const vacancyFromQuery = Number(urlSearchParams.get("vacancyId"))
+  const normalizedVacancyFromQuery =
+    Number.isFinite(vacancyFromQuery) && vacancyFromQuery > 0 ? vacancyFromQuery : null
+  const openedVacancyFromQueryRef = useRef<number | null>(null)
   const [searchInput, setSearchInput] = useState("")
   const [query, setQuery] = useState("")
   const [searchTrigger, setSearchTrigger] = useState(0)
@@ -535,6 +542,29 @@ const JobSearchNew = () => {
       setPage(totalPages)
     }
   }, [page, totalPages])
+
+  useEffect(() => {
+    if (!isAuthenticated || role !== "worker") {
+      return
+    }
+    if (!normalizedVacancyFromQuery) {
+      return
+    }
+    if (openedVacancyFromQueryRef.current === normalizedVacancyFromQuery) {
+      return
+    }
+
+    openedVacancyFromQueryRef.current = normalizedVacancyFromQuery
+    void (async () => {
+      try {
+        const vacancy = await getVacancyById(normalizedVacancyFromQuery)
+        setSelectedVacancy(vacancy)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Не вдалося відкрити вакансію"
+        setActionError(message)
+      }
+    })()
+  }, [isAuthenticated, normalizedVacancyFromQuery, role])
 
   useEffect(() => {
     if (!isAuthenticated) {

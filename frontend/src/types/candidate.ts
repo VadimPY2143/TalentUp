@@ -15,6 +15,7 @@ export interface CandidateSearchParams {
 
 export interface CandidateSearchItem {
   id: number
+  user_id?: number | null
   name?: string | null
   title?: string | null
   summary?: string | null

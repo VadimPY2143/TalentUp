@@ -1,9 +1,11 @@
+import asyncio
 import json
 import os
 from datetime import datetime
 from typing import Any
 
 import redis.asyncio as redis
+from redis.exceptions import RedisError
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +14,7 @@ from .connection_manager import manager
 from .models import (
     ChatCreateRequest,
     ChatMessagesListResponse,
+    ChatResumeResponse,
     ChatResponse,
     ChatUnreadCountersResponse,
     MyChatsListResponse,
@@ -25,14 +28,78 @@ from users.auth import get_current_user, get_current_user_by_token
 from users.define_roles import require_roles
 
 
-REDIS_URL = os.getenv("REDIS_URL")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+redis_listener_task: asyncio.Task[None] | None = None
 
 router = APIRouter(
     tags=["Chat"],
     prefix="/chat",
 )
 chat_service = ChatService(repository=ChatRepository())
+
+
+async def _relay_pubsub_events_to_local_sockets() -> None:
+    while True:
+        pubsub = redis_client.pubsub()
+        try:
+            await pubsub.psubscribe("user:*")
+            async for event in pubsub.listen():
+                if event.get("type") != "pmessage":
+                    continue
+
+                channel = event.get("channel")
+                if not isinstance(channel, str) or not channel.startswith("user:"):
+                    continue
+
+                user_id_raw = channel.split(":", 1)[1]
+                if not user_id_raw.isdigit():
+                    continue
+
+                raw_payload = event.get("data")
+                if not isinstance(raw_payload, str):
+                    continue
+
+                try:
+                    payload = json.loads(raw_payload)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid Redis pubsub payload on channel {channel}")
+                    continue
+
+                if not isinstance(payload, dict):
+                    continue
+
+                await manager.send_to_user(int(user_id_raw), payload)
+        except asyncio.CancelledError:
+            raise
+        except RedisError as exc:
+            logger.error(f"Redis pubsub listener error: {exc}")
+            await asyncio.sleep(1)
+        except Exception as exc:
+            logger.error(f"Unexpected pubsub listener error: {exc}")
+            await asyncio.sleep(1)
+        finally:
+            await pubsub.aclose()
+
+
+@router.on_event("startup")
+async def _start_redis_pubsub_listener() -> None:
+    global redis_listener_task
+    if redis_listener_task is None or redis_listener_task.done():
+        redis_listener_task = asyncio.create_task(_relay_pubsub_events_to_local_sockets())
+
+
+@router.on_event("shutdown")
+async def _stop_redis_pubsub_listener() -> None:
+    global redis_listener_task
+    if redis_listener_task is not None:
+        redis_listener_task.cancel()
+        try:
+            await redis_listener_task
+        except asyncio.CancelledError:
+            pass
+        redis_listener_task = None
+    await redis_client.aclose()
 
 @router.post("", response_model=ChatResponse, status_code=status.HTTP_201_CREATED)
 async def create_chat(
@@ -44,7 +111,7 @@ async def create_chat(
         session=session,
         vacancy_id=payload.vacancy_id,
         employer_user_id=current_user["id"],
-        worker_user_id=payload.worker_user_id,
+        resume_id=payload.resume_id,
     )
     return chat
 
@@ -92,6 +159,24 @@ async def get_messages(
         offset=offset,
     )
     return ChatMessagesListResponse(messages=messages)
+
+
+@router.get("/{chat_id}/resume", response_model=ChatResumeResponse)
+async def get_chat_worker_resume(
+    chat_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict[str, Any] = Depends(require_roles(["employer"])),
+) -> ChatResumeResponse:
+    chat = await chat_service.get_chat_or_404(session=session, chat_id=chat_id)
+    await chat_service.ensure_chat_member_or_403(
+        session=session,
+        chat_id=chat["id"],
+        user_id=current_user["id"],
+    )
+    return await chat_service.get_chat_resume(
+        session=session,
+        chat=chat,
+    )
 
 
 @router.websocket("/ws/{chat_id}")
@@ -243,10 +328,9 @@ async def websocket_endpoint(
                 "created_at": created_message["created_at"].isoformat(),
             }
 
-            await redis_client.publish(f"user:{to_user_id}", json.dumps(message_payload))
-            await manager.send_to_user(to_user_id, message_payload)
-            if to_user_id != user["id"]:
-                await manager.send_to_user(user["id"], message_payload)
+            target_user_ids = {to_user_id, user["id"]}
+            for target_user_id in target_user_ids:
+                await redis_client.publish(f"user:{target_user_id}", json.dumps(message_payload))
     except WebSocketDisconnect:
         logger.info(f"User {user['id']} disconnected from chat {chat_id}")
     finally:

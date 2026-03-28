@@ -1,10 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import (
+    chat_table,
     get_session,
     resumes_table,
     vacancies_search_history_table,
@@ -96,6 +97,52 @@ async def search_vacancy(
     result = await session.execute(stmt)
     vacancies = [dict(row) for row in result.mappings().all()]
     return {"vacancies": vacancies}
+
+
+@router.get("/vacancy_search/vacancy/{vacancy_id}")
+async def get_vacancy_by_id_for_chat(
+    vacancy_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker", "employer"])),
+) -> dict[str, Any]:
+    stmt = select(vacancies_table).where(vacancies_table.c.id == vacancy_id)
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+
+    if current_user["role"] == "worker":
+        if row["is_active"] is True:
+            return dict(row)
+
+        access_stmt = (
+            select(chat_table.c.id)
+            .where(
+                chat_table.c.vacancy_id == vacancy_id,
+                chat_table.c.worker_user_id == current_user["id"],
+            )
+            .limit(1)
+        )
+        has_access = (await session.execute(access_stmt)).scalar_one_or_none()
+        if has_access is None:
+            raise HTTPException(status_code=404, detail="Vacancy not found")
+        return dict(row)
+
+    if row["created_by_user_id"] == current_user["id"]:
+        return dict(row)
+
+    access_stmt = (
+        select(chat_table.c.id)
+        .where(
+            chat_table.c.vacancy_id == vacancy_id,
+            chat_table.c.employer_user_id == current_user["id"],
+        )
+        .limit(1)
+    )
+    has_access = (await session.execute(access_stmt)).scalar_one_or_none()
+    if has_access is None:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    return dict(row)
 
 
 @router.get("/vacancy_search/recommendations")

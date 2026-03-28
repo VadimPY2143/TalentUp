@@ -4,9 +4,10 @@ interface VacancyModalProps {
   vacancy: VacancyResponse | null
   onClose: () => void
   onApply: () => void
+  showApplyButton?: boolean
 }
 
-const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
+const VacancyModal = ({ vacancy, onClose, onApply, showApplyButton = true }: VacancyModalProps) => {
   if (!vacancy) return null
 
   const normalizeBadgeList = (
@@ -192,15 +193,19 @@ const VacancyModal = ({ vacancy, onClose, onApply }: VacancyModalProps) => {
         {/* Дії */}
         <div className="sticky bottom-0 border-t border-slate-200 bg-white p-6">
           <div className="flex gap-3">
+            {showApplyButton && (
+              <button
+                className="flex-1 rounded-xl bg-[#1f2f5e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1b294f]"
+                type="button"
+                onClick={onApply}
+              >
+                Відгукнутися на вакансію
+              </button>
+            )}
             <button
-              className="flex-1 rounded-xl bg-[#1f2f5e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1b294f]"
-              type="button"
-              onClick={onApply}
-            >
-              Відгукнутися на вакансію
-            </button>
-            <button
-              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+              className={`rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 ${
+                showApplyButton ? "" : "flex-1"
+              }`}
               type="button"
               onClick={onClose}
             >

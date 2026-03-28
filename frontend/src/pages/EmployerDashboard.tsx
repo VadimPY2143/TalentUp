@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
+import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import { deleteSavedResumeByCompany, listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
@@ -1077,7 +1078,7 @@ const EmployerDashboard = () => {
             </h2>
             <div className="flex items-center gap-2">
               <button
-                className={`rounded-xl border bg-gradient-to-r from-[#0f1f46] via-[#172c62] to-[#2c3f82] px-3 py-2 text-xs font-semibold text-white transition ${
+                className={`rounded-xl border bg-gradient-to-r from-[#0f1f46] via-[#172c62] to-[#2c3f82] px-3 py-2 text-xs font-semibold leading-none text-white transition ${
                   showAIPromptEditor
                     ? "border-[#35579f] shadow-sm"
                     : "border-[#28467f] hover:brightness-110"
@@ -1090,7 +1091,10 @@ const EmployerDashboard = () => {
                 }}
                 disabled={!company || isVacancySaving || isAIFilling}
               >
-                AI допомога
+                <span className="inline-flex translate-y-[1px] items-center gap-1.5 whitespace-nowrap">
+                  <AISparkleIcon className="h-5 w-5 text-cyan-200" />
+                  AI допомога
+                </span>
               </button>
               <button
                 className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"
@@ -1142,12 +1146,22 @@ const EmployerDashboard = () => {
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <button
-                    className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold leading-none text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     onClick={handleAIFillVacancy}
                     disabled={!company || isAIFilling || isVacancySaving}
                   >
-                    {isAIFilling ? "Генерація..." : "Згенерувати чернетку"}
+                    {isAIFilling ? (
+                      <span className="inline-flex translate-y-[1px] items-center gap-2 whitespace-nowrap">
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border border-white/40 border-t-white" />
+                        Генерація...
+                      </span>
+                    ) : (
+                      <span className="inline-flex translate-y-[1px] items-center gap-2 whitespace-nowrap">
+                        <AISparkleIcon className="h-5 w-5 text-yellow-100" />
+                        Згенерувати чернетку
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>

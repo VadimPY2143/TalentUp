@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from sqlalchemy import (
     ARRAY,
     Boolean,
-    CheckConstraint,
     Column,
     DateTime,
     Enum,
@@ -187,6 +186,7 @@ chat_table = Table(
     metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('vacancy_id', Integer, ForeignKey('vacancies.id', ondelete='CASCADE'), nullable=False),
+    Column('resume_id', Integer, ForeignKey('resumes.id', ondelete='SET NULL')),
     Column('employer_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
     Column('worker_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
     Column('last_message_at', DateTime(timezone=True)),
@@ -198,19 +198,7 @@ chat_table = Table(
         onupdate=func.now(),
         nullable=False,
     ),
-    UniqueConstraint('vacancy_id', 'worker_user_id', name='uq_chat_vacancy_worker'),
-)
-
-chat_members_table = Table(
-    'chat_members',
-    metadata,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('chat_id', Integer, ForeignKey('chat.id', ondelete='CASCADE'), nullable=False),
-    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
-    Column('role', String(20), nullable=False),
-    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
-    UniqueConstraint('chat_id', 'user_id', name='uq_chat_members_chat_user'),
-    CheckConstraint("role IN ('employer', 'worker')", name='ck_chat_members_role'),
+    UniqueConstraint('vacancy_id', 'resume_id', name='uq_chat_vacancy_resume'),
 )
 
 messages_table = Table(

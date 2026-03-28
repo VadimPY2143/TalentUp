@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import (
     ChatMessageResponse,
+    ChatResumeResponse,
     ChatResponse,
     ChatUnreadCounter,
     ChatUnreadCountersResponse,
@@ -22,8 +23,16 @@ class ChatService:
         session: AsyncSession,
         vacancy_id: int,
         employer_user_id: int,
-        worker_user_id: int,
+        resume_id: int,
     ) -> ChatResponse:
+        resume_owner = await self.repository.fetch_resume_owner(
+            session=session,
+            resume_id=resume_id,
+        )
+        if not resume_owner:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        worker_user_id = int(resume_owner["user_id"])
+
         worker = await self.repository.fetch_worker(
             session=session,
             worker_user_id=worker_user_id,
@@ -39,10 +48,10 @@ class ChatService:
         if owned_vacancy_id is None:
             raise HTTPException(status_code=404, detail="Vacancy not found")
 
-        existing_chat_id = await self.repository.fetch_chat_id_by_vacancy_worker(
+        existing_chat_id = await self.repository.fetch_chat_id_by_vacancy_resume(
             session=session,
             vacancy_id=vacancy_id,
-            worker_user_id=worker_user_id,
+            resume_id=resume_id,
         )
         if existing_chat_id is not None:
             raise HTTPException(status_code=409, detail="Chat already exists")
@@ -50,12 +59,7 @@ class ChatService:
         chat = await self.repository.insert_chat(
             session=session,
             vacancy_id=vacancy_id,
-            employer_user_id=employer_user_id,
-            worker_user_id=worker_user_id,
-        )
-        await self.repository.insert_chat_members(
-            session=session,
-            chat_id=chat["id"],
+            resume_id=resume_id,
             employer_user_id=employer_user_id,
             worker_user_id=worker_user_id,
         )
@@ -106,12 +110,12 @@ class ChatService:
         chat_id: int,
         user_id: int,
     ) -> None:
-        member_id = await self.repository.fetch_chat_member_id(
+        is_member = await self.repository.is_chat_member(
             session=session,
             chat_id=chat_id,
             user_id=user_id,
         )
-        if member_id is None:
+        if not is_member:
             raise HTTPException(status_code=403, detail="Access denied")
 
     async def list_messages(
@@ -182,3 +186,23 @@ class ChatService:
         )
         await session.commit()
         return created_message
+
+    async def get_chat_resume(
+        self,
+        session: AsyncSession,
+        chat: dict[str, Any],
+    ) -> ChatResumeResponse:
+        resume: dict[str, Any] | None = None
+        if chat.get("resume_id"):
+            resume = await self.repository.fetch_resume_by_id(
+                session=session,
+                resume_id=int(chat["resume_id"]),
+            )
+        if not resume:
+            resume = await self.repository.fetch_latest_worker_resume(
+                session=session,
+                worker_user_id=int(chat["worker_user_id"]),
+            )
+        if not resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        return ChatResumeResponse(**resume)

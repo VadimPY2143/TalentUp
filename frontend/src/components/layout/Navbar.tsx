@@ -41,12 +41,14 @@ const Navbar = () => {
           {isAuthenticated && role === "worker" && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
+              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
               <Link className="transition hover:text-orange-300" to="/dashboard">Кабінет</Link>
             </>
           )}
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">База резюме</Link>
+              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
               <Link className="transition hover:text-orange-300" to="/">Найняти фахівця</Link>
             </>
           )}
