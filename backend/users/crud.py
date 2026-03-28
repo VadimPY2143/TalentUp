@@ -1,13 +1,23 @@
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import RefreshRequest, TokenPair, User, UserLogin, UserResponse
-from database import get_session, refresh_tokens_table, users_table
+from .models import (
+    RefreshRequest,
+    TokenPair,
+    User,
+    UserLogin,
+    UserResponse,
+    UserProfileCreate,
+    UserProfileResponse,
+    UserProfileUpdate,
+)
+from database import get_session, refresh_tokens_table, user_profiles_table, users_table
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     create_refresh_token,
+    get_current_user,
     get_password_hash,
     get_refresh_token_expiry,
     hash_refresh_token,
@@ -132,3 +142,82 @@ async def refresh_token(
         refresh_token=new_refresh_token,
         token_type="bearer",
     )
+
+
+@router.get("/user/profile", response_model=UserProfileResponse)
+async def get_user_profile(
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> UserProfileResponse:
+    stmt = select(user_profiles_table).where(user_profiles_table.c.user_id == current_user["id"])
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return UserProfileResponse(**row)
+
+
+@router.post(
+    "/user/profile",
+    response_model=UserProfileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_user_profile(
+    payload: UserProfileCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> UserProfileResponse:
+    exists_stmt = select(user_profiles_table.c.id).where(
+        user_profiles_table.c.user_id == current_user["id"]
+    )
+    exists = (await session.execute(exists_stmt)).scalar_one_or_none()
+    if exists:
+        raise HTTPException(status_code=409, detail="Profile already exists")
+
+    values = payload.model_dump(exclude_none=True)
+    stmt = (
+        insert(user_profiles_table)
+        .values(user_id=current_user["id"], **values)
+        .returning(*user_profiles_table.c)
+    )
+    result = await session.execute(stmt)
+    await session.commit()
+    row = result.mappings().one()
+    return UserProfileResponse(**row)
+
+
+@router.put("/user/profile", response_model=UserProfileResponse)
+async def upsert_user_profile(
+    payload: UserProfileUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> UserProfileResponse:
+    values = payload.model_dump(exclude_unset=True)
+    if not values:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    exists_stmt = select(user_profiles_table.c.id).where(
+        user_profiles_table.c.user_id == current_user["id"]
+    )
+    exists = (await session.execute(exists_stmt)).scalar_one_or_none()
+
+    if exists:
+        stmt = (
+            update(user_profiles_table)
+            .where(user_profiles_table.c.user_id == current_user["id"])
+            .values(**values, updated_at=datetime.utcnow())
+            .returning(*user_profiles_table.c)
+        )
+    else:
+        stmt = (
+            insert(user_profiles_table)
+            .values(user_id=current_user["id"], **values)
+            .returning(*user_profiles_table.c)
+        )
+
+    result = await session.execute(stmt)
+    await session.commit()
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return UserProfileResponse(**row)
