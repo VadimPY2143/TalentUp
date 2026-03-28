@@ -212,6 +212,57 @@ messages_table = Table(
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
 
+APPLICATION_STATUSES = ("applied", "viewed", "rejected", "accepted")
+application_status_enum = Enum(*APPLICATION_STATUSES, name="application_status")
+
+job_applications_table = Table(
+    "job_applications",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("vacancy_id", Integer, ForeignKey("vacancies.id"), nullable=False),
+    Column("cover_letter", Text),
+    Column(
+        "status",
+        application_status_enum,
+        nullable=False,
+        server_default="applied",
+    ),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    Index("uq_job_applications_user_vacancy", "user_id", "vacancy_id", unique=True),
+    Index("ix_job_applications_user_id", "user_id"),
+    Index("ix_job_applications_vacancy_id", "vacancy_id"),
+)
+
+
+application_history_table = Table(
+    "application_history",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column(
+        "application_id",
+        Integer,
+        ForeignKey("job_applications.id", ondelete="CASCADE"),
+        nullable=False,
+    ),
+    Column(
+        "status",
+        application_status_enum,
+        nullable=False,
+    ),
+    Column("comment", Text),
+    Column("changed_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Index("ix_application_history_application_id", "application_id"),
+)
+
+
 
 
 async def get_session() -> AsyncSession:
