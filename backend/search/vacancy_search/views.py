@@ -1,17 +1,24 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import (
+    chat_table,
     get_session,
     resumes_table,
     vacancies_search_history_table,
     vacancies_table,
 )
 from users.define_roles import require_roles
-from search.vacancy_search.filters import VacancySearchFilters, apply_vacancy_search_filters
+from search.vacancy_search.filters import (
+    EmploymentKind,
+    PublishedWithin,
+    VacancySearchFilters,
+    WorkFormat,
+    apply_vacancy_search_filters,
+)
 
 router = APIRouter(tags=["vacancy_search"])
 
@@ -28,12 +35,40 @@ def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
     return conditions
 
 
+def get_vacancy_search_filters(
+    location: str | None = Query(None, max_length=255),
+    company_id: int | None = Query(None, ge=1),
+    employment_kind: list[EmploymentKind] | None = Query(None),
+    work_format: list[WorkFormat] | None = Query(None),
+    salary_min: int | None = Query(None, ge=0),
+    salary_max: int | None = Query(None, ge=0),
+    salary_currency: str | None = Query(None, max_length=10),
+    experience_years_min: int | None = Query(None, ge=0, le=80),
+    experience_years_max: int | None = Query(None, ge=0, le=80),
+    published_within: PublishedWithin | None = Query(None),
+    exclude_expired: bool = Query(False),
+) -> VacancySearchFilters:
+    return VacancySearchFilters(
+        location=location,
+        company_id=company_id,
+        employment_kind=employment_kind,
+        work_format=work_format,
+        salary_min=salary_min,
+        salary_max=salary_max,
+        salary_currency=salary_currency,
+        experience_years_min=experience_years_min,
+        experience_years_max=experience_years_max,
+        published_within=published_within,
+        exclude_expired=exclude_expired,
+    )
+
+
 @router.get("/vacancy_search")
 async def search_vacancy(
     vacancy_name: str = Query(..., min_length=2, max_length=100),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: VacancySearchFilters = Depends(),
+    filters: VacancySearchFilters = Depends(get_vacancy_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:
@@ -64,11 +99,57 @@ async def search_vacancy(
     return {"vacancies": vacancies}
 
 
+@router.get("/vacancy_search/vacancy/{vacancy_id}")
+async def get_vacancy_by_id_for_chat(
+    vacancy_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker", "employer"])),
+) -> dict[str, Any]:
+    stmt = select(vacancies_table).where(vacancies_table.c.id == vacancy_id)
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+
+    if current_user["role"] == "worker":
+        if row["is_active"] is True:
+            return dict(row)
+
+        access_stmt = (
+            select(chat_table.c.id)
+            .where(
+                chat_table.c.vacancy_id == vacancy_id,
+                chat_table.c.worker_user_id == current_user["id"],
+            )
+            .limit(1)
+        )
+        has_access = (await session.execute(access_stmt)).scalar_one_or_none()
+        if has_access is None:
+            raise HTTPException(status_code=404, detail="Vacancy not found")
+        return dict(row)
+
+    if row["created_by_user_id"] == current_user["id"]:
+        return dict(row)
+
+    access_stmt = (
+        select(chat_table.c.id)
+        .where(
+            chat_table.c.vacancy_id == vacancy_id,
+            chat_table.c.employer_user_id == current_user["id"],
+        )
+        .limit(1)
+    )
+    has_access = (await session.execute(access_stmt)).scalar_one_or_none()
+    if has_access is None:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    return dict(row)
+
+
 @router.get("/vacancy_search/recommendations")
 async def vacancy_recommendations(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    filters: VacancySearchFilters = Depends(),
+    filters: VacancySearchFilters = Depends(get_vacancy_search_filters),
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> dict[str, Any]:

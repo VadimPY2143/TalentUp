@@ -1,6 +1,20 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import ARRAY, Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, MetaData, String, Table, Text, func, Index
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    MetaData,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -53,32 +67,11 @@ resumes_table = Table(
     Column('summary', Text),
     Column('desired_role', String(255)),
     Column('employment_type', ARRAY(String(50))),
-    # Full-time/Part-time/Contract/etc. (separate from Remote/Hybrid/Office stored in employment_type).
-    Column('employment_kind', ARRAY(String(50))),
     Column('location', String(255)),
-    Column('city', String(100)),
-    Column('country', String(100)),
-    Column('location_lat', Float),
-    Column('location_lng', Float),
     Column('salary_min', Integer),
     Column('salary_max', Integer),
     Column('salary_currency', String(10)),
-    Column('salary_period', String(10)),
     Column('years_experience', Integer),
-    Column('category', String(100)),
-    Column('tags', ARRAY(String(50))),
-    Column('education_level', String(20)),
-    Column('hard_skills', ARRAY(String(50))),
-    Column('soft_skills', ARRAY(String(50))),
-    Column('languages', ARRAY(String(30))),
-    Column('english_level', String(2)),
-    Column('company_types', ARRAY(String(50))),
-    Column('company_size', String(20)),
-    Column('work_schedule', ARRAY(String(20))),
-    Column('position_level', String(20)),
-    Column('contract_types', ARRAY(String(20))),
-    Column('benefits', ARRAY(String(50))),
-    Column('hire_speed', String(20)),
     Column('is_active', Boolean, nullable=False, server_default='true'),
     Column('pdf_file_path', String(500)),
     Column('pdf_original_name', String(255)),
@@ -188,6 +181,36 @@ refresh_tokens_table = Table(
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
 
+chat_table = Table(
+    'chat',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('vacancy_id', Integer, ForeignKey('vacancies.id', ondelete='CASCADE'), nullable=False),
+    Column('resume_id', Integer, ForeignKey('resumes.id', ondelete='SET NULL')),
+    Column('employer_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('worker_user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('last_message_at', DateTime(timezone=True)),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    UniqueConstraint('vacancy_id', 'resume_id', name='uq_chat_vacancy_resume'),
+)
+
+messages_table = Table(
+    'messages',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('chat_id', Integer, ForeignKey('chat.id', ondelete='CASCADE'), nullable=False),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('message', Text, nullable=False),
+    Column('is_read', Boolean, nullable=False, server_default='false'),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
 
 APPLICATION_STATUSES = ("applied", "viewed", "rejected", "accepted")
 application_status_enum = Enum(*APPLICATION_STATUSES, name="application_status")

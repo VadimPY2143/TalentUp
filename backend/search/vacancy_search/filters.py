@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Iterable
 
 from pydantic import BaseModel, Field, model_validator
-from sqlalchemy import Select, and_, func
+from sqlalchemy import Select, and_, func, or_
 
 from database import vacancies_table
 
@@ -29,6 +29,22 @@ class PublishedWithin(str, Enum):
     D3 = "3d"
     WEEK = "7d"
     MONTH = "30d"
+
+
+WORK_FORMAT_ALIASES: dict[WorkFormat, tuple[str, ...]] = {
+    WorkFormat.REMOTE: ("Remote", "remote"),
+    WorkFormat.HYBRID: ("Hybrid", "hybrid"),
+    WorkFormat.OFFICE: (
+        "Office",
+        "office",
+        "Onsite",
+        "onsite",
+        "On-site",
+        "on-site",
+        "Offline",
+        "offline",
+    ),
+}
 
 
 class VacancySearchFilters(BaseModel):
@@ -79,6 +95,11 @@ def _overlap(column, values: Iterable[str]):
     return column.op("&&")(list(values))
 
 
+def _match_any_array(column_names: Iterable, values: Iterable[str]):
+    normalized_values = list(dict.fromkeys(value.strip() for value in values if value.strip()))
+    return or_(*(_overlap(column, normalized_values) for column in column_names))
+
+
 def _published_since(v: PublishedWithin) -> datetime:
     now = datetime.now(timezone.utc)
     if v == PublishedWithin.H24:
@@ -102,7 +123,17 @@ def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Selec
     if f.employment_kind:
         conditions.append(_overlap(vacancies_table.c.employment_type, [e.value for e in f.employment_kind]))
     if f.work_format:
-        conditions.append(_overlap(vacancies_table.c.work_format, [w.value for w in f.work_format]))
+        work_format_values = [
+            alias
+            for work_format in f.work_format
+            for alias in WORK_FORMAT_ALIASES.get(work_format, (work_format.value,))
+        ]
+        conditions.append(
+            _match_any_array(
+                (vacancies_table.c.work_format, vacancies_table.c.employment_type),
+                work_format_values,
+            )
+        )
 
     if f.salary_currency:
         conditions.append(vacancies_table.c.salary_currency == f.salary_currency)
@@ -136,4 +167,3 @@ def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Selec
     if conditions:
         stmt = stmt.where(and_(*conditions))
     return stmt
-

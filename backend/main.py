@@ -14,7 +14,9 @@ app = FastAPI()
 
 from employer.company.crud import router as company_router
 from employer.vacancy.crud import router as vacancy_router
+from chat.views import router as chat_router
 from search.resume_search.views import router as search_router
+from search.vacancy_search.views import router as vacancy_search_router
 from users.crud import router as user_router
 from users.oauth import router as oauth_router
 from worker.crud import router as worker_router
@@ -40,7 +42,9 @@ app.include_router(user_router)
 app.include_router(worker_router)
 app.include_router(company_router)
 app.include_router(vacancy_router)
+app.include_router(chat_router)
 app.include_router(search_router)
+app.include_router(vacancy_search_router)
 app.include_router(oauth_router)
 
 

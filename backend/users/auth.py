@@ -128,8 +128,12 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = _normalize_bearer_token(credentials.credentials)
-    payload = verify_token(token)
+    return await get_current_user_by_token(credentials.credentials, session)
+
+
+async def get_current_user_by_token(token: str, session: AsyncSession) -> dict:
+    normalized_token = _normalize_bearer_token(token)
+    payload = verify_token(normalized_token)
     email = payload.get("sub")
 
     if not email:

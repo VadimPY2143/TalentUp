@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
+import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
-import { listSavedResumesByCompany } from "../api/candidates"
+import { deleteSavedResumeByCompany, listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
 import {
   aiFillCompanyVacancy,
@@ -323,6 +324,7 @@ const EmployerDashboard = () => {
   const [savedResumes, setSavedResumes] = useState<Resume[]>([])
   const [isSavedResumesLoading, setIsSavedResumesLoading] = useState(false)
   const [savedResumesError, setSavedResumesError] = useState<string | null>(null)
+  const [deletingSavedResumeId, setDeletingSavedResumeId] = useState<number | null>(null)
   const [aiDescription, setAiDescription] = useState("")
   const [isAIFilling, setIsAIFilling] = useState(false)
   const [showAIPromptEditor, setShowAIPromptEditor] = useState(false)
@@ -377,6 +379,24 @@ const EmployerDashboard = () => {
       setSavedResumesError(message)
     } finally {
       setIsSavedResumesLoading(false)
+    }
+  }
+
+  const handleDeleteSavedResume = async (resumeId: number) => {
+    if (!company) {
+      return
+    }
+
+    try {
+      setDeletingSavedResumeId(resumeId)
+      setSavedResumesError(null)
+      await deleteSavedResumeByCompany(company.id, resumeId)
+      setSavedResumes((prev) => prev.filter((resume) => resume.id !== resumeId))
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося видалити збережене резюме"
+      setSavedResumesError(message)
+    } finally {
+      setDeletingSavedResumeId(null)
     }
   }
 
@@ -1015,8 +1035,20 @@ const EmployerDashboard = () => {
                   <div className="mt-4 grid gap-3 md:grid-cols-1">
                     {savedResumes.map((resume) => (
                       <article key={resume.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <h3 className="text-base font-semibold text-slate-900">{resume.title}</h3>
-                        <p className="mt-1 text-sm text-slate-600">{resume.desired_role || "Роль не вказана"}</p>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">{resume.title}</h3>
+                            <p className="mt-1 text-sm text-slate-600">{resume.desired_role || "Роль не вказана"}</p>
+                          </div>
+                          <button
+                            className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            type="button"
+                            onClick={() => handleDeleteSavedResume(resume.id)}
+                            disabled={deletingSavedResumeId === resume.id}
+                          >
+                            {deletingSavedResumeId === resume.id ? "Видалення..." : "Видалити"}
+                          </button>
+                        </div>
                         {resume.summary && (
                           <p className="mt-2 line-clamp-3 text-sm text-slate-600">{resume.summary}</p>
                         )}
@@ -1046,7 +1078,7 @@ const EmployerDashboard = () => {
             </h2>
             <div className="flex items-center gap-2">
               <button
-                className={`rounded-xl border bg-gradient-to-r from-[#0f1f46] via-[#172c62] to-[#2c3f82] px-3 py-2 text-xs font-semibold text-white transition ${
+                className={`rounded-xl border bg-gradient-to-r from-[#0f1f46] via-[#172c62] to-[#2c3f82] px-3 py-2 text-xs font-semibold leading-none text-white transition ${
                   showAIPromptEditor
                     ? "border-[#35579f] shadow-sm"
                     : "border-[#28467f] hover:brightness-110"
@@ -1059,7 +1091,10 @@ const EmployerDashboard = () => {
                 }}
                 disabled={!company || isVacancySaving || isAIFilling}
               >
-                AI допомога
+                <span className="inline-flex translate-y-[1px] items-center gap-1.5 whitespace-nowrap">
+                  <AISparkleIcon className="h-5 w-5 text-cyan-200" />
+                  AI допомога
+                </span>
               </button>
               <button
                 className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"
@@ -1111,12 +1146,22 @@ const EmployerDashboard = () => {
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <button
-                    className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold leading-none text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     onClick={handleAIFillVacancy}
                     disabled={!company || isAIFilling || isVacancySaving}
                   >
-                    {isAIFilling ? "Генерація..." : "Згенерувати чернетку"}
+                    {isAIFilling ? (
+                      <span className="inline-flex translate-y-[1px] items-center gap-2 whitespace-nowrap">
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border border-white/40 border-t-white" />
+                        Генерація...
+                      </span>
+                    ) : (
+                      <span className="inline-flex translate-y-[1px] items-center gap-2 whitespace-nowrap">
+                        <AISparkleIcon className="h-5 w-5 text-yellow-100" />
+                        Згенерувати чернетку
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>

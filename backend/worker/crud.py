@@ -30,7 +30,7 @@ from database import (
 )
 from users.auth import get_current_user
 from users.define_roles import require_roles
-from .models import EmploymentType, Resume, ResumeUpdate
+from .models import Resume, ResumeUpdate
 from logger import logger as LOGGER
 from .tools import (
     BACKEND_DIR,
@@ -192,7 +192,7 @@ async def create_resume(
         location=resume.location,
         salary_min=resume.salary_min,
         salary_max=resume.salary_max,
-        salary_currency=resume.salary_currency,
+        salary_currency=resume.salary_currency.value,
         years_experience=resume.years_experience,
         is_active=resume.is_active,
     )
@@ -213,6 +213,8 @@ async def update_resume(
     values = resume.model_dump(exclude_unset=True)
     if "employment_type" in values:
         values["employment_type"] = normalize_employment_type(values["employment_type"])
+    if "salary_currency" in values and values["salary_currency"] is not None:
+        values["salary_currency"] = values["salary_currency"].value
     if not values:
         return {"status": "ok"}
 

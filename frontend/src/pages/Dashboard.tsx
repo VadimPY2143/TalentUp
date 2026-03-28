@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
+import { Link } from "react-router-dom"
 import Navbar from "../components/layout/Navbar"
 import { useAuth } from "../auth/useAuth"
 import EmployerDashboard from "./EmployerDashboard"
@@ -16,9 +17,9 @@ const employmentOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const currencyOptions: CurrencyType[] = ["UAH", "USD", "EUR"]
 
 const employmentLabels: Record<EmploymentType, string> = {
-  Remote: "Віддалено",
-  Office: "Офіс",
-  Hybrid: "Гібрид",
+  Remote: "Remote",
+  Office: "Office",
+  Hybrid: "Hybrid",
 }
 const currencyLabels: Record<CurrencyType, string> = {
   UAH: "UAH (грн)",
@@ -41,6 +42,7 @@ const emptyResume: ResumeBase = {
 
 const Dashboard = () => {
   const { role } = useAuth()
+  console.log('Current role:', role) // Дебагінг
   const [resumes, setResumes] = useState<Resume[]>([])
   const [form, setForm] = useState<ResumeBase>(emptyResume)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -216,24 +218,65 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e9edf4]">
+    <div className="min-h-screen bg-[#edf2f8]">
       <Navbar />
-      <div className="relative mx-auto max-w-[1200px] px-4 py-10">
-        <div className="relative grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
-          <section className="rounded-[28px] border border-slate-200 bg-white p-6 text-slate-900 shadow-medium">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Кабінет</p>
-                <h1 className="font-display text-2xl font-semibold">Мої резюме</h1>
+
+      <div className="mx-auto max-w-[1280px] px-4 pb-12 pt-8">
+        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-7 text-white shadow-medium md:p-10">
+          <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-orange-400/20 blur-2xl" />
+          <div className="pointer-events-none absolute -left-8 bottom-0 h-44 w-44 rounded-full bg-cyan-300/20 blur-2xl" />
+          <div className="relative">
+            <p className="text-xs uppercase tracking-[0.35em] text-white/65">Worker workspace</p>
+            <h1 className="mt-2 font-display text-3xl font-semibold md:text-4xl">Резюме та пошук роботи</h1>
+            <p className="mt-3 max-w-3xl text-sm text-white/80 md:text-base">
+              Створіть професійне резюме та знайдіть роботу мрії. Керуйте своїми резюме та відстежуйте відгуки.
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white/85">
+                Резюме: <span className="font-semibold text-white">{resumes.length}</span>
               </div>
-              <button
-                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
-                type="button"
-                onClick={openNewForm}
+              <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white/85">
+                Активні: <span className="font-semibold text-white">{resumes.filter(r => r.is_active).length}</span>
+              </div>
+              <Link
+                to="/jobs"
+                className="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
               >
-                Нове резюме
-              </button>
+                Пошук вакансій
+              </Link>
             </div>
+          </div>
+        </section>
+
+            <div className="mt-6 grid gap-5 lg:grid-cols-[1.12fr,0.88fr]">
+          <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-2xl font-semibold text-slate-900">
+                Мої резюме
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+                  type="button"
+                  onClick={openNewForm}
+                >
+                  Нове резюме
+                </button>
+                <button
+                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"
+                  type="button"
+                  onClick={loadResumes}
+                  disabled={isLoading}
+                >
+                  Оновити
+                </button>
+              </div>
+            </div>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Створюйте та редагуйте свої резюме для пошуку роботи.
+            </p>
 
             {isLoading ? (
               <div className="mt-6 text-sm text-slate-500">Завантаження...</div>
@@ -285,7 +328,7 @@ const Dashboard = () => {
             )}
           </section>
 
-          <section className="rounded-[28px] border border-slate-200 bg-white p-6 text-slate-900 shadow-medium">
+          <section className="rounded-[24px] border border-slate-200 bg-white p-5 text-slate-900 shadow-medium">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl font-semibold">{heading}</h2>
               <button

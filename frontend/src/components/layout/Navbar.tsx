@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
 
@@ -34,16 +34,21 @@ const Navbar = () => {
         <nav className="hidden items-center gap-8 text-sm font-medium text-white/90 md:flex">
           {!isAuthenticated && (
             <>
-              <Link className="transition hover:text-orange-300" to="/register?role=worker">Знайти роботу</Link>
+              <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
               <Link className="transition hover:text-orange-300" to="/register?role=employer">Найняти фахівця</Link>
             </>
           )}
           {isAuthenticated && role === "worker" && (
-            <Link className="transition hover:text-orange-300" to="/">Знайти роботу</Link>
+            <>
+              <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
+              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
+              <Link className="transition hover:text-orange-300" to="/dashboard">Кабінет</Link>
+            </>
           )}
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">База резюме</Link>
+              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
               <Link className="transition hover:text-orange-300" to="/">Найняти фахівця</Link>
             </>
           )}

@@ -23,10 +23,30 @@ UPLOAD_ROOT = upload_root_path.resolve()
 MAX_PDF_SIZE_BYTES = int(os.getenv("MAX_PDF_SIZE_BYTES", "5242880"))
 
 
+def _normalize_employment_token(value: EmploymentType | str) -> str | None:
+    raw_value = value.value if isinstance(value, EmploymentType) else str(value)
+    token = raw_value.strip().lower().replace("-", "").replace("_", "").replace(" ", "")
+    if not token:
+        return None
+    if token == "remote":
+        return EmploymentType.REMOTE.value
+    if token == "hybrid":
+        return EmploymentType.HYBRID.value
+    if token in {"office", "onsite", "offline"}:
+        return EmploymentType.OFFICE.value
+    return raw_value.strip()
+
+
 def normalize_employment_type(value: Iterable[EmploymentType | str] | None) -> list[str] | None:
     if value is None:
         return None
-    return [item.value if isinstance(item, EmploymentType) else item for item in value]
+
+    normalized_values = [
+        normalized
+        for item in value
+        if (normalized := _normalize_employment_token(item)) is not None
+    ]
+    return list(dict.fromkeys(normalized_values))
 
 
 def normalize_enum_list(value: Iterable[Enum | str] | None) -> list[str] | None:

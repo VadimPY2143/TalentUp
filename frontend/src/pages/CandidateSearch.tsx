@@ -3,27 +3,29 @@
   useMemo,
   useState,
   type FormEvent,
-  type KeyboardEvent,
 } from "react"
+import { useNavigate } from "react-router-dom"
+import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import {
+  fetchCandidateResumeSummary,
   fetchRecommendedCandidates,
   listSavedResumesByCompany,
   openCandidateResume,
   saveCandidateResume,
   searchCandidates,
 } from "../api/candidates"
-import { apiFetch } from "../api/client"
 import { listCompanies } from "../api/companies"
+import { listCompanyVacancies } from "../api/vacancies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
+import type { VacancyResponse } from "../types/vacancy"
 
 interface FilterState {
-  city: string
-  remoteOnly: boolean
-  experience: string
-  skills: string[]
+  location: string
+  yearsExperience: string
   salaryMin: string
   salaryMax: string
+  salaryCurrency: string
   employmentTypes: string[]
 }
 
@@ -36,10 +38,6 @@ interface SearchBarProps {
 
 interface FiltersPanelProps {
   filters: FilterState
-  skillsInput: string
-  onSkillsInputChange: (value: string) => void
-  onAddSkills: () => void
-  onRemoveSkill: (skill: string) => void
   onToggleEmployment: (value: string) => void
   onUpdateField: (field: keyof FilterState, value: string | boolean) => void
   onClear: () => void
@@ -57,9 +55,11 @@ interface CandidateCardProps {
   candidate: CandidateSearchItem
   isSaved: boolean
   isSaving: boolean
+  isSummaryLoading: boolean
   onToggleSave: () => void
   onViewResume: () => void
   onViewSummary: () => void
+  onStartChat: () => void
 }
 
 interface PaginationProps {
@@ -71,11 +71,11 @@ interface PaginationProps {
 const PAGE_SIZE = 6
 
 const employmentTypeOptions = [
-  { value: "Full-time", label: "Повна зайнятість" },
-  { value: "Part-time", label: "Часткова зайнятість" },
-  { value: "Contract", label: "Проєктна робота" },
-  { value: "Internship", label: "Стажування" },
+  { value: "Remote", label: "Remote" },
+  { value: "Office", label: "Office" },
+  { value: "Hybrid", label: "Hybrid" },
 ]
+const currencyOptions = ["UAH", "USD", "EUR"] as const
 
 const sortOptions: Array<{ value: CandidateSort; label: string }> = [
   { value: "relevance", label: "За відповідністю" },
@@ -84,12 +84,11 @@ const sortOptions: Array<{ value: CandidateSort; label: string }> = [
 ]
 
 const initialFilters: FilterState = {
-  city: "",
-  remoteOnly: false,
-  experience: "",
-  skills: [],
+  location: "",
+  yearsExperience: "",
   salaryMin: "",
   salaryMax: "",
+  salaryCurrency: "",
   employmentTypes: [],
 }
 
@@ -100,6 +99,26 @@ const parseNumber = (value: string) => {
   }
   const numberValue = Number(trimmed)
   return Number.isFinite(numberValue) ? numberValue : undefined
+}
+
+const normalizeEmploymentTypes = (value: string[] | null | undefined): string[] => {
+  if (!value?.length) {
+    return []
+  }
+
+  const normalized = new Set<string>()
+  for (const item of value) {
+    const token = item.trim().toLowerCase().replace(/[\s_-]/g, "")
+    if (token === "remote") {
+      normalized.add("Remote")
+    } else if (token === "hybrid") {
+      normalized.add("Hybrid")
+    } else if (token === "office" || token === "onsite" || token === "offline") {
+      normalized.add("Office")
+    }
+  }
+
+  return Array.from(normalized)
 }
 
 const formatSalary = (candidate: CandidateSearchItem) => {
@@ -127,14 +146,8 @@ const formatExperience = (years?: number | null) => {
 }
 
 const formatLocation = (candidate: CandidateSearchItem) => {
-  if (candidate.city) {
-    return candidate.city
-  }
   if (candidate.location) {
     return candidate.location
-  }
-  if (candidate.is_remote) {
-    return "Віддалено"
   }
   return "Локація не вказана"
 }
@@ -161,10 +174,6 @@ const SearchBar = ({ value, onChange, onSubmit, isLoading }: SearchBarProps) => 
 
 const FiltersPanel = ({
   filters,
-  skillsInput,
-  onSkillsInputChange,
-  onAddSkills,
-  onRemoveSkill,
   onToggleEmployment,
   onUpdateField,
   onClear,
@@ -187,22 +196,14 @@ const FiltersPanel = ({
     <div className="mt-5 space-y-4 text-sm text-slate-700">
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Місто
+          Локація
         </label>
         <input
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-          placeholder="Київ, Львів, Одеса"
-          value={filters.city}
-          onChange={(event) => onUpdateField("city", event.target.value)}
+          placeholder="Київ, Львів, Ukraine (Remote)"
+          value={filters.location}
+          onChange={(event) => onUpdateField("location", event.target.value)}
         />
-        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={filters.remoteOnly}
-            onChange={(event) => onUpdateField("remoteOnly", event.target.checked)}
-          />
-          Лише віддалена робота
-        </label>
       </div>
 
       <div>
@@ -211,8 +212,8 @@ const FiltersPanel = ({
         </label>
         <select
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
-          value={filters.experience}
-          onChange={(event) => onUpdateField("experience", event.target.value)}
+          value={filters.yearsExperience}
+          onChange={(event) => onUpdateField("yearsExperience", event.target.value)}
         >
           <option value="">Будь-який</option>
           <option value="0">До 1 року</option>
@@ -227,48 +228,6 @@ const FiltersPanel = ({
           <option value="9">9 років</option>
           <option value="10">10+ років</option>
         </select>
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Навички
-        </label>
-        <div className="mt-2 flex gap-2">
-          <input
-            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-            placeholder="React, Figma, SQL"
-            value={skillsInput}
-            onChange={(event) => onSkillsInputChange(event.target.value)}
-            onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-              if (event.key === "Enter" || event.key === ",") {
-                event.preventDefault()
-                onAddSkills()
-              }
-            }}
-          />
-          <button
-            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
-            type="button"
-            onClick={onAddSkills}
-          >
-            Додати
-          </button>
-        </div>
-        {filters.skills.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">
-            {filters.skills.map((skill) => (
-              <button
-                key={skill}
-                className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 transition hover:border-orange-300"
-                type="button"
-                onClick={() => onRemoveSkill(skill)}
-              >
-                {skill}
-                <span className="text-slate-400">×</span>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div>
@@ -291,11 +250,23 @@ const FiltersPanel = ({
             onChange={(event) => onUpdateField("salaryMax", event.target.value)}
           />
         </div>
+        <select
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          value={filters.salaryCurrency}
+          onChange={(event) => onUpdateField("salaryCurrency", event.target.value)}
+        >
+          <option value="">Будь-яка валюта</option>
+          {currencyOptions.map((currency) => (
+            <option key={currency} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Тип зайнятості
+          Формат роботи
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
           {employmentTypeOptions.map((option) => {
@@ -366,16 +337,16 @@ const CandidateCard = ({
   candidate,
   isSaved,
   isSaving,
+  isSummaryLoading,
   onToggleSave,
   onViewResume,
   onViewSummary,
+  onStartChat,
 }: CandidateCardProps) => {
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
-  const skills = candidate.skills ?? []
-  const employment = candidate.employment_type ?? []
+  const employment = normalizeEmploymentTypes(candidate.employment_type)
   const hasPdf = Boolean(candidate.pdf_file_path)
-  const isActive = candidate.is_active !== false
   const summaryLength = candidate.summary?.trim().length ?? 0
   const showAiSummary = summaryLength >= 120
 
@@ -390,23 +361,27 @@ const CandidateCard = ({
           <div className="flex flex-col items-end gap-2">
             {showAiSummary && (
               <button
-                className="rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f]"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[#1f2f5e] px-3 py-1.5 text-[11px] font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
                 type="button"
                 onClick={onViewSummary}
+                disabled={isSummaryLoading}
               >
-                AI Summary
+                {isSummaryLoading ? (
+                  <>
+                    <span className="h-3 w-3 animate-spin rounded-full border border-white/40 border-t-white" />
+                    Loading
+                  </>
+                ) : (
+                  <>
+                    <AISparkleIcon className="h-5 w-5 text-cyan-200" />
+                    AI Summary
+                  </>
+                )}
               </button>
             )}
             <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
               {formatExperience(candidate.years_experience)}
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {isActive ? "Активне" : "Неактивне"}
-            </span>
           </div>
         </div>
 
@@ -425,13 +400,8 @@ const CandidateCard = ({
           </div>
         </div>
 
-        {(skills.length > 0 || employment.length > 0) && (
+        {employment.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
-            {skills.map((skill) => (
-              <span key={skill} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
-                {skill}
-              </span>
-            ))}
             {employment.map((type) => (
               <span key={type} className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-orange-700">
                 {type}
@@ -449,6 +419,13 @@ const CandidateCard = ({
           disabled={!hasPdf}
         >
           {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
+        </button>
+        <button
+          className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
+          type="button"
+          onClick={onStartChat}
+        >
+          Написати кандидату
         </button>
         <button
           className={`flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-700 ${
@@ -494,11 +471,11 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const CandidateSearch = () => {
+  const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState("")
   const [query, setQuery] = useState("")
   const [searchTrigger, setSearchTrigger] = useState(0)
   const [filters, setFilters] = useState<FilterState>(initialFilters)
-  const [skillsInput, setSkillsInput] = useState("")
   const [sort, setSort] = useState<CandidateSort>("relevance")
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
@@ -506,15 +483,24 @@ const CandidateSearch = () => {
   const [savedIds, setSavedIds] = useState<Set<number>>(new Set())
   const [savingIds, setSavingIds] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
+  const [isVacanciesLoading, setIsVacanciesLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [companyId, setCompanyId] = useState<number | null>(null)
+  const [vacancies, setVacancies] = useState<VacancyResponse[]>([])
+  const [chatVacancyId, setChatVacancyId] = useState<string>("")
+  const [chatModal, setChatModal] = useState<{
+    candidateResumeId: number
+    candidateTitle: string
+  } | null>(null)
   const [summaryModal, setSummaryModal] = useState<{
     candidateId: number
     title: string
     summary: string
     strengths: string[]
+    cached: boolean
   } | null>(null)
+  const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
 
@@ -524,12 +510,11 @@ const CandidateSearch = () => {
   const searchParams = useMemo(
     () => ({
       query: query || undefined,
-      city: filters.city.trim() || undefined,
-      remote: filters.remoteOnly || undefined,
-      experience_min: parseNumber(filters.experience),
-      skills: filters.skills.length ? filters.skills : undefined,
+      location: filters.location.trim() || undefined,
+      years_experience: parseNumber(filters.yearsExperience),
       salary_min: parseNumber(filters.salaryMin),
       salary_max: parseNumber(filters.salaryMax),
+      salary_currency: filters.salaryCurrency || undefined,
       employment_type: filters.employmentTypes.length ? filters.employmentTypes : undefined,
       page,
       page_size: PAGE_SIZE,
@@ -537,6 +522,22 @@ const CandidateSearch = () => {
     }),
     [filters, page, query, sort],
   )
+
+  useEffect(() => {
+    if (!summaryModal && !chatModal) {
+      return
+    }
+
+    const previousBodyOverflow = document.body.style.overflow
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    document.body.style.overflow = "hidden"
+    document.documentElement.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow
+      document.documentElement.style.overflow = previousHtmlOverflow
+    }
+  }, [chatModal, summaryModal])
 
   useEffect(() => {
     if (page > totalPages) {
@@ -595,6 +596,41 @@ const CandidateSearch = () => {
   }, [companyId])
 
   useEffect(() => {
+    if (!companyId) {
+      setVacancies([])
+      setChatVacancyId("")
+      return
+    }
+
+    let mounted = true
+    const loadVacancies = async () => {
+      setIsVacanciesLoading(true)
+      try {
+        const companyVacancies = await listCompanyVacancies(companyId)
+        if (!mounted) {
+          return
+        }
+        setVacancies(companyVacancies)
+        setChatVacancyId(companyVacancies[0] ? String(companyVacancies[0].id) : "")
+      } catch {
+        if (mounted) {
+          setVacancies([])
+          setChatVacancyId("")
+        }
+      } finally {
+        if (mounted) {
+          setIsVacanciesLoading(false)
+        }
+      }
+    }
+
+    void loadVacancies()
+    return () => {
+      mounted = false
+    }
+  }, [companyId])
+
+  useEffect(() => {
     let mounted = true
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
@@ -607,12 +643,11 @@ const CandidateSearch = () => {
               PAGE_SIZE,
               (page - 1) * PAGE_SIZE,
               {
-                city: searchParams.city,
-                remote: searchParams.remote,
-                experience_min: searchParams.experience_min,
-                skills: searchParams.skills,
+                location: searchParams.location,
+                years_experience: searchParams.years_experience,
                 salary_min: searchParams.salary_min,
                 salary_max: searchParams.salary_max,
+                salary_currency: searchParams.salary_currency,
                 employment_type: searchParams.employment_type,
               },
               controller.signal,
@@ -661,33 +696,8 @@ const CandidateSearch = () => {
     setPage(1)
   }
 
-  const addSkills = () => {
-    const tokens = skillsInput
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean)
-    if (tokens.length === 0) {
-      return
-    }
-    setFilters((prev) => ({
-      ...prev,
-      skills: Array.from(new Set([...prev.skills, ...tokens])),
-    }))
-    setSkillsInput("")
-    setPage(1)
-  }
-
-  const removeSkill = (skill: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      skills: prev.skills.filter((item) => item !== skill),
-    }))
-    setPage(1)
-  }
-
   const clearFilters = () => {
     setFilters(initialFilters)
-    setSkillsInput("")
     setPage(1)
   }
 
@@ -737,22 +747,56 @@ const CandidateSearch = () => {
   const handleViewSummary = async (candidate: CandidateSearchItem) => {
     setSummaryError(null)
     setSummaryLoading(true)
+    setSummaryLoadingId(candidate.id)
     try {
-      const data = await apiFetch<{ summary: string; strengths: string[] }>(
-        `/resume_search/summary?resume_id=${candidate.id}`,
-      )
+      const data = await fetchCandidateResumeSummary(candidate.id)
       setSummaryModal({
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
         strengths: data?.strengths ?? [],
+        cached: Boolean(data?.cached),
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося отримати вижимку"
       setSummaryError(message)
     } finally {
       setSummaryLoading(false)
+      setSummaryLoadingId(null)
     }
+  }
+
+  const handleStartChat = (candidate: CandidateSearchItem) => {
+    if (!candidate.id || candidate.id <= 0) {
+      setActionError("Для цього резюме недоступний ідентифікатор резюме")
+      return
+    }
+    if (isVacanciesLoading) {
+      setActionError("Зачекайте, завантажуються вакансії")
+      return
+    }
+    if (!vacancies.length) {
+      setActionError("Щоб почати чат, спочатку створіть хоча б одну вакансію")
+      return
+    }
+    setActionError(null)
+    setChatVacancyId(String(vacancies[0].id))
+    setChatModal({
+      candidateResumeId: candidate.id,
+      candidateTitle: candidate.title || candidate.desired_role || "Кандидат",
+    })
+  }
+
+  const handleConfirmStartChat = () => {
+    if (!chatModal || !chatVacancyId) {
+      return
+    }
+    const params = new URLSearchParams({
+      resumeId: String(chatModal.candidateResumeId),
+      vacancyId: chatVacancyId,
+    })
+    setChatModal(null)
+    navigate(`/messages?${params.toString()}`)
   }
 
   const showEmptyState = !isLoading && !error && candidates.length === 0
@@ -788,10 +832,6 @@ const CandidateSearch = () => {
         <div className="mt-6 grid gap-6 lg:grid-cols-[320px,1fr]">
           <FiltersPanel
             filters={filters}
-            skillsInput={skillsInput}
-            onSkillsInputChange={setSkillsInput}
-            onAddSkills={addSkills}
-            onRemoveSkill={removeSkill}
             onToggleEmployment={toggleEmploymentType}
             onUpdateField={updateFilters}
             onClear={clearFilters}
@@ -835,9 +875,11 @@ const CandidateSearch = () => {
                     candidate={candidate}
                     isSaved={savedIds.has(candidate.id)}
                     isSaving={savingIds.has(candidate.id)}
+                    isSummaryLoading={summaryLoadingId === candidate.id}
                     onToggleSave={() => toggleSave(candidate.id)}
                     onViewResume={() => handleViewResume(candidate.id)}
                     onViewSummary={() => handleViewSummary(candidate)}
+                    onStartChat={() => handleStartChat(candidate)}
                   />
                 ))}
               </div>
@@ -849,8 +891,69 @@ const CandidateSearch = () => {
           </div>
         </div>
       </div>
+      {chatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-strong">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Новий діалог
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-slate-900">
+                  {chatModal.candidateTitle}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Оберіть вакансію, від імені якої буде відкрито переписку.
+                </p>
+              </div>
+              <button
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300"
+                type="button"
+                onClick={() => setChatModal(null)}
+              >
+                Закрити
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Вакансія
+              </label>
+              <select
+                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+                value={chatVacancyId}
+                onChange={(event) => setChatVacancyId(event.target.value)}
+              >
+                {vacancies.map((vacancy) => (
+                  <option key={vacancy.id} value={vacancy.id}>
+                    {vacancy.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                type="button"
+                onClick={() => setChatModal(null)}
+              >
+                Скасувати
+              </button>
+              <button
+                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                onClick={handleConfirmStartChat}
+                disabled={!chatVacancyId}
+              >
+                Почати чат
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {summaryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
           <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-strong">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -860,6 +963,9 @@ const CandidateSearch = () => {
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">
                   {summaryModal.title}
                 </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {summaryModal.cached ? "Відповідь з кешу" : "Згенеровано AI"}
+                </p>
               </div>
               <button
                 className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300"

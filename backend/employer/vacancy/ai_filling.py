@@ -1,82 +1,59 @@
-import json
 import os
+from pathlib import Path
 from typing import Any
-
 from dotenv import load_dotenv
-from openai import OpenAI
+from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
+from .models import Vacancy
 
 load_dotenv()
 
-client = OpenAI(
-    api_key=os.getenv("API_KEY"),
-    base_url="https://openrouter.ai/api/v1"
-)
-
 SYSTEM_PROMPT = """
-Your task is to fill vacancy JSON from the vacancy description.
-Return only valid JSON in the same language as request (except enum-like fields).
-Every field should be filled. If user doesn't provide it in the prompt you need to generate it by yourself based on other data.
-{
-  "title": "string",
-  "description": "string",
-  "responsibilities": "string",
-  "requirements": "string",
-  "is_active": true,
-  "employment_type": [
-    "Full-time"/"Part-time"
-  ],
-  "location": "string",
-  "salary_min": 0,
-  "salary_max": 0,
-  "salary_currency": "string",
-  "experience_years_min": 0,
-  "experience_years_max": 0,
-  "work_format": [
-    "Remote"/"Hybrid"/"Office"
-  ],
-  "expires_at": "2026-03-06T22:44:42.336Z"
-}
-"""
+You are a senior Ukrainian HR/recruiter assistant.
+Generate one complete vacancy JSON from user description.
 
-def _extract_json_block(content: str) -> str:
-    stripped = content.strip()
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        if len(lines) >= 3:
-            lines = lines[1:]
-            if lines and lines[-1].strip().startswith("```"):
-                lines = lines[:-1]
-            stripped = "\n".join(lines).strip()
-    return stripped
+Hard rules:
+1) Market: Ukraine only.
+2) Language: same as user request Ukrainian/English (except enum-like fields).
+3) Return only one valid JSON object. No markdown, no comments, no extra text.
+4) All fields must be filled with meaningful values. Never use null, empty strings, or empty arrays.
+5) If some details are missing, infer realistic values from the role and context.
+6) Salary must be monthly (for 1 month), integer values only.
+7) Salary range must be logical: salary_min <= salary_max.
+8) expires_at must be valid ISO datetime in the future.
 
-
-def _extract_json_object(content: str) -> str:
-    start = content.find("{")
-    end = content.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        return ""
-    return content[start:end + 1].strip()
+Field quality requirements:
+- title: specific, professional, and market-ready.
+- description: detailed and structured, at least 600 characters.
+- responsibilities: one string with 8-12 clear bullet points.
+- requirements: one string with 8-12 clear bullet points.
+- is_active: true by default.
+- employment_type: choose from "Full-time" or "Part-time".
+- location: real Ukrainian city or "Ukraine (Remote)".
+- salary_currency: use "UAH" for Ukrainian market unless user explicitly asks another currency.
+- experience_years_min / experience_years_max: realistic and consistent with title.
+- work_format: choose from "Remote", "Hybrid", "Office".
+""".strip()
 
 
 async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
-    response = client.chat.completions.create(
-        model="anthropic/claude-3-haiku",
-        temperature=0.4,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Description: {vacancy_description}"}
-        ],
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Set OPENAI_API_KEY in requirements.txt")
+
+    provider = OpenAIProvider(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
     )
-    content = response.choices[0].message.content or ""
-    cleaned = _extract_json_block(content)
-    if not cleaned:
-        raise ValueError("Empty AI response")
+    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
+    agent = Agent(model, system_prompt=SYSTEM_PROMPT)
 
-    json_text = _extract_json_object(cleaned) or cleaned
-    if not json_text:
-        raise ValueError("AI response does not contain JSON")
-
-    try:
-        return json.loads(json_text)
-    except json.JSONDecodeError as exc:
-        raise ValueError("AI returned invalid JSON") from exc
+    result = await agent.run(
+        f"Description: {vacancy_description}",
+        output_type=Vacancy,
+    )
+    output = result.output
+    if isinstance(output, Vacancy):
+        return output.model_dump()
+    return Vacancy.model_validate(output).model_dump()
