@@ -1,10 +1,33 @@
+from __future__ import annotations
+
 import time
+from datetime import datetime
+from enum import Enum
 from pathlib import Path
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
-from sqlalchemy import delete, func, insert, select, update
+from pydantic import BaseModel, Field
+from sqlalchemy import (
+    DateTime,
+    delete,
+    func,
+    insert,
+    select,
+    update,
+)
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from database import companies_table, get_session, resumes_table, saved_resumes_table
+
+from database import (
+    application_history_table,
+    companies_table,
+    get_session,
+    job_applications_table,
+    resumes_table,
+    saved_resumes_table,
+    vacancies_table,
+)
 from users.auth import get_current_user
 from users.define_roles import require_roles
 from .models import EmploymentType, Resume, ResumeUpdate
@@ -18,7 +41,131 @@ from .tools import (
     remove_pdf_from_disk,
 )
 
-router = APIRouter(tags=["resumes"])
+router = APIRouter(tags=["resumes", "applications"])
+
+
+class ApplicationStatus(str, Enum):
+    applied = "applied"
+    viewed = "viewed"
+    rejected = "rejected"
+    accepted = "accepted"
+
+
+class VacancyBrief(BaseModel):
+    id: int
+    title: str
+    company_id: int
+
+
+class ApplicationHistoryOut(BaseModel):
+    id: int
+    status: ApplicationStatus
+    comment: str | None = None
+    changed_at: datetime
+
+
+class JobApplicationOut(BaseModel):
+    id: int
+    user_id: int
+    vacancy_id: int
+    cover_letter: str | None = None
+    status: ApplicationStatus
+    created_at: datetime
+    updated_at: datetime
+    vacancy: VacancyBrief | None = None
+    history: list[ApplicationHistoryOut] = Field(default_factory=list)
+
+
+class JobApplicationCreateIn(BaseModel):
+    vacancy_id: int = Field(ge=1)
+    cover_letter: str | None = None
+
+
+class JobApplicationStatusUpdateIn(BaseModel):
+    status: ApplicationStatus
+    comment: str | None = None
+
+
+async def _ensure_vacancy_exists(session: AsyncSession, vacancy_id: int) -> dict:
+    stmt = select(vacancies_table).where(vacancies_table.c.id == vacancy_id)
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    return dict(row)
+
+
+async def _get_application_for_user_or_employer(
+    session: AsyncSession,
+    application_id: int,
+    current_user: dict,
+) -> dict:
+    stmt = (
+        select(
+            job_applications_table,
+            vacancies_table.c.title.label("vacancy_title"),
+            vacancies_table.c.company_id.label("company_id"),
+            companies_table.c.user_id.label("company_owner_user_id"),
+        )
+        .select_from(
+            job_applications_table.join(
+                vacancies_table, vacancies_table.c.id == job_applications_table.c.vacancy_id
+            ).join(companies_table, companies_table.c.id == vacancies_table.c.company_id)
+        )
+        .where(job_applications_table.c.id == application_id)
+    )
+
+    if current_user["role"] == "employer":
+        stmt = stmt.where(companies_table.c.user_id == current_user["id"])
+    else:
+        stmt = stmt.where(job_applications_table.c.user_id == current_user["id"])
+
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return dict(row)
+
+
+async def _load_application_history(
+    session: AsyncSession,
+    application_id: int,
+) -> list[dict]:
+    stmt = (
+        select(application_history_table)
+        .where(application_history_table.c.application_id == application_id)
+        .order_by(application_history_table.c.changed_at.asc(), application_history_table.c.id.asc())
+    )
+    result = await session.execute(stmt)
+    return [dict(r) for r in result.mappings().all()]
+
+
+def _build_application_out(row: dict, history_rows: list[dict]) -> JobApplicationOut:
+    vacancy = None
+    if "vacancy_title" in row and row.get("company_id") is not None:
+        vacancy = VacancyBrief(id=row["vacancy_id"], title=row["vacancy_title"], company_id=row["company_id"])
+
+    history = [
+        ApplicationHistoryOut(
+            id=h["id"],
+            status=ApplicationStatus(h["status"]),
+            comment=h.get("comment"),
+            changed_at=h["changed_at"],
+        )
+        for h in history_rows
+    ]
+
+    return JobApplicationOut(
+        id=row["id"],
+        user_id=row["user_id"],
+        vacancy_id=row["vacancy_id"],
+        cover_letter=row.get("cover_letter"),
+        status=ApplicationStatus(row["status"]),
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        vacancy=vacancy,
+        history=history,
+    )
 
 @router.get("/resumes")
 async def list_resumes(
@@ -251,4 +398,188 @@ async def list_saved_resumes(
     )
     result = await session.execute(stmt)
     return [dict(row) for row in result.mappings().all()]
+
+
+@router.post(
+    "/applications",
+    response_model=JobApplicationOut,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_application(
+    payload: JobApplicationCreateIn,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> JobApplicationOut:
+    if current_user["role"] != "worker":
+        raise HTTPException(status_code=403, detail="Only workers can apply to vacancies")
+
+    async with session.begin():
+        vacancy = await _ensure_vacancy_exists(session=session, vacancy_id=payload.vacancy_id)
+
+        duplicate_stmt = select(job_applications_table.c.id).where(
+            job_applications_table.c.user_id == current_user["id"],
+            job_applications_table.c.vacancy_id == payload.vacancy_id,
+        )
+        duplicate = (await session.execute(duplicate_stmt)).scalar_one_or_none()
+        if duplicate is not None:
+            raise HTTPException(status_code=409, detail="You have already applied to this vacancy")
+
+        try:
+            stmt = (
+                insert(job_applications_table)
+                .values(
+                    user_id=current_user["id"],
+                    vacancy_id=payload.vacancy_id,
+                    cover_letter=payload.cover_letter,
+                    status=ApplicationStatus.applied.value,
+                )
+                .returning(*job_applications_table.c)
+            )
+            result = await session.execute(stmt)
+            app_row = dict(result.mappings().one())
+
+            await session.execute(
+                insert(application_history_table).values(
+                    application_id=app_row["id"],
+                    status=ApplicationStatus.applied.value,
+                    comment=None,
+                )
+            )
+        except IntegrityError as exc:
+            msg = str(getattr(exc, "orig", exc))
+            if "uq_job_applications_user_vacancy" in msg or "job_applications" in msg:
+                raise HTTPException(
+                    status_code=409,
+                    detail="You have already applied to this vacancy",
+                ) from exc
+            raise
+
+    history_rows = await _load_application_history(session=session, application_id=app_row["id"])
+    app_row["vacancy_title"] = vacancy["title"]
+    app_row["company_id"] = vacancy["company_id"]
+    return _build_application_out(app_row, history_rows)
+
+
+@router.get("/applications/my", response_model=list[JobApplicationOut])
+async def list_my_applications(
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> list[JobApplicationOut]:
+    if current_user["role"] != "worker":
+        raise HTTPException(status_code=403, detail="Only workers can view this endpoint")
+
+    stmt = (
+        select(
+            job_applications_table,
+            vacancies_table.c.title.label("vacancy_title"),
+            vacancies_table.c.company_id.label("company_id"),
+        )
+        .select_from(
+            job_applications_table.join(
+                vacancies_table, vacancies_table.c.id == job_applications_table.c.vacancy_id
+            )
+        )
+        .where(job_applications_table.c.user_id == current_user["id"])
+        .order_by(job_applications_table.c.created_at.desc(), job_applications_table.c.id.desc())
+    )
+    result = await session.execute(stmt)
+    app_rows = [dict(r) for r in result.mappings().all()]
+    if not app_rows:
+        return []
+
+    app_ids = [r["id"] for r in app_rows]
+    history_stmt = (
+        select(application_history_table)
+        .where(application_history_table.c.application_id.in_(app_ids))
+        .order_by(application_history_table.c.changed_at.asc(), application_history_table.c.id.asc())
+    )
+    history_result = await session.execute(history_stmt)
+    history_rows = [dict(r) for r in history_result.mappings().all()]
+
+    grouped: dict[int, list[dict]] = {app_id: [] for app_id in app_ids}
+    for h in history_rows:
+        grouped.setdefault(h["application_id"], []).append(h)
+
+    return [_build_application_out(r, grouped.get(r["id"], [])) for r in app_rows]
+
+
+@router.get("/applications/{application_id}", response_model=JobApplicationOut)
+async def get_application_by_id(
+    application_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> JobApplicationOut:
+    app_row = await _get_application_for_user_or_employer(
+        session=session,
+        application_id=application_id,
+        current_user=current_user,
+    )
+    history_rows = await _load_application_history(session=session, application_id=application_id)
+    return _build_application_out(app_row, history_rows)
+
+
+@router.get("/applications/{application_id}/history", response_model=list[ApplicationHistoryOut])
+async def get_application_history(
+    application_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> list[ApplicationHistoryOut]:
+    await _get_application_for_user_or_employer(
+        session=session,
+        application_id=application_id,
+        current_user=current_user,
+    )
+    history_rows = await _load_application_history(session=session, application_id=application_id)
+    return [
+        ApplicationHistoryOut(
+            id=h["id"],
+            status=ApplicationStatus(h["status"]),
+            comment=h.get("comment"),
+            changed_at=h["changed_at"],
+        )
+        for h in history_rows
+    ]
+
+
+@router.patch("/applications/{application_id}/status", response_model=JobApplicationOut)
+async def update_application_status(
+    application_id: int,
+    payload: JobApplicationStatusUpdateIn,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["employer"])),
+) -> JobApplicationOut:
+    async with session.begin():
+        app_row = await _get_application_for_user_or_employer(
+            session=session,
+            application_id=application_id,
+            current_user=current_user,
+        )
+
+        if app_row["status"] == payload.status.value:
+            raise HTTPException(status_code=400, detail="Status is already set to this value")
+
+        stmt = (
+            update(job_applications_table)
+            .where(job_applications_table.c.id == application_id)
+            .values(status=payload.status.value, updated_at=func.now())
+            .returning(*job_applications_table.c)
+        )
+        result = await session.execute(stmt)
+        updated = dict(result.mappings().one())
+
+        await session.execute(
+            insert(application_history_table).values(
+                application_id=application_id,
+                status=payload.status.value,
+                comment=payload.comment,
+            )
+        )
+
+    merged = {
+        **updated,
+        "vacancy_title": app_row.get("vacancy_title"),
+        "company_id": app_row.get("company_id"),
+    }
+    history_rows = await _load_application_history(session=session, application_id=application_id)
+    return _build_application_out(merged, history_rows)
 

@@ -1,11 +1,18 @@
 import asyncio
 from logging.config import fileConfig
+import sys
+from pathlib import Path
 
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from backend.database import DATABASE_URL, metadata
+BASE_DIR = Path(__file__).resolve().parents[1]
+BACKEND_DIR = BASE_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+from database import DATABASE_URL, metadata
 
 config = context.config
 
