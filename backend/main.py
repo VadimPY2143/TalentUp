@@ -19,6 +19,7 @@ from search.resume_search.views import router as search_router
 from search.vacancy_search.views import router as vacancy_search_router
 from users.crud import router as user_router
 from users.oauth import router as oauth_router
+from users.views import router as user_profile_router
 from worker.applications.views import router as worker_applications_router
 from worker.resumes.views import router as worker_resumes_router
 
@@ -40,6 +41,7 @@ app.add_middleware(
 
 # 🔹 Роути
 app.include_router(user_router)
+app.include_router(user_profile_router)
 app.include_router(worker_resumes_router)
 app.include_router(worker_applications_router)
 app.include_router(company_router)
