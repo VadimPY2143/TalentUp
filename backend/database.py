@@ -4,9 +4,11 @@ from sqlalchemy import (
     ARRAY,
     Boolean,
     Column,
+    Date,
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     MetaData,
     String,
@@ -56,6 +58,34 @@ users_table = Table(
         nullable=False,
         server_default='worker',
     ),
+)
+
+user_profiles_table = Table(
+    'users_profile',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column(
+        'user_id',
+        Integer,
+        ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False,
+    ),
+    Column('city', String(100)),
+    Column('education', String(255)),
+    Column('bio', Text),
+    Column('birth_date', Date),
+    Column('phone', String(50)),
+    Column('languages', ARRAY(String(100))),
+    Column('links', ARRAY(String(255))),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    UniqueConstraint('user_id', name='uq_users_profile_user_id'),
 )
 
 resumes_table = Table(
