@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+export const API_URL = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000"
 
 const ACCESS_TOKEN_KEY = "accessToken"
 const REFRESH_TOKEN_KEY = "refreshToken"
@@ -98,7 +98,10 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
   }
   const data = await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(parseErrorDetail(data?.detail))
+    const errorMessage = parseErrorDetail(data?.detail)
+    const error = new Error(errorMessage)
+    ;(error as Error & { status?: number }).status = response.status
+    throw error
   }
 
   return data as T

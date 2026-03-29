@@ -19,7 +19,7 @@ const OAuthCallback = () => {
     }
 
     login(accessToken, refreshToken)
-    navigate("/dashboard", { replace: true })
+    navigate("/", { replace: true })
   }, [accessToken, refreshToken, login, navigate])
 
   return (
