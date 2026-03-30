@@ -243,7 +243,7 @@ messages_table = Table(
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
 )
 
-APPLICATION_STATUSES = ("applied", "viewed", "rejected", "accepted")
+APPLICATION_STATUSES = ("applied", "viewed", "chat_started")
 application_status_enum = Enum(*APPLICATION_STATUSES, name="application_status")
 
 job_applications_table = Table(

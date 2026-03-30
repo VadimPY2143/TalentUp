@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import {
   Star,
   Settings,
@@ -39,6 +39,7 @@ import {
 import { listMyApplications } from "../api/applications"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
+import Navbar from "./layout/Navbar"
 
 interface WorkerProfileProps {
   userEmail?: string
@@ -78,15 +79,13 @@ const employmentTypeOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
 const applicationStatusLabel: Record<ApplicationStatus, string> = {
   applied: "Подано",
   viewed: "Переглянуто",
-  accepted: "Прийнято",
-  rejected: "Відхилено",
+  chat_started: "Почато переписку",
 }
 
 const applicationStatusClassName: Record<ApplicationStatus, string> = {
   applied: "border-sky-200 bg-sky-50 text-sky-700",
   viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
-  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+  chat_started: "border-violet-200 bg-violet-50 text-violet-700",
 }
 
 const formatDateTime = (value?: string | null) => {
@@ -433,23 +432,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
 
   return (
     <div className="min-h-screen bg-[#f5f7fa]">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-white">Talent</span>
-              <span className="text-2xl font-bold text-orange-500">Up</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-white/80">{userName || "Користувач"}</span>
-            <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold">
-              {(userName || "U")[0].toUpperCase()}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="mx-auto flex max-w-7xl gap-6 p-6">
         {/* Sidebar */}
@@ -1263,9 +1246,15 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                     {applications.map((application) => (
                       <article
                         key={application.id}
-                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                        className="relative rounded-2xl border border-slate-200 bg-slate-50 p-4 pr-36"
                       >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
+                        <span
+                          className={`absolute right-4 top-4 rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+                        >
+                          {applicationStatusLabel[application.status]}
+                        </span>
+
+                        <div className="flex flex-wrap items-start gap-3">
                           <div>
                             <h3 className="text-base font-semibold text-slate-900">
                               {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
@@ -1275,11 +1264,6 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                               <span>Подано: {formatDateTime(application.created_at)}</span>
                             </div>
                           </div>
-                          <span
-                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
-                          >
-                            {applicationStatusLabel[application.status]}
-                          </span>
                         </div>
 
                         {application.cover_letter && (

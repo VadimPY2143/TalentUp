@@ -549,14 +549,11 @@ const CandidateSearch = () => {
   }, [page, totalPages])
 
   useEffect(() => {
-    if (queryFromParams === query && queryFromParams === searchInput) {
-      return
-    }
     setSearchInput(queryFromParams)
     setQuery(queryFromParams)
     setPage(1)
     setSearchTrigger((prev) => prev + 1)
-  }, [queryFromParams, query, searchInput])
+  }, [queryFromParams])
 
   useEffect(() => {
     let mounted = true

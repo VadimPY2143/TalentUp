@@ -47,12 +47,10 @@ class ApplicationService:
         allowed_transitions: dict[ApplicationStatus, set[ApplicationStatus]] = {
             ApplicationStatus.applied: {
                 ApplicationStatus.viewed,
-                ApplicationStatus.rejected,
-                ApplicationStatus.accepted,
+                ApplicationStatus.chat_started,
             },
-            ApplicationStatus.viewed: {ApplicationStatus.rejected, ApplicationStatus.accepted},
-            ApplicationStatus.rejected: set(),
-            ApplicationStatus.accepted: set(),
+            ApplicationStatus.viewed: {ApplicationStatus.chat_started},
+            ApplicationStatus.chat_started: set(),
         }
         if next_status not in allowed_transitions[current_status]:
             raise HTTPException(
@@ -125,7 +123,7 @@ class ApplicationService:
         history = [
             ApplicationHistoryOut(
                 id=h["id"],
-                status=ApplicationStatus(h["status"]),
+                status=ApplicationStatus(str(h["status"])),
                 comment=h.get("comment"),
                 changed_at=h["changed_at"],
             )
@@ -139,7 +137,7 @@ class ApplicationService:
             resume_id=row.get("resume_id"),
             resume_title=row.get("resume_title"),
             cover_letter=row.get("cover_letter"),
-            status=ApplicationStatus(row["status"]),
+            status=ApplicationStatus(str(row["status"])),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
             vacancy=vacancy,

@@ -7,8 +7,7 @@ from pydantic import BaseModel, Field
 class ApplicationStatus(str, Enum):
     applied = "applied"
     viewed = "viewed"
-    rejected = "rejected"
-    accepted = "accepted"
+    chat_started = "chat_started"
 
 
 class VacancyBrief(BaseModel):

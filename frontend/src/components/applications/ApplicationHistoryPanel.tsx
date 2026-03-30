@@ -26,15 +26,10 @@ const statusMeta: Record<ApplicationStatus, { label: string; badge: string; dot:
     badge: "border-indigo-200 bg-indigo-50 text-indigo-700",
     dot: "bg-indigo-500",
   },
-  accepted: {
-    label: "Прийнято",
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  rejected: {
-    label: "Відхилено",
-    badge: "border-rose-200 bg-rose-50 text-rose-700",
-    dot: "bg-rose-500",
+  chat_started: {
+    label: "Почато переписку",
+    badge: "border-violet-200 bg-violet-50 text-violet-700",
+    dot: "bg-violet-500",
   },
 }
 

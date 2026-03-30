@@ -1,4 +1,4 @@
-export type ApplicationStatus = "applied" | "viewed" | "rejected" | "accepted"
+export type ApplicationStatus = "applied" | "viewed" | "chat_started"
 
 export interface VacancyBrief {
   id: number

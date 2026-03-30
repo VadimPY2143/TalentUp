@@ -243,7 +243,7 @@ async def get_application_history(
     return [
         ApplicationHistoryOut(
             id=h["id"],
-            status=ApplicationStatus(h["status"]),
+            status=ApplicationStatus(str(h["status"])),
             comment=h.get("comment"),
             changed_at=h["changed_at"],
         )
@@ -288,10 +288,10 @@ async def update_application_status(
             current_user=current_user,
         )
 
-        if app_row["status"] == payload.status.value:
+        current_status = ApplicationStatus(str(app_row["status"]))
+        if current_status == payload.status:
             raise HTTPException(status_code=400, detail="Status is already set to this value")
 
-        current_status = ApplicationStatus(app_row["status"])
         ApplicationService.validate_application_status_transition(
             current_status=current_status,
             next_status=payload.status,

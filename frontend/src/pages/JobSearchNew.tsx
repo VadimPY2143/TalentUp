@@ -104,15 +104,13 @@ const initialFilters: FilterState = {
 const applicationStatusBadge: Record<ApplicationStatus, string> = {
   applied: "border-sky-200 bg-sky-50 text-sky-700",
   viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
-  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+  chat_started: "border-violet-200 bg-violet-50 text-violet-700",
 }
 
 const applicationStatusLabel: Record<ApplicationStatus, string> = {
   applied: "Подано",
   viewed: "Переглянуто",
-  accepted: "Прийнято",
-  rejected: "Відхилено",
+  chat_started: "Почато переписку",
 }
 
 const parseNumber = (value: string) => {
@@ -697,14 +695,11 @@ const JobSearchNew = () => {
   }, [page, totalPages])
 
   useEffect(() => {
-    if (queryFromParams === query && queryFromParams === searchInput) {
-      return
-    }
     setSearchInput(queryFromParams)
     setQuery(queryFromParams)
     setPage(1)
     setSearchTrigger((prev) => prev + 1)
-  }, [queryFromParams, query, searchInput])
+  }, [queryFromParams])
 
   useEffect(() => {
     if (!isAuthenticated || role !== "worker") {
@@ -1042,6 +1037,8 @@ const JobSearchNew = () => {
         vacancy={selectedVacancy}
         onClose={handleModalClose}
         onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
+        isApplyDisabled={selectedVacancy ? applicationByVacancyId.has(selectedVacancy.id) : false}
+        applicationStatus={selectedVacancy ? applicationByVacancyId.get(selectedVacancy.id)?.status : undefined}
       />
 
       <ApplyModal

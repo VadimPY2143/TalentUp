@@ -2,7 +2,12 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
-import { getApplicationResume, listEmployerApplications, openApplicationResumePdf } from "../api/applications"
+import {
+  getApplicationResume,
+  listEmployerApplications,
+  openApplicationResumePdf,
+  updateApplicationStatus,
+} from "../api/applications"
 import { deleteSavedResumeByCompany, listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
 import {
@@ -275,15 +280,13 @@ const formatDateTime = (value: string) => {
 const applicationStatusLabel: Record<ApplicationStatus, string> = {
   applied: "Подано",
   viewed: "Переглянуто",
-  accepted: "Прийнято",
-  rejected: "Відхилено",
+  chat_started: "Почато переписку",
 }
 
 const applicationStatusClassName: Record<ApplicationStatus, string> = {
   applied: "border-sky-200 bg-sky-50 text-sky-700",
   viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
-  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+  chat_started: "border-violet-200 bg-violet-50 text-violet-700",
 }
 
 const hasValue = (value: unknown): boolean => {
@@ -377,6 +380,7 @@ const EmployerDashboard = () => {
   const [applicationsVacancyFilter, setApplicationsVacancyFilter] = useState<number | null>(null)
   const [expandedApplicationId, setExpandedApplicationId] = useState<number | null>(null)
   const [applicationResumeLoadingId, setApplicationResumeLoadingId] = useState<number | null>(null)
+  const [applicationStatusUpdatingId, setApplicationStatusUpdatingId] = useState<number | null>(null)
   const [selectedApplicationResume, setSelectedApplicationResume] = useState<{
     resume: ApplicationResume
     vacancyTitle: string
@@ -493,6 +497,15 @@ const EmployerDashboard = () => {
         vacancyTitle: application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`,
         candidateId: application.user_id,
       })
+
+      if (application.status === "applied") {
+        try {
+          const updated = await updateApplicationStatus(application.id, { status: "viewed" })
+          setEmployerApplications((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+        } catch {
+          // Keep resume modal open even if auto-status update fails.
+        }
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити повне резюме"
       setApplicationResumeError(message)
@@ -501,10 +514,21 @@ const EmployerDashboard = () => {
     }
   }
 
-  const handleWriteToCandidate = (application: JobApplication) => {
+  const handleWriteToCandidate = async (application: JobApplication) => {
     if (!application.resume_id) {
       setApplicationResumeError("Для цього відгуку не знайдено резюме")
       return
+    }
+    if (application.status === "applied" || application.status === "viewed") {
+      try {
+        setApplicationStatusUpdatingId(application.id)
+        const updated = await updateApplicationStatus(application.id, { status: "chat_started" })
+        setEmployerApplications((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+      } catch {
+        // Do not block navigation to chat if status update fails.
+      } finally {
+        setApplicationStatusUpdatingId(null)
+      }
     }
     const params = new URLSearchParams({
       resumeId: String(application.resume_id),
@@ -1310,9 +1334,15 @@ const EmployerDashboard = () => {
                           return (
                             <article
                               key={application.id}
-                              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft"
+                              className="relative rounded-2xl border border-slate-200 bg-white p-4 pr-36 shadow-soft"
                             >
-                              <div className="flex flex-wrap items-start justify-between gap-3">
+                              <span
+                                className={`absolute right-4 top-4 rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+                              >
+                                {applicationStatusLabel[application.status]}
+                              </span>
+
+                              <div className="flex flex-wrap items-start gap-3">
                                 <div>
                                   <h3 className="text-base font-semibold text-slate-900">
                                     {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
@@ -1325,11 +1355,6 @@ const EmployerDashboard = () => {
                                     <span>Подано: {formatDateTime(application.created_at)}</span>
                                   </div>
                                 </div>
-                                <span
-                                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
-                                >
-                                  {applicationStatusLabel[application.status]}
-                                </span>
                               </div>
 
                               {application.cover_letter && (
@@ -1338,17 +1363,17 @@ const EmployerDashboard = () => {
                                 </p>
                               )}
 
-                              <div className="mt-4 flex flex-wrap items-center gap-2">
+                              <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
                                 <button
-                                  className="rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
                                   type="button"
-                                  onClick={() => handleWriteToCandidate(application)}
-                                  disabled={!application.resume_id}
+                                  onClick={() => void handleWriteToCandidate(application)}
+                                  disabled={!application.resume_id || applicationStatusUpdatingId === application.id}
                                 >
-                                  Написати кандидату
+                                  {applicationStatusUpdatingId === application.id ? "Оновлення..." : "Написати кандидату"}
                                 </button>
                                 <button
-                                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
                                   type="button"
                                   onClick={() => void handleOpenApplicationResume(application)}
                                   disabled={applicationResumeLoadingId === application.id}
@@ -1356,7 +1381,7 @@ const EmployerDashboard = () => {
                                   {applicationResumeLoadingId === application.id ? "Відкриваємо..." : "Відкрити резюме"}
                                 </button>
                                 <button
-                                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                                  className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
                                   type="button"
                                   onClick={() => setExpandedApplicationId(isExpanded ? null : application.id)}
                                 >
