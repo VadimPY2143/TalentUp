@@ -39,7 +39,6 @@ app.add_middleware(
 )
 
 
-# 🔹 Роути
 app.include_router(user_router)
 app.include_router(user_profile_router)
 app.include_router(worker_resumes_router)
@@ -52,6 +51,5 @@ app.include_router(vacancy_search_router)
 app.include_router(oauth_router)
 
 
-# 🔹 Запуск
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

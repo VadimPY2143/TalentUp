@@ -137,3 +137,14 @@ async def refresh_token(
         refresh_token=new_refresh_token,
         token_type="bearer",
     )
+
+
+@router.get("/users/me", response_model=UserResponse)
+async def get_me(
+    current_user: dict = Depends(get_current_user),
+) -> UserResponse:
+    return UserResponse(
+        username=current_user["username"],
+        email=current_user["email"],
+        role=current_user["role"],
+    )

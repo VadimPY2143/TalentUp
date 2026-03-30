@@ -38,22 +38,26 @@ async def create_resume(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(get_current_user),
 ):
-    stmt = insert(resumes_table).values(
-        user_id=current_user["id"],
-        title=resume.title,
-        summary=resume.summary,
-        desired_role=resume.desired_role,
-        employment_type=ResumeService.normalize_employment_type(resume.employment_type),
-        location=resume.location,
-        salary_min=resume.salary_min,
-        salary_max=resume.salary_max,
-        salary_currency=resume.salary_currency.value,
-        years_experience=resume.years_experience,
-        is_active=resume.is_active,
+    stmt = (
+        insert(resumes_table)
+        .values(
+            user_id=current_user["id"],
+            title=resume.title,
+            summary=resume.summary,
+            desired_role=resume.desired_role,
+            employment_type=ResumeService.normalize_employment_type(resume.employment_type),
+            location=resume.location,
+            salary_min=resume.salary_min,
+            salary_max=resume.salary_max,
+            salary_currency=resume.salary_currency.value,
+            years_experience=resume.years_experience,
+            is_active=resume.is_active,
+        )
+        .returning(resumes_table.c.id)
     )
-    await session.execute(stmt)
+    result = await session.execute(stmt)
     await session.commit()
-    return {"status": "ok"}
+    return {"status": "ok", "id": result.scalar_one()}
 
 
 @router.put("/resumes/{resume_id}")
