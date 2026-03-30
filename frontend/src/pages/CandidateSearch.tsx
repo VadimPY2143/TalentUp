@@ -4,7 +4,7 @@
   useState,
   type FormEvent,
 } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import ResumeModal from "../components/ResumeModal"
@@ -472,8 +472,10 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 
 const CandidateSearch = () => {
   const navigate = useNavigate()
-  const [searchInput, setSearchInput] = useState("")
-  const [query, setQuery] = useState("")
+  const [urlSearchParams] = useSearchParams()
+  const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
+  const [searchInput, setSearchInput] = useState(queryFromParams)
+  const [query, setQuery] = useState(queryFromParams)
   const [searchTrigger, setSearchTrigger] = useState(0)
   const [filters, setFilters] = useState<FilterState>(initialFilters)
   const [sort, setSort] = useState<CandidateSort>("relevance")
@@ -545,6 +547,16 @@ const CandidateSearch = () => {
       setPage(totalPages)
     }
   }, [page, totalPages])
+
+  useEffect(() => {
+    if (queryFromParams === query && queryFromParams === searchInput) {
+      return
+    }
+    setSearchInput(queryFromParams)
+    setQuery(queryFromParams)
+    setPage(1)
+    setSearchTrigger((prev) => prev + 1)
+  }, [queryFromParams, query, searchInput])
 
   useEffect(() => {
     let mounted = true

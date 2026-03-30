@@ -1,20 +1,24 @@
 import Navbar from "../components/layout/Navbar"
 import { useAuth } from "../auth/useAuth"
-import Hero from "../components/sections/Hero"
-import Categories from "../components/sections/Categories"
-import TopFreelancers from "../components/sections/TopFreelancers"
-import CallToAction from "../components/sections/CallToAction"
+import HomeHero from "../components/sections/HomeHero"
+import HomeSignals from "../components/sections/HomeSignals"
+import HomeHowItWorks from "../components/sections/HomeHowItWorks"
+import HomePlatformFeatures from "../components/sections/HomePlatformFeatures"
+import HomeFinalCta from "../components/sections/HomeFinalCta"
 
 const Home = () => {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, role } = useAuth()
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#e9edf4]">
       <Navbar />
-      <Hero />
-      <Categories />
-      <TopFreelancers />
-      {!isAuthenticated && <CallToAction />}
+      <main>
+        <HomeHero isAuthenticated={isAuthenticated} role={role} />
+        <HomeSignals />
+        <HomeHowItWorks />
+        <HomePlatformFeatures />
+        <HomeFinalCta isAuthenticated={isAuthenticated} role={role} />
+      </main>
     </div>
   )
 }

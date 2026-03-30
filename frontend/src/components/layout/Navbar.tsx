@@ -23,33 +23,46 @@ const Navbar = () => {
 
       <div className="relative mx-auto flex max-w-[1120px] items-center justify-between px-4 py-2">
         <Link to="/" className="flex items-center gap-3">
-          <img
-            src={logo}
-
-            alt="TalentUp"
-            className="h-16 w-auto translate-y-0.4 scale-[1.5] origin-left md:h-20 md:translate-y-3"
-          />
+          <img src={logo} alt="TalentUp" className="h-14 w-auto scale-[1.35] origin-left md:h-16" />
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-white/90 md:flex">
           {!isAuthenticated && (
             <>
-              <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
-              <Link className="transition hover:text-orange-300" to="/register?role=employer">Найняти фахівця</Link>
+              <Link className="transition hover:text-orange-300" to="/jobs">
+                Знайти роботу
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/register?role=employer">
+                Розмістити вакансію
+              </Link>
             </>
           )}
+
           {isAuthenticated && role === "worker" && (
             <>
-              <Link className="transition hover:text-orange-300" to="/jobs">Знайти роботу</Link>
-              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
-              <Link className="transition hover:text-orange-300" to="/dashboard">Кабінет</Link>
+              <Link className="transition hover:text-orange-300" to="/jobs">
+                Знайти роботу
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/messages">
+                Повідомлення
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/dashboard">
+                Кабінет
+              </Link>
             </>
           )}
+
           {isAuthenticated && role === "employer" && (
             <>
-              <Link className="transition hover:text-orange-300" to="/candidates">База резюме</Link>
-              <Link className="transition hover:text-orange-300" to="/messages">Повідомлення</Link>
-              <Link className="transition hover:text-orange-300" to="/">Найняти фахівця</Link>
+              <Link className="transition hover:text-orange-300" to="/candidates">
+                База резюме
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/messages">
+                Повідомлення
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/dashboard">
+                Кабінет
+              </Link>
             </>
           )}
         </nav>

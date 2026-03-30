@@ -27,3 +27,36 @@
 2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 17:51:35 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 17:51:40 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 17:51:45 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 17:51:50 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:08 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:13 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:18 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:23 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:29 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:34 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:05:39 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:08:36 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:08:41 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:08:46 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:08:51 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:08:56 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:09:01 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:09:06 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-29 18:41:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 18:41:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 18:41:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 18:41:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 18:41:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 19:28:24 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-29 19:28:24 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-03-30 08:44:26 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:31 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:36 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:41 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:46 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:51 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:44:57 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-03-30 08:45:02 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.

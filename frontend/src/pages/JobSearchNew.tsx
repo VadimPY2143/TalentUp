@@ -633,12 +633,13 @@ const ApplyModal = ({
 const JobSearchNew = () => {
   const { isAuthenticated, role } = useAuth()
   const [urlSearchParams] = useSearchParams()
+  const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
   const vacancyFromQuery = Number(urlSearchParams.get("vacancyId"))
   const normalizedVacancyFromQuery =
     Number.isFinite(vacancyFromQuery) && vacancyFromQuery > 0 ? vacancyFromQuery : null
   const openedVacancyFromQueryRef = useRef<number | null>(null)
-  const [searchInput, setSearchInput] = useState("")
-  const [query, setQuery] = useState("")
+  const [searchInput, setSearchInput] = useState(queryFromParams)
+  const [query, setQuery] = useState(queryFromParams)
   const [searchTrigger, setSearchTrigger] = useState(0)
   const [filters, setFilters] = useState<FilterState>(initialFilters)
   const [page, setPage] = useState(1)
@@ -694,6 +695,16 @@ const JobSearchNew = () => {
       setPage(totalPages)
     }
   }, [page, totalPages])
+
+  useEffect(() => {
+    if (queryFromParams === query && queryFromParams === searchInput) {
+      return
+    }
+    setSearchInput(queryFromParams)
+    setQuery(queryFromParams)
+    setPage(1)
+    setSearchTrigger((prev) => prev + 1)
+  }, [queryFromParams, query, searchInput])
 
   useEffect(() => {
     if (!isAuthenticated || role !== "worker") {
