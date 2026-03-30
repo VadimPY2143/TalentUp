@@ -12,17 +12,16 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
 
-# from employer.company.views import router as company_router
-# from employer.vacancy.views import router as vacancy_router
-# from chat.views import router as chat_router  # Temporarily disabled
-# from search.resume_search.views import router as search_router  # Temporarily disabled
-# from search.vacancy_search.views import router as vacancy_search_router  # Temporarily disabled
+from employer.company.views import router as company_router
+from employer.vacancy.views import router as vacancy_router
+from chat.views import router as chat_router
+from search.resume_search.views import router as search_router
+from search.vacancy_search.views import router as vacancy_search_router
 from users.crud import router as user_router
-# from users.oauth import router as oauth_router  # Temporarily disabled
+from users.oauth import router as oauth_router
 from users.views import router as user_profile_router
 from worker.applications.views import router as worker_applications_router
 from worker.resumes.views import router as worker_resumes_router
-from vacancy_search_temp import router as vacancy_search_temp_router
 
 
 app.add_middleware(
@@ -45,14 +44,14 @@ app.include_router(user_router)
 app.include_router(user_profile_router)
 app.include_router(worker_resumes_router)
 app.include_router(worker_applications_router)
-# app.include_router(company_router)
-# app.include_router(vacancy_router)
-# app.include_router(chat_router)  # Temporarily disabled
-# app.include_router(search_router)
-app.include_router(vacancy_search_temp_router)
-# app.include_router(oauth_router)
+app.include_router(company_router)
+app.include_router(vacancy_router)
+app.include_router(chat_router)
+app.include_router(search_router)
+app.include_router(vacancy_search_router)
+app.include_router(oauth_router)
 
 
 # 🔹 Запуск
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=False)
+    uvicorn.run("main:app", reload=True)
