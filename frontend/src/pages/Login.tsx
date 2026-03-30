@@ -28,7 +28,7 @@ const Login = () => {
       setIsSubmitting(true)
       const data = await loginUser({ email, password })
       login(data.access_token, data.refresh_token)
-      navigate("/dashboard")
+      navigate("/")
     } catch (err) {
       const message = err instanceof Error ? err.message : "Помилка входу"
       setError(message)
