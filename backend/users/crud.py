@@ -14,7 +14,6 @@ from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     create_refresh_token,
-    get_current_user,
     get_password_hash,
     get_refresh_token_expiry,
     hash_refresh_token,
@@ -141,10 +140,9 @@ async def refresh_token(
 
 
 @router.get("/users/me", response_model=UserResponse)
-async def get_current_user_info(
+async def get_me(
     current_user: dict = Depends(get_current_user),
 ) -> UserResponse:
-    """Отримати інформацію про поточного користувача"""
     return UserResponse(
         username=current_user["username"],
         email=current_user["email"],

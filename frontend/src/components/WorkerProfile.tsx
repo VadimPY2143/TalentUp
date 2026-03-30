@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import {
-  Briefcase,
-  Eye,
   Star,
-  EyeOff,
-  Mail,
   Settings,
   LogOut,
   User,
@@ -16,13 +12,11 @@ import {
   Globe,
   FileText,
   Save,
-  X,
   ChevronRight,
   FileStack,
   Send,
   Bell,
   BarChart3,
-  Camera,
   Home,
 } from "lucide-react"
 import { useAuth } from "../auth/useAuth"
@@ -33,6 +27,18 @@ import {
   type UserProfile,
   type UserProfileUpdate,
 } from "../api/userProfile"
+import {
+  createResume,
+  deleteResume,
+  deleteResumePdf,
+  listResumes,
+  openResumePdf,
+  updateResume,
+  uploadResumePdf,
+} from "../api/resumes"
+import { listMyApplications } from "../api/applications"
+import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
+import type { ApplicationStatus, JobApplication } from "../types/application"
 
 interface WorkerProfileProps {
   userEmail?: string
@@ -40,6 +46,90 @@ interface WorkerProfileProps {
 }
 
 type Section = "overview" | "resumes" | "applications" | "saved" | "notifications" | "analytics" | "settings" | "profile"
+
+interface CreateResumeFormState {
+  title: string
+  desired_role: string
+  summary: string
+  location: string
+  employment_type: EmploymentType[]
+  salary_min: string
+  salary_max: string
+  salary_currency: CurrencyType
+  years_experience: string
+  is_active: boolean
+}
+
+const createResumeInitialForm: CreateResumeFormState = {
+  title: "",
+  desired_role: "",
+  summary: "",
+  location: "",
+  employment_type: ["Remote"],
+  salary_min: "",
+  salary_max: "",
+  salary_currency: "UAH",
+  years_experience: "",
+  is_active: true,
+}
+
+const employmentTypeOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
+
+const applicationStatusLabel: Record<ApplicationStatus, string> = {
+  applied: "Подано",
+  viewed: "Переглянуто",
+  accepted: "Прийнято",
+  rejected: "Відхилено",
+}
+
+const applicationStatusClassName: Record<ApplicationStatus, string> = {
+  applied: "border-sky-200 bg-sky-50 text-sky-700",
+  viewed: "border-indigo-200 bg-indigo-50 text-indigo-700",
+  accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  rejected: "border-rose-200 bg-rose-50 text-rose-700",
+}
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) {
+    return "—"
+  }
+  return new Date(value).toLocaleString("uk-UA", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+const formatResumeSalary = (resume: Resume): string => {
+  const currency = resume.salary_currency ?? "UAH"
+  if (resume.salary_min && resume.salary_max) {
+    return `${resume.salary_min}-${resume.salary_max} ${currency}`
+  }
+  if (resume.salary_min) {
+    return `від ${resume.salary_min} ${currency}`
+  }
+  if (resume.salary_max) {
+    return `до ${resume.salary_max} ${currency}`
+  }
+  return "Не вказано"
+}
+
+const resumeToForm = (resume: Resume): CreateResumeFormState => ({
+  title: resume.title ?? "",
+  desired_role: resume.desired_role ?? "",
+  summary: resume.summary ?? "",
+  location: resume.location ?? "",
+  employment_type: resume.employment_type?.length ? [...resume.employment_type] : ["Remote"],
+  salary_min: resume.salary_min !== undefined && resume.salary_min !== null ? String(resume.salary_min) : "",
+  salary_max: resume.salary_max !== undefined && resume.salary_max !== null ? String(resume.salary_max) : "",
+  salary_currency: (resume.salary_currency as CurrencyType) ?? "UAH",
+  years_experience: resume.years_experience !== undefined && resume.years_experience !== null
+    ? String(resume.years_experience)
+    : "",
+  is_active: Boolean(resume.is_active),
+})
 
 const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const { logout } = useAuth()
@@ -50,9 +140,26 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const [profileError, setProfileError] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<UserProfileUpdate>({})
+  const [resumes, setResumes] = useState<Resume[]>([])
+  const [resumesLoading, setResumesLoading] = useState(false)
+  const [resumesError, setResumesError] = useState<string | null>(null)
+  const [showCreateResumeForm, setShowCreateResumeForm] = useState(false)
+  const [createResumeForm, setCreateResumeForm] = useState<CreateResumeFormState>(createResumeInitialForm)
+  const [createResumeLoading, setCreateResumeLoading] = useState(false)
+  const [createResumeFile, setCreateResumeFile] = useState<File | null>(null)
+  const [editingResumeId, setEditingResumeId] = useState<number | null>(null)
+  const [editResumeForm, setEditResumeForm] = useState<CreateResumeFormState>(createResumeInitialForm)
+  const [editResumeFile, setEditResumeFile] = useState<File | null>(null)
+  const [editResumeLoading, setEditResumeLoading] = useState(false)
+  const [deletingResumeId, setDeletingResumeId] = useState<number | null>(null)
+  const [applications, setApplications] = useState<JobApplication[]>([])
+  const [applicationsLoading, setApplicationsLoading] = useState(false)
+  const [applicationsError, setApplicationsError] = useState<string | null>(null)
 
   useEffect(() => {
-    loadProfile()
+    void loadProfile()
+    void loadResumes()
+    void loadApplications()
   }, [])
 
   const loadProfile = async () => {
@@ -118,6 +225,195 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
       setProfileError(err instanceof Error ? err.message : "Помилка збереження")
     } finally {
       setProfileLoading(false)
+    }
+  }
+
+  const loadResumes = async () => {
+    try {
+      setResumesLoading(true)
+      setResumesError(null)
+      const data = await listResumes()
+      setResumes(data)
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося завантажити резюме")
+    } finally {
+      setResumesLoading(false)
+    }
+  }
+
+  const loadApplications = async () => {
+    try {
+      setApplicationsLoading(true)
+      setApplicationsError(null)
+      const data = await listMyApplications()
+      setApplications(data)
+    } catch (err) {
+      setApplicationsError(err instanceof Error ? err.message : "Не вдалося завантажити відгуки")
+    } finally {
+      setApplicationsLoading(false)
+    }
+  }
+
+  const handleOpenResumePdf = async (resumeId: number) => {
+    try {
+      await openResumePdf(resumeId)
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося відкрити PDF")
+    }
+  }
+
+  const handleToggleEmploymentType = (value: EmploymentType) => {
+    setCreateResumeForm((prev) => {
+      const exists = prev.employment_type.includes(value)
+      const next = exists
+        ? prev.employment_type.filter((item) => item !== value)
+        : [...prev.employment_type, value]
+      return { ...prev, employment_type: next }
+    })
+  }
+
+  const handleToggleEditEmploymentType = (value: EmploymentType) => {
+    setEditResumeForm((prev) => {
+      const exists = prev.employment_type.includes(value)
+      const next = exists
+        ? prev.employment_type.filter((item) => item !== value)
+        : [...prev.employment_type, value]
+      return { ...prev, employment_type: next }
+    })
+  }
+
+  const handleCreateResume = async () => {
+    if (!createResumeForm.title.trim()) {
+      setResumesError("Назва резюме обов'язкова")
+      return
+    }
+    if (createResumeForm.employment_type.length === 0) {
+      setResumesError("Оберіть хоча б один формат роботи")
+      return
+    }
+
+    try {
+      setCreateResumeLoading(true)
+      setResumesError(null)
+      const created = await createResume({
+        title: createResumeForm.title.trim(),
+        desired_role: createResumeForm.desired_role.trim() || undefined,
+        summary: createResumeForm.summary.trim() || undefined,
+        location: createResumeForm.location.trim() || undefined,
+        employment_type: createResumeForm.employment_type,
+        salary_min: createResumeForm.salary_min ? Number(createResumeForm.salary_min) : undefined,
+        salary_max: createResumeForm.salary_max ? Number(createResumeForm.salary_max) : undefined,
+        salary_currency: createResumeForm.salary_currency,
+        years_experience: createResumeForm.years_experience
+          ? Number(createResumeForm.years_experience)
+          : undefined,
+        is_active: createResumeForm.is_active,
+      })
+
+      if (createResumeFile && created.id) {
+        try {
+          await uploadResumePdf(created.id, createResumeFile)
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Невідома помилка"
+          setResumesError(`Резюме створено, але PDF не завантажено: ${msg}`)
+        }
+      }
+
+      setCreateResumeForm(createResumeInitialForm)
+      setCreateResumeFile(null)
+      setShowCreateResumeForm(false)
+      await loadResumes()
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося створити резюме")
+    } finally {
+      setCreateResumeLoading(false)
+    }
+  }
+
+  const handleStartEditResume = (resume: Resume) => {
+    setEditingResumeId(resume.id)
+    setEditResumeForm(resumeToForm(resume))
+    setEditResumeFile(null)
+    setResumesError(null)
+  }
+
+  const handleCancelEditResume = () => {
+    setEditingResumeId(null)
+    setEditResumeForm(createResumeInitialForm)
+    setEditResumeFile(null)
+  }
+
+  const handleSaveEditedResume = async () => {
+    if (!editingResumeId) {
+      return
+    }
+    if (!editResumeForm.title.trim()) {
+      setResumesError("Назва резюме обов'язкова")
+      return
+    }
+    if (editResumeForm.employment_type.length === 0) {
+      setResumesError("Оберіть хоча б один формат роботи")
+      return
+    }
+
+    try {
+      setEditResumeLoading(true)
+      setResumesError(null)
+      await updateResume(editingResumeId, {
+        title: editResumeForm.title.trim(),
+        desired_role: editResumeForm.desired_role.trim() || undefined,
+        summary: editResumeForm.summary.trim() || undefined,
+        location: editResumeForm.location.trim() || undefined,
+        employment_type: editResumeForm.employment_type,
+        salary_min: editResumeForm.salary_min ? Number(editResumeForm.salary_min) : undefined,
+        salary_max: editResumeForm.salary_max ? Number(editResumeForm.salary_max) : undefined,
+        salary_currency: editResumeForm.salary_currency,
+        years_experience: editResumeForm.years_experience
+          ? Number(editResumeForm.years_experience)
+          : undefined,
+        is_active: editResumeForm.is_active,
+      })
+
+      if (editResumeFile) {
+        await uploadResumePdf(editingResumeId, editResumeFile)
+      }
+
+      handleCancelEditResume()
+      await loadResumes()
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося оновити резюме")
+    } finally {
+      setEditResumeLoading(false)
+    }
+  }
+
+  const handleRemoveResume = async (resumeId: number) => {
+    const confirmed = window.confirm("Видалити це резюме?")
+    if (!confirmed) {
+      return
+    }
+    try {
+      setDeletingResumeId(resumeId)
+      setResumesError(null)
+      await deleteResume(resumeId)
+      if (editingResumeId === resumeId) {
+        handleCancelEditResume()
+      }
+      await loadResumes()
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося видалити резюме")
+    } finally {
+      setDeletingResumeId(null)
+    }
+  }
+
+  const handleRemoveResumePdf = async (resumeId: number) => {
+    try {
+      setResumesError(null)
+      await deleteResumePdf(resumeId)
+      await loadResumes()
+    } catch (err) {
+      setResumesError(err instanceof Error ? err.message : "Не вдалося видалити PDF")
     }
   }
 
@@ -244,6 +540,11 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         <main className="flex-1">
           {activeSection === "profile" ? (
             <div className="space-y-6">
+              {profileError && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {profileError}
+                </div>
+              )}
               {/* Profile Header */}
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-orange-400/20 blur-2xl" />
@@ -500,25 +801,494 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
           ) : activeSection === "resumes" ? (
             <div className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
-                <div className="relative">
-                  <h1 className="text-3xl font-bold">Мої резюме</h1>
-                  <p className="mt-2 text-white/80">Керуйте своїми резюме та створюйте нові</p>
+                <div className="relative flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h1 className="text-3xl font-bold">Мої резюме</h1>
+                    <p className="mt-2 text-white/80">Ваші активні та архівні резюме</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowCreateResumeForm((prev) => !prev)}
+                      className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
+                      type="button"
+                    >
+                      {showCreateResumeForm ? "Сховати форму" : "Створити резюме"}
+                    </button>
+                    <button
+                      onClick={() => void loadResumes()}
+                      className="rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                      type="button"
+                      disabled={resumesLoading}
+                    >
+                      {resumesLoading ? "Оновлення..." : "Оновити"}
+                    </button>
+                  </div>
                 </div>
               </section>
+
               <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть ваші резюме...</p>
+                {resumesError && (
+                  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {resumesError}
+                  </div>
+                )}
+                {showCreateResumeForm && (
+                  <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <h3 className="text-base font-semibold text-slate-900">Нове резюме</h3>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                        placeholder="Назва резюме *"
+                        value={createResumeForm.title}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, title: e.target.value }))}
+                      />
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                        placeholder="Бажана роль"
+                        value={createResumeForm.desired_role}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, desired_role: e.target.value }))}
+                      />
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                        placeholder="Локація"
+                        value={createResumeForm.location}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, location: e.target.value }))}
+                      />
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                        placeholder="Роки досвіду"
+                        type="number"
+                        min={0}
+                        value={createResumeForm.years_experience}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, years_experience: e.target.value }))}
+                      />
+                      <input
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                        placeholder="Зарплата від"
+                        type="number"
+                        min={0}
+                        value={createResumeForm.salary_min}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, salary_min: e.target.value }))}
+                      />
+                      <div className="grid grid-cols-[1fr_auto] gap-2">
+                        <input
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                          placeholder="Зарплата до"
+                          type="number"
+                          min={0}
+                          value={createResumeForm.salary_max}
+                          onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, salary_max: e.target.value }))}
+                        />
+                        <select
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+                          value={createResumeForm.salary_currency}
+                          onChange={(e) =>
+                            setCreateResumeForm((prev) => ({
+                              ...prev,
+                              salary_currency: e.target.value as CurrencyType,
+                            }))
+                          }
+                        >
+                          <option value="UAH">UAH</option>
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Формат роботи *</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {employmentTypeOptions.map((option) => {
+                          const active = createResumeForm.employment_type.includes(option)
+                          return (
+                            <button
+                              key={option}
+                              type="button"
+                              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                                active
+                                  ? "border-orange-400 bg-orange-100 text-orange-700"
+                                  : "border-slate-300 bg-white text-slate-700"
+                              }`}
+                              onClick={() => handleToggleEmploymentType(option)}
+                            >
+                              {option}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <textarea
+                      className="mt-3 min-h-[90px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                      placeholder="Коротко про себе"
+                      value={createResumeForm.summary}
+                      onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, summary: e.target.value }))}
+                    />
+
+                    <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        PDF резюме (опційно)
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <label className="cursor-pointer rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-orange-400/70">
+                          Обрати файл
+                          <input
+                            type="file"
+                            accept="application/pdf,.pdf"
+                            className="hidden"
+                            onChange={(e) => setCreateResumeFile(e.target.files?.[0] ?? null)}
+                          />
+                        </label>
+                        {createResumeFile && (
+                          <>
+                            <span className="max-w-[320px] truncate text-xs text-slate-600">
+                              {createResumeFile.name}
+                            </span>
+                            <button
+                              className="rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                              type="button"
+                              onClick={() => setCreateResumeFile(null)}
+                            >
+                              Очистити
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <label className="mt-3 inline-flex items-center gap-2 text-sm text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={createResumeForm.is_active}
+                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, is_active: e.target.checked }))}
+                      />
+                      Активне резюме
+                    </label>
+
+                    <div className="mt-4 flex justify-end gap-2">
+                      <button
+                        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                        type="button"
+                        onClick={() => {
+                          setShowCreateResumeForm(false)
+                          setCreateResumeForm(createResumeInitialForm)
+                          setCreateResumeFile(null)
+                        }}
+                      >
+                        Скасувати
+                      </button>
+                      <button
+                        className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+                        type="button"
+                        onClick={() => void handleCreateResume()}
+                        disabled={createResumeLoading}
+                      >
+                        {createResumeLoading ? "Створення..." : "Створити"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {resumesLoading ? (
+                  <div className="py-8 text-sm text-slate-500">Завантаження резюме...</div>
+                ) : resumes.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                    У вас поки немає резюме.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {resumes.map((resume) => (
+                      <article
+                        key={resume.id}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">{resume.title}</h3>
+                            <p className="mt-1 text-sm text-slate-600">{resume.desired_role || "Роль не вказана"}</p>
+                            <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+                              <span>Локація: {resume.location || "Не вказано"}</span>
+                              <span>Зарплата: {formatResumeSalary(resume)}</span>
+                              <span>Оновлено: {formatDateTime(resume.updated_at ?? resume.created_at ?? null)}</span>
+                            </div>
+                          </div>
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                              resume.is_active
+                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                : "border-slate-200 bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {resume.is_active ? "Активне" : "Неактивне"}
+                          </span>
+                        </div>
+
+                        {resume.summary && (
+                          <p className="mt-3 line-clamp-3 text-sm text-slate-600">{resume.summary}</p>
+                        )}
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                            type="button"
+                            onClick={() => void handleOpenResumePdf(resume.id)}
+                            disabled={!resume.pdf_file_path}
+                          >
+                            {resume.pdf_file_path ? "Відкрити PDF" : "PDF відсутній"}
+                          </button>
+                          <button
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                            type="button"
+                            onClick={() => handleStartEditResume(resume)}
+                          >
+                            Редагувати
+                          </button>
+                          <button
+                            className="rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            type="button"
+                            onClick={() => void handleRemoveResume(resume.id)}
+                            disabled={deletingResumeId === resume.id}
+                          >
+                            {deletingResumeId === resume.id ? "Видалення..." : "Видалити"}
+                          </button>
+                          {resume.pdf_file_path && (
+                            <button
+                              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                              type="button"
+                              onClick={() => void handleRemoveResumePdf(resume.id)}
+                            >
+                              Видалити PDF
+                            </button>
+                          )}
+                        </div>
+
+                        {editingResumeId === resume.id && (
+                          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+                            <h4 className="text-sm font-semibold text-slate-900">Редагування резюме</h4>
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                              <input
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                placeholder="Назва резюме *"
+                                value={editResumeForm.title}
+                                onChange={(e) => setEditResumeForm((prev) => ({ ...prev, title: e.target.value }))}
+                              />
+                              <input
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                placeholder="Бажана роль"
+                                value={editResumeForm.desired_role}
+                                onChange={(e) =>
+                                  setEditResumeForm((prev) => ({ ...prev, desired_role: e.target.value }))
+                                }
+                              />
+                              <input
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                placeholder="Локація"
+                                value={editResumeForm.location}
+                                onChange={(e) => setEditResumeForm((prev) => ({ ...prev, location: e.target.value }))}
+                              />
+                              <input
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                placeholder="Роки досвіду"
+                                type="number"
+                                min={0}
+                                value={editResumeForm.years_experience}
+                                onChange={(e) =>
+                                  setEditResumeForm((prev) => ({ ...prev, years_experience: e.target.value }))
+                                }
+                              />
+                              <input
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                placeholder="Зарплата від"
+                                type="number"
+                                min={0}
+                                value={editResumeForm.salary_min}
+                                onChange={(e) => setEditResumeForm((prev) => ({ ...prev, salary_min: e.target.value }))}
+                              />
+                              <div className="grid grid-cols-[1fr_auto] gap-2">
+                                <input
+                                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                                  placeholder="Зарплата до"
+                                  type="number"
+                                  min={0}
+                                  value={editResumeForm.salary_max}
+                                  onChange={(e) => setEditResumeForm((prev) => ({ ...prev, salary_max: e.target.value }))}
+                                />
+                                <select
+                                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+                                  value={editResumeForm.salary_currency}
+                                  onChange={(e) =>
+                                    setEditResumeForm((prev) => ({
+                                      ...prev,
+                                      salary_currency: e.target.value as CurrencyType,
+                                    }))
+                                  }
+                                >
+                                  <option value="UAH">UAH</option>
+                                  <option value="USD">USD</option>
+                                  <option value="EUR">EUR</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="mt-3">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Формат роботи *</p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {employmentTypeOptions.map((option) => {
+                                  const active = editResumeForm.employment_type.includes(option)
+                                  return (
+                                    <button
+                                      key={`${resume.id}-${option}`}
+                                      type="button"
+                                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                                        active
+                                          ? "border-orange-400 bg-orange-100 text-orange-700"
+                                          : "border-slate-300 bg-white text-slate-700"
+                                      }`}
+                                      onClick={() => handleToggleEditEmploymentType(option)}
+                                    >
+                                      {option}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            </div>
+
+                            <textarea
+                              className="mt-3 min-h-[90px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+                              placeholder="Коротко про себе"
+                              value={editResumeForm.summary}
+                              onChange={(e) => setEditResumeForm((prev) => ({ ...prev, summary: e.target.value }))}
+                            />
+
+                            <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Оновити PDF (опційно)
+                              </p>
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <label className="cursor-pointer rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-orange-400/70">
+                                  Обрати файл
+                                  <input
+                                    type="file"
+                                    accept="application/pdf,.pdf"
+                                    className="hidden"
+                                    onChange={(e) => setEditResumeFile(e.target.files?.[0] ?? null)}
+                                  />
+                                </label>
+                                {editResumeFile && (
+                                  <>
+                                    <span className="max-w-[320px] truncate text-xs text-slate-600">
+                                      {editResumeFile.name}
+                                    </span>
+                                    <button
+                                      className="rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                                      type="button"
+                                      onClick={() => setEditResumeFile(null)}
+                                    >
+                                      Очистити
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            <label className="mt-3 inline-flex items-center gap-2 text-sm text-slate-600">
+                              <input
+                                type="checkbox"
+                                checked={editResumeForm.is_active}
+                                onChange={(e) =>
+                                  setEditResumeForm((prev) => ({ ...prev, is_active: e.target.checked }))
+                                }
+                              />
+                              Активне резюме
+                            </label>
+
+                            <div className="mt-4 flex justify-end gap-2">
+                              <button
+                                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                                type="button"
+                                onClick={handleCancelEditResume}
+                              >
+                                Скасувати
+                              </button>
+                              <button
+                                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+                                type="button"
+                                onClick={() => void handleSaveEditedResume()}
+                                disabled={editResumeLoading}
+                              >
+                                {editResumeLoading ? "Збереження..." : "Зберегти"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                )}
               </section>
             </div>
           ) : activeSection === "applications" ? (
             <div className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
-                <div className="relative">
-                  <h1 className="text-3xl font-bold">Мої відгуки</h1>
-                  <p className="mt-2 text-white/80">Відстежуйте статус ваших відгуків на вакансії</p>
+                <div className="relative flex items-center justify-between gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold">Мої відгуки</h1>
+                    <p className="mt-2 text-white/80">Відгуки на вакансії та їхні статуси</p>
+                  </div>
+                  <button
+                    onClick={() => void loadApplications()}
+                    className="rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                    type="button"
+                    disabled={applicationsLoading}
+                  >
+                    {applicationsLoading ? "Оновлення..." : "Оновити"}
+                  </button>
                 </div>
               </section>
+
               <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть ваші відгуки на вакансії...</p>
+                {applicationsError && (
+                  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {applicationsError}
+                  </div>
+                )}
+                {applicationsLoading ? (
+                  <div className="py-8 text-sm text-slate-500">Завантаження відгуків...</div>
+                ) : applications.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                    Ви ще не подавали відгуки на вакансії.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {applications.map((application) => (
+                      <article
+                        key={application.id}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-base font-semibold text-slate-900">
+                              {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
+                            </h3>
+                            <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+                              <span>Резюме: {application.resume_title ?? "Без назви"}</span>
+                              <span>Подано: {formatDateTime(application.created_at)}</span>
+                            </div>
+                          </div>
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+                          >
+                            {applicationStatusLabel[application.status]}
+                          </span>
+                        </div>
+
+                        {application.cover_letter && (
+                          <p className="mt-3 line-clamp-3 text-sm text-slate-600">{application.cover_letter}</p>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                )}
               </section>
             </div>
           ) : activeSection === "saved" ? (
@@ -591,7 +1361,14 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                     <h3 className="text-lg font-bold text-slate-900">
                       Створіть власне резюме для збільшення шансів знайти ідеальну вакансію
                     </h3>
-                    <button className="mt-4 flex items-center gap-2 rounded-full border-2 border-orange-500 bg-white px-6 py-3 text-sm font-semibold text-orange-500 transition hover:bg-orange-500 hover:text-white">
+                    <button
+                      className="mt-4 flex items-center gap-2 rounded-full border-2 border-orange-500 bg-white px-6 py-3 text-sm font-semibold text-orange-500 transition hover:bg-orange-500 hover:text-white"
+                      onClick={() => {
+                        setActiveSection("resumes")
+                        setShowCreateResumeForm(true)
+                      }}
+                      type="button"
+                    >
                       <span className="text-lg">+</span>
                       Створити резюме
                     </button>
