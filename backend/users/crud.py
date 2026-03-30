@@ -14,6 +14,7 @@ from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     create_refresh_token,
+    get_current_user,
     get_password_hash,
     get_refresh_token_expiry,
     hash_refresh_token,
@@ -136,4 +137,15 @@ async def refresh_token(
         access_token=access_token,
         refresh_token=new_refresh_token,
         token_type="bearer",
+    )
+
+
+@router.get("/users/me", response_model=UserResponse)
+async def get_me(
+    current_user: dict = Depends(get_current_user),
+) -> UserResponse:
+    return UserResponse(
+        username=current_user["username"],
+        email=current_user["email"],
+        role=current_user["role"],
     )

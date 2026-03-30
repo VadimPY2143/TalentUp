@@ -3,8 +3,13 @@ import type { Resume, ResumeBase } from "../types/resume"
 
 export const listResumes = () => apiFetch<Resume[]>("/resumes")
 
+export interface CreateResumeResponse {
+  status: string
+  id: number
+}
+
 export const createResume = (payload: ResumeBase) =>
-  apiFetch<{ status: string }>("/resumes", {
+  apiFetch<CreateResumeResponse>("/resumes", {
     method: "POST",
     body: JSON.stringify(payload),
   })
