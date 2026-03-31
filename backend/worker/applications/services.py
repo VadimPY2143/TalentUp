@@ -9,6 +9,7 @@ from database import (
     companies_table,
     job_applications_table,
     resumes_table,
+    users_table,
     vacancies_table,
 )
 
@@ -70,6 +71,7 @@ class ApplicationService:
                 vacancies_table.c.title.label("vacancy_title"),
                 vacancies_table.c.company_id.label("company_id"),
                 resumes_table.c.title.label("resume_title"),
+                users_table.c.username.label("candidate_name"),
                 companies_table.c.user_id.label("company_owner_user_id"),
             )
             .select_from(
@@ -77,6 +79,7 @@ class ApplicationService:
                     vacancies_table, vacancies_table.c.id == job_applications_table.c.vacancy_id
                 )
                 .join(companies_table, companies_table.c.id == vacancies_table.c.company_id)
+                .join(users_table, users_table.c.id == job_applications_table.c.user_id)
                 .join(
                     resumes_table,
                     resumes_table.c.id == job_applications_table.c.resume_id,
@@ -133,6 +136,7 @@ class ApplicationService:
         return JobApplicationOut(
             id=row["id"],
             user_id=row["user_id"],
+            candidate_name=row.get("candidate_name"),
             vacancy_id=row["vacancy_id"],
             resume_id=row.get("resume_id"),
             resume_title=row.get("resume_title"),

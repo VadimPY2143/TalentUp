@@ -32,6 +32,8 @@ class ChatMessagesListResponse(BaseModel):
 
 
 class MyChatResponse(ChatResponse):
+    employer_name: str | None = None
+    worker_name: str | None = None
     unread_count: int
 
 

@@ -350,6 +350,27 @@ const formatApplicationResumeSalary = (resume: ApplicationResume): string => {
   return "Зарплата не вказана"
 }
 
+const mapSavedResumeToApplicationResume = (resume: Resume): ApplicationResume => ({
+  id: resume.id,
+  user_id: 0,
+  title: resume.title,
+  summary: resume.summary ?? null,
+  desired_role: resume.desired_role ?? null,
+  employment_type: resume.employment_type ?? null,
+  location: resume.location ?? null,
+  salary_min: resume.salary_min ?? null,
+  salary_max: resume.salary_max ?? null,
+  salary_currency: resume.salary_currency ?? null,
+  years_experience: resume.years_experience ?? null,
+  is_active: Boolean(resume.is_active),
+  pdf_file_path: resume.pdf_file_path ?? null,
+  pdf_original_name: resume.pdf_original_name ?? null,
+  pdf_size: resume.pdf_size ?? null,
+  pdf_uploaded_at: resume.pdf_uploaded_at ?? null,
+  created_at: resume.created_at ?? new Date().toISOString(),
+  updated_at: resume.updated_at ?? new Date().toISOString(),
+})
+
 const EmployerDashboard = () => {
   const navigate = useNavigate()
   const [company, setCompany] = useState<CompanyResponse | null>(null)
@@ -384,7 +405,7 @@ const EmployerDashboard = () => {
   const [selectedApplicationResume, setSelectedApplicationResume] = useState<{
     resume: ApplicationResume
     vacancyTitle: string
-    candidateId: number
+    candidateLabel: string
   } | null>(null)
   const [applicationResumeError, setApplicationResumeError] = useState<string | null>(null)
   const [aiDescription, setAiDescription] = useState("")
@@ -487,6 +508,33 @@ const EmployerDashboard = () => {
     }
   }
 
+  const handleOpenSavedResume = (resume: Resume) => {
+    setApplicationResumeError(null)
+    setSelectedApplicationResume({
+      resume: mapSavedResumeToApplicationResume(resume),
+      vacancyTitle: "Збережений кандидат",
+      candidateLabel: resume.title || "Кандидат",
+    })
+  }
+
+  const handleStartChatWithSavedResume = (resume: Resume) => {
+    if (!resume.id) {
+      setSavedResumesError("Для цього кандидата недоступний ідентифікатор резюме")
+      return
+    }
+    const vacancyId = applicationsVacancyFilter ?? vacancies[0]?.id
+    if (!vacancyId) {
+      setSavedResumesError("Щоб почати переписку, спочатку створіть хоча б одну вакансію")
+      return
+    }
+    setSavedResumesError(null)
+    const params = new URLSearchParams({
+      resumeId: String(resume.id),
+      vacancyId: String(vacancyId),
+    })
+    navigate(`/messages?${params.toString()}`)
+  }
+
   const handleOpenApplicationResume = async (application: JobApplication) => {
     setApplicationResumeError(null)
     try {
@@ -495,7 +543,7 @@ const EmployerDashboard = () => {
       setSelectedApplicationResume({
         resume,
         vacancyTitle: application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`,
-        candidateId: application.user_id,
+        candidateLabel: `Кандидат: ${application.candidate_name || "Невідомий кандидат"}`,
       })
 
       if (application.status === "applied") {
@@ -1272,6 +1320,22 @@ const EmployerDashboard = () => {
                               : "Не вказано"}
                           </div>
                         </div>
+                        <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+                          <button
+                            className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f]"
+                            type="button"
+                            onClick={() => handleStartChatWithSavedResume(resume)}
+                          >
+                            Розпочати переписку
+                          </button>
+                          <button
+                            className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+                            type="button"
+                            onClick={() => handleOpenSavedResume(resume)}
+                          >
+                            Переглянути резюме
+                          </button>
+                        </div>
                       </article>
                     ))}
                   </div>
@@ -1348,7 +1412,7 @@ const EmployerDashboard = () => {
                                     {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
                                   </h3>
                                   <p className="mt-1 text-sm text-slate-600">
-                                    Кандидат #{application.user_id}
+                                    {`Кандидат: ${application.candidate_name || "Невідомий кандидат"}`}
                                   </p>
                                   <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
                                     <span>Резюме: {application.resume_title ?? "Без назви"}</span>
@@ -1736,7 +1800,7 @@ const EmployerDashboard = () => {
                     {selectedApplicationResume.resume.title}
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    {selectedApplicationResume.vacancyTitle} · Кандидат #{selectedApplicationResume.candidateId}
+                    {selectedApplicationResume.vacancyTitle} · {selectedApplicationResume.candidateLabel}
                   </p>
                 </div>
                 <button

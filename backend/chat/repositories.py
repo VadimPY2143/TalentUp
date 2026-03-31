@@ -1,6 +1,7 @@
 from typing import Any
 
 from sqlalchemy import and_, func, insert, or_, select, update
+from sqlalchemy.orm import aliased
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import (
@@ -19,8 +20,23 @@ class ChatRepository:
         session: AsyncSession,
         user_id: int,
     ) -> list[dict[str, Any]]:
+        employer_user = aliased(users_table)
+        worker_user = aliased(users_table)
         stmt = (
-            select(chat_table)
+            select(
+                chat_table,
+                employer_user.c.username.label("employer_name"),
+                worker_user.c.username.label("worker_name"),
+            )
+            .select_from(
+                chat_table.join(
+                    employer_user,
+                    employer_user.c.id == chat_table.c.employer_user_id,
+                ).join(
+                    worker_user,
+                    worker_user.c.id == chat_table.c.worker_user_id,
+                )
+            )
             .where(
                 or_(
                     chat_table.c.employer_user_id == user_id,

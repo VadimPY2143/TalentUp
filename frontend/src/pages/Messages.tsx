@@ -131,9 +131,10 @@ const Messages = () => {
       const participantId = participantUserIdByRole(chat, role)
       const vacancyTitle = chatVacancyById[chat.vacancy_id]?.title
       if (role === "worker") {
-        return vacancyTitle || `Employer #${participantId}`
+        return vacancyTitle || chat.employer_name || `Employer #${participantId}`
       }
-      return vacancyTitle ? `${vacancyTitle} · Candidate #${participantId}` : `Candidate #${participantId}`
+      const candidateLabel = chat.worker_name || "Невідомий кандидат"
+      return vacancyTitle ? `${vacancyTitle} · ${candidateLabel}` : candidateLabel
     },
     [chatVacancyById, role],
   )

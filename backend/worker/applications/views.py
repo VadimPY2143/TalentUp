@@ -9,6 +9,7 @@ from database import (
     get_session,
     job_applications_table,
     resumes_table,
+    users_table,
     vacancies_table,
 )
 from users.auth import get_current_user
@@ -107,6 +108,7 @@ async def create_application(
     app_row["vacancy_title"] = vacancy["title"]
     app_row["company_id"] = vacancy["company_id"]
     app_row["resume_title"] = selected_resume.get("title")
+    app_row["candidate_name"] = current_user.get("username")
     return ApplicationService.build_application_out(app_row, history_rows)
 
 
@@ -124,10 +126,13 @@ async def list_my_applications(
             vacancies_table.c.title.label("vacancy_title"),
             vacancies_table.c.company_id.label("company_id"),
             resumes_table.c.title.label("resume_title"),
+            users_table.c.username.label("candidate_name"),
         )
         .select_from(
             job_applications_table.join(
                 vacancies_table, vacancies_table.c.id == job_applications_table.c.vacancy_id
+            ).join(
+                users_table, users_table.c.id == job_applications_table.c.user_id
             ).join(
                 resumes_table,
                 resumes_table.c.id == job_applications_table.c.resume_id,
@@ -170,11 +175,14 @@ async def list_employer_applications(
             vacancies_table.c.title.label("vacancy_title"),
             vacancies_table.c.company_id.label("company_id"),
             resumes_table.c.title.label("resume_title"),
+            users_table.c.username.label("candidate_name"),
         )
         .select_from(
             job_applications_table.join(
                 vacancies_table, vacancies_table.c.id == job_applications_table.c.vacancy_id
             ).join(companies_table, companies_table.c.id == vacancies_table.c.company_id).join(
+                users_table, users_table.c.id == job_applications_table.c.user_id
+            ).join(
                 resumes_table,
                 resumes_table.c.id == job_applications_table.c.resume_id,
                 isouter=True,
@@ -322,6 +330,7 @@ async def update_application_status(
         **updated,
         "vacancy_title": app_row.get("vacancy_title"),
         "company_id": app_row.get("company_id"),
+        "candidate_name": app_row.get("candidate_name"),
     }
     history_rows = await ApplicationService.load_application_history(
         session=session,

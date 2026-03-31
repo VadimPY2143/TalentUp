@@ -26,6 +26,7 @@ class ApplicationHistoryOut(BaseModel):
 class JobApplicationOut(BaseModel):
     id: int
     user_id: int
+    candidate_name: str | None = None
     vacancy_id: int
     resume_id: int | None = None
     resume_title: str | None = None

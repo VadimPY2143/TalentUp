@@ -16,6 +16,7 @@ export interface ApplicationHistoryItem {
 export interface JobApplication {
   id: number
   user_id: number
+  candidate_name?: string | null
   vacancy_id: number
   resume_id?: number | null
   resume_title?: string | null

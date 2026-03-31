@@ -15,6 +15,8 @@ export interface ChatResponse {
 }
 
 export interface MyChatResponse extends ChatResponse {
+  employer_name?: string | null
+  worker_name?: string | null
   unread_count: number
 }
 
