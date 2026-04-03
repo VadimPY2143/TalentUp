@@ -6,6 +6,7 @@ export interface ResumeBase {
   summary?: string
   desired_role?: string
   employment_type: EmploymentType[]
+  city_id?: number | null
   location?: string
   salary_min?: number
   salary_max?: number

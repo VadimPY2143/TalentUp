@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from cities.service import CityService
 from database import (
     chat_table,
     get_session,
@@ -49,7 +50,9 @@ def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
     return conditions
 
 
-def get_vacancy_search_filters(
+async def get_vacancy_search_filters(
+    session: AsyncSession = Depends(get_session),
+    city_id: int | None = Query(None, ge=1),
     location: str | None = Query(None, max_length=255),
     company_id: int | None = Query(None, ge=1),
     employment_kind: list[EmploymentKind] | None = Query(None),
@@ -62,8 +65,28 @@ def get_vacancy_search_filters(
     published_within: PublishedWithin | None = Query(None),
     exclude_expired: bool = Query(True),
 ) -> VacancySearchFilters:
+    resolved_city_id = city_id
+    resolved_location = location
+    location_aliases: list[str] | None = None
+    city_service = CityService(session=session)
+
+    if city_id is not None:
+        city = await city_service.get_city_by_id(city_id)
+        if city is None:
+            raise HTTPException(status_code=400, detail="City not found")
+        location_aliases = await city_service.get_city_aliases(city_id)
+        resolved_location = city["name_uk"]
+    elif location:
+        city = await city_service.find_city_by_alias(location)
+        if city is not None:
+            resolved_city_id = city["id"]
+            resolved_location = city["name_uk"]
+            location_aliases = await city_service.get_city_aliases(city["id"])
+
     return VacancySearchFilters(
-        location=location,
+        city_id=resolved_city_id,
+        location=resolved_location,
+        location_aliases=location_aliases,
         company_id=company_id,
         employment_kind=employment_kind,
         work_format=work_format,

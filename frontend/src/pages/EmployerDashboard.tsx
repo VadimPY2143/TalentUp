@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
+import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import {
@@ -17,6 +18,7 @@ import {
   listCompanyVacancies,
   updateCompanyVacancy,
 } from "../api/vacancies"
+import type { CityOption } from "../types/city"
 import type { CompanyPayload, CompanyResponse } from "../types/company"
 import type { ApplicationResume, ApplicationStatus, JobApplication } from "../types/application"
 import type { Resume } from "../types/resume"
@@ -42,6 +44,7 @@ interface VacancyFormState {
   description: string
   responsibilities: string
   requirements: string
+  city_id: number | null
   location: string
   salary_min: string
   salary_max: string
@@ -74,6 +77,7 @@ const emptyVacancyForm: VacancyFormState = {
   description: "",
   responsibilities: "",
   requirements: "",
+  city_id: null,
   location: "",
   salary_min: "",
   salary_max: "",
@@ -116,6 +120,7 @@ const toVacancyPayload = (form: VacancyFormState): VacancyPayload => ({
   description: form.description.trim(),
   responsibilities: toText(form.responsibilities),
   requirements: toText(form.requirements),
+  city_id: form.city_id ?? undefined,
   location: toText(form.location),
   salary_min: form.salary_min ? Number(form.salary_min) : undefined,
   salary_max: form.salary_max ? Number(form.salary_max) : undefined,
@@ -148,6 +153,7 @@ const vacancyToForm = (vacancy: VacancyResponse): VacancyFormState => ({
   description: vacancy.description ?? "",
   responsibilities: vacancy.responsibilities ?? "",
   requirements: vacancy.requirements ?? "",
+  city_id: vacancy.city_id ?? null,
   location: vacancy.location ?? "",
   salary_min: vacancy.salary_min ? String(vacancy.salary_min) : "",
   salary_max: vacancy.salary_max ? String(vacancy.salary_max) : "",
@@ -236,6 +242,7 @@ const aiVacancyToForm = (vacancy: VacancyPayload): VacancyFormState => {
     description: vacancy.description ?? "",
     responsibilities: vacancy.responsibilities ?? "",
     requirements: vacancy.requirements ?? "",
+    city_id: vacancy.city_id ?? null,
     location: vacancy.location ?? "",
     salary_min: vacancy.salary_min ? String(vacancy.salary_min) : "",
     salary_max: vacancy.salary_max ? String(vacancy.salary_max) : "",
@@ -657,7 +664,7 @@ const EmployerDashboard = () => {
     setCompanyForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  const setVacancyField = (key: keyof VacancyFormState, value: string | boolean) => {
+  const setVacancyField = (key: keyof VacancyFormState, value: string | boolean | number | null) => {
     setVacancyForm((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -1681,11 +1688,17 @@ const EmployerDashboard = () => {
               </div>
 
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <input
+                <CityAutocomplete
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-500/60"
-                  placeholder="Локація"
+                  placeholder="Оберіть місто"
                   value={vacancyForm.location}
-                  onChange={(event) => setVacancyField("location", event.target.value)}
+                  onChange={(value) => setVacancyField("location", value)}
+                  onOptionSelect={(option: CityOption | null) => {
+                    setVacancyField("city_id", option?.id ?? null)
+                    if (option) {
+                      setVacancyField("location", option.name_uk)
+                    }
+                  }}
                   disabled={!company}
                 />
                 <div className="grid gap-3 sm:grid-cols-2">

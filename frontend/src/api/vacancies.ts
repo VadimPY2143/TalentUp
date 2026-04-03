@@ -8,6 +8,7 @@ import type {
 
 interface VacancySearchParams {
   query?: string
+  city_id?: number
   location?: string
   salary_min?: number
   salary_max?: number
@@ -50,6 +51,7 @@ const buildVacancySearchParams = (payload: VacancySearchParams) => {
   const params = new URLSearchParams()
 
   appendParam(params, "vacancy_name", payload.query)
+  appendParam(params, "city_id", payload.city_id)
   appendParam(params, "location", payload.location)
   appendParam(params, "salary_min", payload.salary_min)
   appendParam(params, "salary_max", payload.salary_max)

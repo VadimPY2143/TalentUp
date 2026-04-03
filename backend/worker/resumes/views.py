@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from cities.service import CityService
 from database import (
     companies_table,
     get_session,
@@ -38,6 +39,11 @@ async def create_resume(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(get_current_user),
 ):
+    city_service = CityService(session=session)
+    city = await city_service.resolve_city(city_id=resume.city_id, location=resume.location)
+    if resume.city_id is not None and city is None:
+        raise HTTPException(status_code=400, detail="City not found")
+
     stmt = (
         insert(resumes_table)
         .values(
@@ -46,7 +52,8 @@ async def create_resume(
             summary=resume.summary,
             desired_role=resume.desired_role,
             employment_type=ResumeService.normalize_employment_type(resume.employment_type),
-            location=resume.location,
+            city_id=city["id"] if city else None,
+            location=city["name_uk"] if city else resume.location,
             salary_min=resume.salary_min,
             salary_max=resume.salary_max,
             salary_currency=resume.salary_currency.value,
@@ -74,6 +81,16 @@ async def update_resume(
         values["employment_type"] = ResumeService.normalize_employment_type(values["employment_type"])
     if "salary_currency" in values and values["salary_currency"] is not None:
         values["salary_currency"] = values["salary_currency"].value
+    if "city_id" in values or "location" in values:
+        city_service = CityService(session=session)
+        city = await city_service.resolve_city(
+            city_id=values.get("city_id"),
+            location=values.get("location"),
+        )
+        if values.get("city_id") is not None and city is None:
+            raise HTTPException(status_code=400, detail="City not found")
+        values["city_id"] = city["id"] if city else None
+        values["location"] = city["name_uk"] if city else values.get("location")
     if not values:
         return {"status": "ok"}
 

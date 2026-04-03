@@ -8,15 +8,18 @@ import {
 import { useSearchParams } from "react-router-dom"
 import { createApplication, listMyApplications } from "../api/applications"
 import { listResumes } from "../api/resumes"
+import CityAutocomplete from "../components/CityAutocomplete"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
 import { fetchRecommendedVacancies, getVacancyById, searchVacancies } from "../api/vacancies"
 import type { ApplicationStatus, JobApplication } from "../types/application"
+import type { CityOption } from "../types/city"
 import type { Resume } from "../types/resume"
 import type { VacancyResponse } from "../types/vacancy"
 import { useAuth } from "../auth/useAuth"
 
 interface FilterState {
+  cityId: number | null
   location: string
   yearsExperienceMin: string
   yearsExperienceMax: string
@@ -39,6 +42,7 @@ interface FiltersPanelProps {
   onToggleEmployment: (value: string) => void
   onToggleWorkFormat: (value: string) => void
   onUpdateField: (field: keyof FilterState, value: string | boolean) => void
+  onCitySelect: (option: CityOption | null) => void
   onClear: () => void
 }
 
@@ -91,6 +95,7 @@ const workFormatOptions = [
 const currencyOptions = ["UAH", "USD", "EUR"] as const
 
 const initialFilters: FilterState = {
+  cityId: null,
   location: "",
   yearsExperienceMin: "",
   yearsExperienceMax: "",
@@ -240,6 +245,7 @@ const FiltersPanel = ({
   onToggleEmployment,
   onToggleWorkFormat,
   onUpdateField,
+  onCitySelect,
   onClear,
 }: FiltersPanelProps) => (
   <aside className="h-full rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
@@ -262,11 +268,12 @@ const FiltersPanel = ({
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Локація
         </label>
-        <input
+        <CityAutocomplete
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-          placeholder="Київ, Львів, Ukraine (Remote)"
+          placeholder="Оберіть місто"
           value={filters.location}
-          onChange={(event) => onUpdateField("location", event.target.value)}
+          onChange={(value) => onUpdateField("location", value)}
+          onOptionSelect={onCitySelect}
         />
       </div>
 
@@ -674,6 +681,7 @@ const JobSearchNew = () => {
   const searchParams = useMemo(
     () => ({
       query: query || undefined,
+      city_id: filters.cityId ?? undefined,
       location: filters.location.trim() || undefined,
       experience_years_min: parseNumber(filters.yearsExperienceMin),
       experience_years_max: parseNumber(filters.yearsExperienceMax),
@@ -787,6 +795,7 @@ const JobSearchNew = () => {
               (page - 1) * PAGE_SIZE,
               {
                 location: searchParams.location,
+                city_id: searchParams.city_id,
                 experience_years_min: searchParams.experience_years_min,
                 experience_years_max: searchParams.experience_years_max,
                 salary_min: searchParams.salary_min,
@@ -827,6 +836,15 @@ const JobSearchNew = () => {
 
   const updateFilters = (field: keyof FilterState, value: string | boolean) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
+    setPage(1)
+  }
+
+  const handleCitySelect = (option: CityOption | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      cityId: option?.id ?? null,
+      location: option?.name_uk ?? prev.location,
+    }))
     setPage(1)
   }
 
@@ -976,6 +994,7 @@ const JobSearchNew = () => {
             onToggleEmployment={toggleEmploymentType}
             onToggleWorkFormat={toggleWorkFormat}
             onUpdateField={updateFilters}
+            onCitySelect={handleCitySelect}
             onClear={clearFilters}
           />
 

@@ -8,7 +8,6 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
-    Index,
     Integer,
     MetaData,
     String,
@@ -45,6 +44,40 @@ async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
 )
 
 metadata = MetaData()
+
+cities_table = Table(
+    "cities",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("slug", String(255), unique=True, nullable=False),
+    Column("name_uk", String(255), nullable=False),
+    Column("name_en", String(255), nullable=False),
+    Column("oblast", String(255), nullable=False),
+    Column("normalized_name", String(255), nullable=False),
+    Column("is_active", Boolean, nullable=False, server_default="true"),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    Index("ix_cities_name_uk", "name_uk"),
+    Index("ix_cities_normalized_name", "normalized_name"),
+)
+
+city_aliases_table = Table(
+    "city_aliases",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("city_id", Integer, ForeignKey("cities.id", ondelete="CASCADE"), nullable=False),
+    Column("alias", String(255), nullable=False),
+    Column("normalized_alias", String(255), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint("city_id", "normalized_alias", name="uq_city_aliases_city_alias"),
+    Index("ix_city_aliases_normalized_alias", "normalized_alias"),
+)
 
 users_table = Table(
     'users',
@@ -98,6 +131,7 @@ resumes_table = Table(
     Column('summary', Text),
     Column('desired_role', String(255)),
     Column('employment_type', ARRAY(String(50))),
+    Column('city_id', Integer, ForeignKey('cities.id', ondelete='SET NULL')),
     Column('location', String(255)),
     Column('salary_min', Integer),
     Column('salary_max', Integer),
@@ -167,6 +201,7 @@ vacancies_table = Table(
     Column('requirements', Text),
     Column('is_active', Boolean, nullable=False, server_default='true'),
     Column('employment_type', ARRAY(String(50))),
+    Column('city_id', Integer, ForeignKey('cities.id', ondelete='SET NULL')),
     Column('location', String(255)),
     Column('salary_min', Integer),
     Column('salary_max', Integer),

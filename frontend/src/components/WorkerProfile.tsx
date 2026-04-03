@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import CityAutocomplete from "./CityAutocomplete"
 import {
   Star,
   Settings,
@@ -37,6 +38,7 @@ import {
   uploadResumePdf,
 } from "../api/resumes"
 import { listMyApplications } from "../api/applications"
+import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
 import Navbar from "./layout/Navbar"
@@ -52,6 +54,7 @@ interface CreateResumeFormState {
   title: string
   desired_role: string
   summary: string
+  city_id: number | null
   location: string
   employment_type: EmploymentType[]
   salary_min: string
@@ -65,6 +68,7 @@ const createResumeInitialForm: CreateResumeFormState = {
   title: "",
   desired_role: "",
   summary: "",
+  city_id: null,
   location: "",
   employment_type: ["Remote"],
   salary_min: "",
@@ -119,6 +123,7 @@ const resumeToForm = (resume: Resume): CreateResumeFormState => ({
   title: resume.title ?? "",
   desired_role: resume.desired_role ?? "",
   summary: resume.summary ?? "",
+  city_id: resume.city_id ?? null,
   location: resume.location ?? "",
   employment_type: resume.employment_type?.length ? [...resume.employment_type] : ["Remote"],
   salary_min: resume.salary_min !== undefined && resume.salary_min !== null ? String(resume.salary_min) : "",
@@ -298,6 +303,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         title: createResumeForm.title.trim(),
         desired_role: createResumeForm.desired_role.trim() || undefined,
         summary: createResumeForm.summary.trim() || undefined,
+        city_id: createResumeForm.city_id ?? undefined,
         location: createResumeForm.location.trim() || undefined,
         employment_type: createResumeForm.employment_type,
         salary_min: createResumeForm.salary_min ? Number(createResumeForm.salary_min) : undefined,
@@ -362,6 +368,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         title: editResumeForm.title.trim(),
         desired_role: editResumeForm.desired_role.trim() || undefined,
         summary: editResumeForm.summary.trim() || undefined,
+        city_id: editResumeForm.city_id ?? undefined,
         location: editResumeForm.location.trim() || undefined,
         employment_type: editResumeForm.employment_type,
         salary_min: editResumeForm.salary_min ? Number(editResumeForm.salary_min) : undefined,
@@ -831,11 +838,18 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                         value={createResumeForm.desired_role}
                         onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, desired_role: e.target.value }))}
                       />
-                      <input
+                      <CityAutocomplete
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
-                        placeholder="Локація"
+                        placeholder="Оберіть місто"
                         value={createResumeForm.location}
-                        onChange={(e) => setCreateResumeForm((prev) => ({ ...prev, location: e.target.value }))}
+                        onChange={(value) => setCreateResumeForm((prev) => ({ ...prev, location: value }))}
+                        onOptionSelect={(option: CityOption | null) =>
+                          setCreateResumeForm((prev) => ({
+                            ...prev,
+                            city_id: option?.id ?? null,
+                            location: option?.name_uk ?? prev.location,
+                          }))
+                        }
                       />
                       <input
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
@@ -1063,11 +1077,18 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                                   setEditResumeForm((prev) => ({ ...prev, desired_role: e.target.value }))
                                 }
                               />
-                              <input
+                              <CityAutocomplete
                                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"
-                                placeholder="Локація"
+                                placeholder="Оберіть місто"
                                 value={editResumeForm.location}
-                                onChange={(e) => setEditResumeForm((prev) => ({ ...prev, location: e.target.value }))}
+                                onChange={(value) => setEditResumeForm((prev) => ({ ...prev, location: value }))}
+                                onOptionSelect={(option: CityOption | null) =>
+                                  setEditResumeForm((prev) => ({
+                                    ...prev,
+                                    city_id: option?.id ?? null,
+                                    location: option?.name_uk ?? prev.location,
+                                  }))
+                                }
                               />
                               <input
                                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70"

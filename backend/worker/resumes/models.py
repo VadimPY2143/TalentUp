@@ -19,6 +19,7 @@ class Resume(BaseModel):
     summary: str | None = None
     desired_role: str | None = None
     employment_type: list[EmploymentType] = Field(min_length=1)
+    city_id: int | None = Field(default=None, ge=1)
     location: str | None = None
     salary_min: int | None = Field(default=None, ge=0)
     salary_max: int | None = Field(default=None, ge=0)
@@ -42,6 +43,7 @@ class ResumeUpdate(BaseModel):
     summary: str | None = None
     desired_role: str | None = None
     employment_type: list[EmploymentType] | None = None
+    city_id: int | None = Field(default=None, ge=1)
     location: str | None = None
     salary_min: int | None = Field(default=None, ge=0)
     salary_max: int | None = Field(default=None, ge=0)

@@ -48,7 +48,9 @@ WORK_FORMAT_ALIASES: dict[WorkFormat, tuple[str, ...]] = {
 
 
 class VacancySearchFilters(BaseModel):
+    city_id: int | None = Field(default=None, ge=1)
     location: str | None = Field(default=None, max_length=255)
+    location_aliases: list[str] | None = None
 
     company_id: int | None = Field(default=None, ge=1)
 
@@ -106,7 +108,16 @@ def _published_since(v: PublishedWithin) -> datetime:
 def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Select:
     conditions = []
 
-    if f.location:
+    if f.city_id is not None:
+        location_conditions = [vacancies_table.c.city_id == f.city_id]
+        aliases = [alias.strip() for alias in f.location_aliases or [] if alias.strip()]
+        if aliases:
+            location_conditions.extend(
+                vacancies_table.c.location.ilike(f"%{alias}%")
+                for alias in aliases
+            )
+        conditions.append(or_(*location_conditions))
+    elif f.location:
         conditions.append(vacancies_table.c.location.ilike(f"%{f.location.strip()}%"))
 
     if f.company_id is not None:

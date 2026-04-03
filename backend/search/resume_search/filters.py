@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from pydantic import BaseModel, Field, model_validator
-from sqlalchemy import Select, and_, func
+from sqlalchemy import Select, and_, func, or_
 
 from database import resumes_table
 
@@ -23,7 +23,9 @@ EMPLOYMENT_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
 
 
 class ResumeSearchFilters(BaseModel):
+    city_id: int | None = Field(default=None, ge=1)
     location: str | None = Field(default=None, max_length=255)
+    location_aliases: list[str] | None = None
     employment_type: list[str] | None = None
     salary_from: int | None = Field(default=None, ge=0)
     salary_to: int | None = Field(default=None, ge=0)
@@ -60,7 +62,16 @@ def _expand_employment_values(values: Iterable[str]) -> list[str]:
 def apply_resume_search_filters(stmt: Select, filters: ResumeSearchFilters) -> Select:
     conditions = [resumes_table.c.is_active.is_(True)]
 
-    if filters.location:
+    if filters.city_id is not None:
+        location_conditions = [resumes_table.c.city_id == filters.city_id]
+        aliases = [alias.strip() for alias in filters.location_aliases or [] if alias.strip()]
+        if aliases:
+            location_conditions.extend(
+                resumes_table.c.location.ilike(f"%{alias}%")
+                for alias in aliases
+            )
+        conditions.append(or_(*location_conditions))
+    elif filters.location:
         conditions.append(resumes_table.c.location.ilike(f"%{filters.location.strip()}%"))
 
     if filters.employment_type:

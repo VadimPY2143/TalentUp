@@ -12,6 +12,7 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
 
+from cities.views import router as cities_router
 from employer.company.views import router as company_router
 from employer.vacancy.views import router as vacancy_router
 from chat.views import router as chat_router
@@ -43,6 +44,7 @@ app.include_router(user_router)
 app.include_router(user_profile_router)
 app.include_router(worker_resumes_router)
 app.include_router(worker_applications_router)
+app.include_router(cities_router)
 app.include_router(company_router)
 app.include_router(vacancy_router)
 app.include_router(chat_router)
