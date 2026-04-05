@@ -18,6 +18,7 @@ from search.resume_search.views import router as search_router
 from users.crud import router as user_router
 from users.oauth import router as oauth_router
 from worker.crud import router as worker_router
+from analytics.crud import router as analytics_router
 
 
 app.add_middleware(
@@ -42,6 +43,7 @@ app.include_router(company_router)
 app.include_router(vacancy_router)
 app.include_router(search_router)
 app.include_router(oauth_router)
+app.include_router(analytics_router)
 
 
 # 🔹 Запуск

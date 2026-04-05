@@ -240,6 +240,26 @@ application_history_table = Table(
 )
 
 
+ANALYTICS_EVENT_TYPES = ("profile_view", "resume_view", "contact_click")
+analytics_event_type_enum = Enum(*ANALYTICS_EVENT_TYPES, name="analytics_event_type")
+
+analytics_events_table = Table(
+    "analytics_events",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("actor_user_id", Integer, ForeignKey("users.id"), nullable=False),
+    Column("target_user_id", Integer, ForeignKey("users.id")),
+    Column("target_resume_id", Integer, ForeignKey("resumes.id")),
+    Column("event_type", analytics_event_type_enum, nullable=False),
+    Column("occurred_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Index("ix_analytics_events_occurred_at", "occurred_at"),
+    Index("ix_analytics_events_event_type", "event_type"),
+    Index("ix_analytics_events_actor_user_id", "actor_user_id"),
+    Index("ix_analytics_events_target_user_id", "target_user_id"),
+    Index("ix_analytics_events_target_resume_id", "target_resume_id"),
+)
+
+
 
 
 async def get_session() -> AsyncSession:

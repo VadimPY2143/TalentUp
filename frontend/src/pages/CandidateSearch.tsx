@@ -13,6 +13,7 @@ import {
   saveCandidateResume,
   searchCandidates,
 } from "../api/candidates"
+import { trackAnalyticsEvent } from "../api/analytics"
 import { apiFetch } from "../api/client"
 import { listCompanies } from "../api/companies"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
@@ -727,6 +728,7 @@ const CandidateSearch = () => {
   const handleViewResume = async (candidateId: number) => {
     setActionError(null)
     try {
+      trackAnalyticsEvent({ event_type: "resume_view", target_resume_id: candidateId }).catch(() => null)
       await openCandidateResume(candidateId)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"
