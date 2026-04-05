@@ -34,7 +34,6 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
 def _utc_now() -> datetime:
-    # DB uses timezone-aware columns; UTC naive is still fine for filtering (asyncpg will treat as UTC).
     return datetime.utcnow()
 
 
@@ -73,29 +72,28 @@ async def create_event(
         target_user_id = int(owner_id)
 
     if target_user_id is not None and int(target_user_id) == actor_user_id:
-        # Ignore self-events.
         return AnalyticsEventOut(status="ok", inserted=False)
 
-    # Cheap de-dup in a short window to avoid inflating counts on refreshes.
-    window_start = _utc_now() - timedelta(minutes=10)
-    exists_stmt = (
-        select(analytics_events_table.c.id)
-        .where(
-            analytics_events_table.c.actor_user_id == actor_user_id,
-            analytics_events_table.c.event_type == payload.event_type.value,
-            analytics_events_table.c.target_user_id.is_(target_user_id)
-            if target_user_id is None
-            else analytics_events_table.c.target_user_id == int(target_user_id),
-            analytics_events_table.c.target_resume_id.is_(target_resume_id)
-            if target_resume_id is None
-            else analytics_events_table.c.target_resume_id == int(target_resume_id),
-            analytics_events_table.c.occurred_at >= window_start,
+    if payload.event_type != AnalyticsEventType.resume_view:
+        window_start = _utc_now() - timedelta(minutes=10)
+        exists_stmt = (
+            select(analytics_events_table.c.id)
+            .where(
+                analytics_events_table.c.actor_user_id == actor_user_id,
+                analytics_events_table.c.event_type == payload.event_type.value,
+                analytics_events_table.c.target_user_id.is_(target_user_id)
+                if target_user_id is None
+                else analytics_events_table.c.target_user_id == int(target_user_id),
+                analytics_events_table.c.target_resume_id.is_(target_resume_id)
+                if target_resume_id is None
+                else analytics_events_table.c.target_resume_id == int(target_resume_id),
+                analytics_events_table.c.occurred_at >= window_start,
+            )
+            .limit(1)
         )
-        .limit(1)
-    )
-    exists = (await session.execute(exists_stmt)).scalar_one_or_none()
-    if exists is not None:
-        return AnalyticsEventOut(status="ok", inserted=False)
+        exists = (await session.execute(exists_stmt)).scalar_one_or_none()
+        if exists is not None:
+            return AnalyticsEventOut(status="ok", inserted=False)
 
     await session.execute(
         insert(analytics_events_table).values(
@@ -119,13 +117,7 @@ async def dashboard(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["worker"])),
 ) -> AnalyticsDashboardOut:
-    """
-    A + C for worker:
-    - Overview KPIs
-    - Timeseries (daily): profile_views, resume_views, applications_sent
-    - Funnel: profile_views -> resume_views -> applications_sent -> viewed -> accepted
-    - Applications table (last N days)
-    """
+
     days = _clamp_days(days)
     to_dt = _utc_now()
     from_dt = to_dt - timedelta(days=days)
@@ -133,7 +125,6 @@ async def dashboard(
 
     resume_ids = await _get_worker_resume_ids(session=session, user_id=worker_user_id)
 
-    # Views
     pv_stmt = select(
         func.count(analytics_events_table.c.id).label("total"),
         func.count(func.distinct(analytics_events_table.c.actor_user_id)).label("uniq"),
@@ -191,7 +182,6 @@ async def dashboard(
         applications_by_status=apps_by_status,
     )
 
-    # Timeseries
     ts_map: dict[date, AnalyticsTimeseriesPointOut] = {}
 
     def _get_point(d: date) -> AnalyticsTimeseriesPointOut:
@@ -265,16 +255,13 @@ async def dashboard(
 
     # Funnel (simple, based on counts in range)
     apps_viewed = int(apps_by_status.get("viewed", 0))
-    apps_accepted = int(apps_by_status.get("accepted", 0))
     funnel = [
         AnalyticsFunnelStepOut(step="profile_views", count=overview.profile_views),
         AnalyticsFunnelStepOut(step="resume_views", count=overview.resume_views),
         AnalyticsFunnelStepOut(step="applications_sent", count=overview.applications_sent),
         AnalyticsFunnelStepOut(step="applications_viewed", count=apps_viewed),
-        AnalyticsFunnelStepOut(step="applications_accepted", count=apps_accepted),
     ]
 
-    # Applications table (for analytics page; richer endpoint exists at /applications/my too)
     apps_stmt = (
         select(
             job_applications_table.c.id,
@@ -314,4 +301,3 @@ async def dashboard(
         funnel=funnel,
         applications=applications,
     )
-

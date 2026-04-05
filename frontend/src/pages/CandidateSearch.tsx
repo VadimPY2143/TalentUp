@@ -763,7 +763,7 @@ const CandidateSearch = () => {
     }
   }
 
-  const handleViewResume = (candidate: CandidateSearchItem) => {
+  const handleViewResume = async (candidate: CandidateSearchItem) => {
     const resume: ChatResumeResponse = {
       id: candidate.id,
       user_id: candidate.user_id ?? 0,
@@ -785,6 +785,13 @@ const CandidateSearch = () => {
       updated_at: candidate.updated_at ?? candidate.created_at ?? new Date().toISOString(),
     }
     setOpenedResume(resume)
+    if (candidate.id > 0) {
+      try {
+        await trackAnalyticsEvent({ event_type: "resume_view", target_resume_id: candidate.id })
+      } catch {
+        // Analytics must not block resume modal UX.
+      }
+    }
   }
 
   const handleOpenResumePdf = async () => {
@@ -793,7 +800,6 @@ const CandidateSearch = () => {
     }
     setActionError(null)
     try {
-      trackAnalyticsEvent({ event_type: "resume_view", target_resume_id: openedResume.id }).catch(() => null)
       await openCandidateResume(openedResume.id)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"

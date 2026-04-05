@@ -423,3 +423,7 @@
 2026-04-05 12:59:36 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-04-05 13:01:57 - moodshare - ERROR - JWT verification error: Not enough segments
 2026-04-05 13:42:16 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-05 14:44:15 - moodshare - INFO - User 6 connected to chat 8
+2026-04-05 14:44:17 - moodshare - INFO - User 6 disconnected from chat 8
+2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.

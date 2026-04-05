@@ -42,6 +42,7 @@ import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
 import Navbar from "./layout/Navbar"
+import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
 
 interface WorkerProfileProps {
@@ -429,6 +430,10 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
     navigate("/")
   }
 
+  const handleMenuItemClick = (section: Section) => {
+    setActiveSection(section)
+  }
+
   const menuItems = [
     { id: "overview", label: "Огляд", icon: BarChart3 },
     { id: "resumes", label: "Мої резюме", icon: FileStack },
@@ -474,7 +479,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveSection(item.id as Section)}
+                onClick={() => handleMenuItemClick(item.id as Section)}
                 className={`flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-slate-50 ${
                   activeSection === item.id
                     ? "border-l-4 border-orange-500 bg-orange-50/50"
@@ -1327,9 +1332,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                   <p className="mt-2 text-white/80">Статистика переглядів профілю та відгуків</p>
                 </div>
               </section>
-              <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут буде аналітика...</p>
-              </section>
+              <AnalyticsDashboard embedded hideLeadCard />
             </div>
           ) : activeSection === "settings" ? (
             <div className="space-y-6">
