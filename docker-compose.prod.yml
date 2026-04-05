@@ -48,6 +48,10 @@ services:
       REDIS_URL: redis://redis:6379/0
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      VACANCY_DIGEST_INTERVAL_MINUTES: ${VACANCY_DIGEST_INTERVAL_MINUTES:-10080}
+      VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS: ${VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS:-1800}
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
       RESUME_UPLOAD_DIR: /app/backend/uploads/resumes
       MAX_PDF_SIZE_BYTES: ${MAX_PDF_SIZE_BYTES:-5242880}
@@ -56,6 +60,12 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
     expose:
       - "8000"
     volumes:
@@ -63,6 +73,76 @@ services:
     command: >
       sh -c "alembic upgrade head &&
       uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: talentup-celery-worker
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      VACANCY_DIGEST_INTERVAL_MINUTES: ${VACANCY_DIGEST_INTERVAL_MINUTES:-10080}
+      VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS: ${VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS:-1800}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+    volumes:
+      - backend_uploads:/app/backend/uploads
+    command: >
+      celery -A worker.messages.celery_app.celery_app worker --pool=solo --loglevel=INFO
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: talentup-celery-beat
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      VACANCY_DIGEST_INTERVAL_MINUTES: ${VACANCY_DIGEST_INTERVAL_MINUTES:-10080}
+      VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS: ${VACANCY_DIGEST_DISPATCH_INTERVAL_SECONDS:-1800}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+    volumes:
+      - backend_uploads:/app/backend/uploads
+    command: >
+      celery -A worker.messages.celery_app.celery_app beat --loglevel=INFO --schedule=/tmp/celerybeat-schedule
 
   redis:
     image: redis:7-alpine

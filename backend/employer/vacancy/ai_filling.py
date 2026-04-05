@@ -18,7 +18,7 @@ Hard rules:
 2) Language: same as user request Ukrainian/English (except enum-like fields).
 3) Return only one valid JSON object. No markdown, no comments, no extra text.
 4) All fields must be filled with meaningful values. Never use null, empty strings, or empty arrays.
-5) If some details are missing, infer realistic values from the role and context.
+5) If some details are missing, infer realistic values from the role and context. Every field must be filled.
 6) Salary must be monthly (for 1 month), integer values only.
 7) Salary range must be logical: salary_min <= salary_max.
 8) expires_at must be valid ISO datetime in the future.
@@ -34,6 +34,7 @@ Field quality requirements:
 - salary_currency: use "UAH" for Ukrainian market unless user explicitly asks another currency.
 - experience_years_min / experience_years_max: realistic and consistent with title.
 - work_format: choose from "Remote", "Hybrid", "Office".
+
 """.strip()
 
 

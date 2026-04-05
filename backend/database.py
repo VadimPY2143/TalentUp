@@ -9,6 +9,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Integer,
+    JSON,
     MetaData,
     String,
     Table,
@@ -226,6 +227,57 @@ vacancies_search_history_table = Table(
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('user_id', Integer, ForeignKey('users.id'), nullable=False),
     Column('search_text', String(255), nullable=False),
+)
+
+vacancy_subscriptions_table = Table(
+    "vacancy_subscriptions",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("email", String(255), nullable=False),
+    Column("search_text", String(255), nullable=False),
+    Column("filters", JSON, nullable=False),
+    Column("is_active", Boolean, nullable=False, server_default="true"),
+    Column("next_run_at", DateTime(timezone=True), nullable=False),
+    Column("last_processed_at", DateTime(timezone=True)),
+    Column("last_sent_at", DateTime(timezone=True)),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    Index("ix_vacancy_subscriptions_user_id", "user_id"),
+    Index("ix_vacancy_subscriptions_due", "is_active", "next_run_at"),
+)
+
+vacancy_subscription_deliveries_table = Table(
+    "vacancy_subscription_deliveries",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column(
+        "subscription_id",
+        Integer,
+        ForeignKey("vacancy_subscriptions.id", ondelete="CASCADE"),
+        nullable=False,
+    ),
+    Column("period_start", DateTime(timezone=True), nullable=False),
+    Column("period_end", DateTime(timezone=True), nullable=False),
+    Column("status", String(20), nullable=False, server_default="pending"),
+    Column("vacancies_count", Integer, nullable=False, server_default="0"),
+    Column("error", Text),
+    Column("sent_at", DateTime(timezone=True)),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint(
+        "subscription_id",
+        "period_start",
+        "period_end",
+        name="uq_vacancy_subscription_deliveries_period",
+    ),
+    Index("ix_vacancy_subscription_deliveries_subscription_id", "subscription_id"),
+    Index("ix_vacancy_subscription_deliveries_status", "status"),
 )
 
 saved_resumes_table = Table(

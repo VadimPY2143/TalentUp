@@ -22,6 +22,7 @@ from users.crud import router as user_router
 from users.oauth import router as oauth_router
 from users.views import router as user_profile_router
 from worker.applications.views import router as worker_applications_router
+from worker.messages.views import router as worker_messages_router
 from worker.resumes.views import router as worker_resumes_router
 from analytics.crud import router as analytics_router
 
@@ -45,6 +46,7 @@ app.include_router(user_router)
 app.include_router(user_profile_router)
 app.include_router(worker_resumes_router)
 app.include_router(worker_applications_router)
+app.include_router(worker_messages_router)
 app.include_router(cities_router)
 app.include_router(company_router)
 app.include_router(vacancy_router)

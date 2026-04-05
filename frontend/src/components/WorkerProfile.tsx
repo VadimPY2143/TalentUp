@@ -42,6 +42,7 @@ import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
 import Navbar from "./layout/Navbar"
+import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
 
 interface WorkerProfileProps {
   userEmail?: string
@@ -1313,12 +1314,10 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative">
                   <h1 className="text-3xl font-bold">Сповіщення</h1>
-                  <p className="mt-2 text-white/80">Нові вакансії та відповіді роботодавців</p>
+                  <p className="mt-2 text-white/80">Керуйте email-підписками на нові вакансії</p>
                 </div>
               </section>
-              <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть ваші сповіщення...</p>
-              </section>
+              <VacancySubscriptionsPanel userEmail={userEmail} />
             </div>
           ) : activeSection === "analytics" ? (
             <div className="space-y-6">
