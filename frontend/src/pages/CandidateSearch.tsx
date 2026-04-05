@@ -17,6 +17,7 @@ import {
   saveCandidateResume,
   searchCandidates,
 } from "../api/candidates"
+import { trackAnalyticsEvent } from "../api/analytics"
 import { listCompanies } from "../api/companies"
 import { listCompanyVacancies } from "../api/vacancies"
 import type { ChatResumeResponse } from "../types/chat"
@@ -792,6 +793,7 @@ const CandidateSearch = () => {
     }
     setActionError(null)
     try {
+      trackAnalyticsEvent({ event_type: "resume_view", target_resume_id: openedResume.id }).catch(() => null)
       await openCandidateResume(openedResume.id)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"
