@@ -8,8 +8,10 @@ import CandidateSearch from "./pages/CandidateSearch"
 import JobSearch from "./pages/JobSearch"
 import JobSearchNew from "./pages/JobSearchNew"
 import Messages from "./pages/Messages"
+import Analytics from "./pages/Analytics"
 import OAuthCallback from "./pages/OAuthCallback"
 import ProtectedRoute from "./routes/ProtectedRoute"
+import RoleRoute from "./routes/RoleRoute"
 import Footer from "./components/layout/Footer"
 
 const App = () => {
@@ -26,9 +28,14 @@ const App = () => {
               <Route path="/jobs" element={<JobSearchNew />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/candidates" element={<CandidateSearch />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/jobs-old" element={<JobSearch />} />
+                <Route element={<RoleRoute allowed={["employer"]} />}>
+                  <Route path="/candidates" element={<CandidateSearch />} />
+                </Route>
+                <Route element={<RoleRoute allowed={["worker"]} />}>
+                  <Route path="/analytics" element={<Analytics />} />
+                </Route>
               </Route>
             </Routes>
           </div>
