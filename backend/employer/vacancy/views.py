@@ -1,6 +1,8 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, insert, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cities.service import CityService
@@ -32,15 +34,35 @@ async def _ensure_owned_company(
 async def list_company_vacancies(
     company_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
+    current_user: dict = Depends(require_roles(["employer", "worker"])),
 ) -> list[VacancyResponse]:
-    await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
+    if current_user["role"] == "employer":
+        await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
+        stmt = (
+            select(vacancies_table)
+            .where(vacancies_table.c.company_id == company_id)
+            .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())
+        )
+    else:
+        company_stmt = select(companies_table.c.id).where(companies_table.c.id == company_id)
+        company_exists = (await session.execute(company_stmt)).scalar_one_or_none()
+        if company_exists is None:
+            raise HTTPException(status_code=404, detail="Company not found")
 
-    stmt = (
-        select(vacancies_table)
-        .where(vacancies_table.c.company_id == company_id)
-        .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())
-    )
+        now_utc = datetime.now(timezone.utc)
+        stmt = (
+            select(vacancies_table)
+            .where(vacancies_table.c.company_id == company_id)
+            .where(vacancies_table.c.is_active.is_(True))
+            .where(
+                or_(
+                    vacancies_table.c.expires_at.is_(None),
+                    vacancies_table.c.expires_at > now_utc,
+                )
+            )
+            .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())
+        )
+
     result = await session.execute(stmt)
     rows = result.mappings().all()
     return [VacancyResponse(**row) for row in rows]

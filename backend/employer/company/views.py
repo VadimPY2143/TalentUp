@@ -55,12 +55,11 @@ async def list_my_companies(
 async def get_company_by_id(
     company_id: int,
     session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["employer"])),
+    current_user: dict = Depends(require_roles(["employer", "worker"])),
 ) -> CompanyResponse:
-    stmt = select(companies_table).where(
-        companies_table.c.id == company_id,
-        companies_table.c.user_id == current_user["id"],
-    )
+    stmt = select(companies_table).where(companies_table.c.id == company_id)
+    if current_user["role"] == "employer":
+        stmt = stmt.where(companies_table.c.user_id == current_user["id"])
     result = await session.execute(stmt)
     row = result.mappings().first()
     if not row:
