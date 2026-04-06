@@ -427,3 +427,24 @@
 2026-04-05 14:44:17 - moodshare - INFO - User 6 disconnected from chat 8
 2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-06 01:34:24 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:30 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:35 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:40 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:45 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:50 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:34:55 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:00 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:05 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:10 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:15 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:20 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:25 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:30 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:35 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:41 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:46 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:51 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:35:56 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:36:01 - moodshare - ERROR - Redis pubsub listener error: Error 22 connecting to localhost:6379. The remote computer refused the network connection.
+2026-04-06 01:36:02 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.

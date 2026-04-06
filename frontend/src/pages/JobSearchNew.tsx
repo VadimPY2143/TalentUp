@@ -5,8 +5,9 @@ import {
   useState,
   type FormEvent,
 } from "react"
-import { useSearchParams } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { createApplication, listMyApplications } from "../api/applications"
+import { getCompanyById } from "../api/companies"
 import { listResumes } from "../api/resumes"
 import CityAutocomplete from "../components/CityAutocomplete"
 import Navbar from "../components/layout/Navbar"
@@ -14,6 +15,7 @@ import VacancyModal from "../components/VacancyModal"
 import { fetchRecommendedVacancies, getVacancyById, searchVacancies } from "../api/vacancies"
 import type { ApplicationStatus, JobApplication } from "../types/application"
 import type { CityOption } from "../types/city"
+import type { CompanyResponse } from "../types/company"
 import type { Resume } from "../types/resume"
 import type { VacancyResponse } from "../types/vacancy"
 import { useAuth } from "../auth/useAuth"
@@ -54,6 +56,7 @@ interface ResultsHeaderProps {
 
 interface VacancyCardProps {
   vacancy: VacancyResponse
+  companyName: string
   onViewDetails: () => void
   onApply: () => void
   isApplyDisabled: boolean
@@ -411,6 +414,7 @@ const ResultsHeader = ({
 
 const VacancyCard = ({
   vacancy,
+  companyName,
   onViewDetails,
   onApply,
   isApplyDisabled,
@@ -432,7 +436,12 @@ const VacancyCard = ({
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <h3 className="text-base font-semibold text-slate-900">{vacancy.title}</h3>
-            <p className="mt-1 text-sm text-slate-600">Компанія</p>
+            <Link
+              to={`/companies/${vacancy.company_id}`}
+              className="mt-1 inline-flex text-sm font-semibold text-slate-600 transition hover:text-orange-600"
+            >
+              {companyName}
+            </Link>
           </div>
           <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
             {formatExperience(vacancy.experience_years_min, vacancy.experience_years_max)}
@@ -650,6 +659,7 @@ const JobSearchNew = () => {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [vacancies, setVacancies] = useState<VacancyResponse[]>([])
+  const [companyById, setCompanyById] = useState<Record<number, CompanyResponse>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -833,6 +843,60 @@ const JobSearchNew = () => {
       controller.abort()
     }
   }, [hasQuery, isAuthenticated, page, role, searchParams, searchTrigger])
+
+  useEffect(() => {
+    if (!isAuthenticated || role !== "worker") {
+      setCompanyById({})
+      return
+    }
+
+    const missingCompanyIds = Array.from(
+      new Set(
+        vacancies
+          .map((vacancy) => vacancy.company_id)
+          .filter((companyId) => !companyById[companyId]),
+      ),
+    )
+
+    if (!missingCompanyIds.length) {
+      return
+    }
+
+    let mounted = true
+    void (async () => {
+      const loadedCompanies = await Promise.all(
+        missingCompanyIds.map(async (companyId) => {
+          try {
+            return await getCompanyById(companyId)
+          } catch {
+            return null
+          }
+        }),
+      )
+      if (!mounted) {
+        return
+      }
+
+      const fetchedCompanies = loadedCompanies.filter(
+        (company): company is CompanyResponse => company !== null,
+      )
+      if (!fetchedCompanies.length) {
+        return
+      }
+
+      setCompanyById((prev) => {
+        const next = { ...prev }
+        for (const company of fetchedCompanies) {
+          next[company.id] = company
+        }
+        return next
+      })
+    })()
+
+    return () => {
+      mounted = false
+    }
+  }, [companyById, isAuthenticated, role, vacancies])
 
   const updateFilters = (field: keyof FilterState, value: string | boolean) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
@@ -1034,6 +1098,7 @@ const JobSearchNew = () => {
                   <VacancyCard
                     key={vacancy.id}
                     vacancy={vacancy}
+                    companyName={companyById[vacancy.company_id]?.name ?? "Company"}
                     onViewDetails={() => handleViewDetails(vacancy)}
                     onApply={() => openApplyModal(vacancy)}
                     isApplyDisabled={Boolean(existingApplication)}
