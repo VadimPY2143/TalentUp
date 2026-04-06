@@ -18,7 +18,7 @@ from database import (
 from users.auth import get_current_user
 from users.define_roles import require_roles
 
-from .schemas import (
+from .models import (
     AnalyticsDashboardOut,
     AnalyticsEventIn,
     AnalyticsEventOut,
@@ -53,17 +53,11 @@ async def create_event(
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
 ) -> AnalyticsEventOut:
-    """
-    Minimal event collector for analytics.
-
-    Frontend should call this when an employer views a worker profile/resume or clicks contact.
-    """
     actor_user_id = int(current_user["id"])
     target_user_id = payload.target_user_id
     target_resume_id = payload.target_resume_id
 
     if payload.event_type == AnalyticsEventType.resume_view:
-        # Resolve resume owner to keep both dimensions searchable.
         stmt = select(resumes_table.c.user_id).where(resumes_table.c.id == target_resume_id)
         res = await session.execute(stmt)
         owner_id = res.scalar_one_or_none()
@@ -150,7 +144,6 @@ async def dashboard(
     else:
         rv_row = {"total": 0, "uniq": 0}
 
-    # Applications
     apps_total_stmt = select(func.count(job_applications_table.c.id)).where(
         job_applications_table.c.user_id == worker_user_id,
         job_applications_table.c.created_at >= from_dt,
@@ -245,7 +238,6 @@ async def dashboard(
         d = r["d"].date() if isinstance(r["d"], datetime) else r["d"]
         _get_point(d).applications_sent = int(r["cnt"])
 
-    # Fill missing days so UI can render a continuous chart.
     all_days: list[AnalyticsTimeseriesPointOut] = []
     cursor = from_dt.date()
     end_day = (to_dt - timedelta(seconds=1)).date()
@@ -253,7 +245,6 @@ async def dashboard(
         all_days.append(ts_map.get(cursor) or AnalyticsTimeseriesPointOut(day=cursor))
         cursor = cursor + timedelta(days=1)
 
-    # Funnel (simple, based on counts in range)
     apps_viewed = int(apps_by_status.get("viewed", 0))
     funnel = [
         AnalyticsFunnelStepOut(step="profile_views", count=overview.profile_views),

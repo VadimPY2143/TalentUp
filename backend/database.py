@@ -395,11 +395,24 @@ analytics_events_table = Table(
     Column("target_resume_id", Integer, ForeignKey("resumes.id")),
     Column("event_type", analytics_event_type_enum, nullable=False),
     Column("occurred_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
-    Index("ix_analytics_events_occurred_at", "occurred_at"),
-    Index("ix_analytics_events_event_type", "event_type"),
-    Index("ix_analytics_events_actor_user_id", "actor_user_id"),
-    Index("ix_analytics_events_target_user_id", "target_user_id"),
-    Index("ix_analytics_events_target_resume_id", "target_resume_id"),
+    Index(
+        "ix_analytics_events_type_target_user_occurred",
+        "event_type",
+        "target_user_id",
+        "occurred_at",
+    ),
+    Index(
+        "ix_analytics_events_type_target_resume_occurred",
+        "event_type",
+        "target_resume_id",
+        "occurred_at",
+    ),
+    Index(
+        "ix_analytics_events_actor_type_occurred",
+        "actor_user_id",
+        "event_type",
+        "occurred_at",
+    ),
 )
 
 
