@@ -10,6 +10,7 @@ import JobSearchNew from "./pages/JobSearchNew"
 import Messages from "./pages/Messages"
 import Analytics from "./pages/Analytics"
 import OAuthCallback from "./pages/OAuthCallback"
+import CompanyProfile from "./pages/CompanyProfile"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import RoleRoute from "./routes/RoleRoute"
 import Footer from "./components/layout/Footer"
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/jobs" element={<JobSearchNew />} />
+              <Route path="/companies/:companyId" element={<CompanyProfile />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/messages" element={<Messages />} />
