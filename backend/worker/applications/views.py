@@ -57,12 +57,12 @@ async def create_application(
             raise HTTPException(status_code=400, detail="Selected resume is not active")
 
         duplicate_stmt = select(job_applications_table.c.id).where(
-            job_applications_table.c.user_id == current_user["id"],
             job_applications_table.c.vacancy_id == payload.vacancy_id,
+            job_applications_table.c.resume_id == payload.resume_id,
         )
         duplicate = (await session.execute(duplicate_stmt)).scalar_one_or_none()
         if duplicate is not None:
-            raise HTTPException(status_code=409, detail="You have already applied to this vacancy")
+            raise HTTPException(status_code=409, detail="You have already applied with this resume")
 
         try:
             stmt = (
@@ -90,10 +90,10 @@ async def create_application(
             original_exc = getattr(exc, "orig", None)
             constraint_name = getattr(original_exc, "constraint_name", None)
             msg = str(original_exc or exc)
-            if constraint_name == "uq_job_applications_user_vacancy" or "uq_job_applications_user_vacancy" in msg:
+            if constraint_name == "uq_job_applications_vacancy_resume" or "uq_job_applications_vacancy_resume" in msg:
                 raise HTTPException(
                     status_code=409,
-                    detail="You have already applied to this vacancy",
+                    detail="You have already applied with this resume",
                 ) from exc
             raise
         await session.commit()

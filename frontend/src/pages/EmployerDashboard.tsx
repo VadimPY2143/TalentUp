@@ -4,6 +4,11 @@ import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
 import {
+  getCandidateMatchingJob,
+  getLatestCandidateMatchingJob,
+  startCandidateMatching,
+} from "../api/candidateMatching"
+import {
   getApplicationResume,
   listEmployerApplications,
   openApplicationResumePdf,
@@ -21,6 +26,11 @@ import {
 import type { CityOption } from "../types/city"
 import type { CompanyPayload, CompanyResponse } from "../types/company"
 import type { ApplicationResume, ApplicationStatus, JobApplication } from "../types/application"
+import type {
+  CandidateMatchJobResponse,
+  CandidateMatchJobStatus,
+  CandidateMatchResultItem,
+} from "../types/candidateMatching"
 import type { Resume } from "../types/resume"
 import type { VacancyPayload, VacancyResponse } from "../types/vacancy"
 
@@ -94,6 +104,7 @@ const currencyOptions = ["UAH", "USD"] as const
 const employmentTypeOptions = ["Full-time", "Part-time"] as const
 const workFormatOptions = ["Remote", "Hybrid", "Office"] as const
 const VACANCIES_PER_PAGE = 3
+const APPLICATIONS_PER_PAGE = 3
 
 const toText = (value: string) => {
   const normalized = value.trim()
@@ -296,6 +307,20 @@ const applicationStatusClassName: Record<ApplicationStatus, string> = {
   chat_started: "border-violet-200 bg-violet-50 text-violet-700",
 }
 
+const candidateMatchStatusLabel: Record<CandidateMatchJobStatus, string> = {
+  pending: "У черзі",
+  running: "Обробка",
+  done: "Готово",
+  failed: "Помилка",
+}
+
+const candidateMatchStatusClassName: Record<CandidateMatchJobStatus, string> = {
+  pending: "border-amber-200 bg-amber-50 text-amber-700",
+  running: "border-sky-200 bg-sky-50 text-sky-700",
+  done: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  failed: "border-rose-200 bg-rose-50 text-rose-700",
+}
+
 const hasValue = (value: unknown): boolean => {
   if (typeof value === "number") {
     return true
@@ -406,6 +431,16 @@ const EmployerDashboard = () => {
   const [isEmployerApplicationsLoading, setIsEmployerApplicationsLoading] = useState(false)
   const [employerApplicationsError, setEmployerApplicationsError] = useState<string | null>(null)
   const [applicationsVacancyFilter, setApplicationsVacancyFilter] = useState<number | null>(null)
+  const [showCandidateMatchPanel, setShowCandidateMatchPanel] = useState(false)
+  const [candidateSectionsView, setCandidateSectionsView] = useState<"ai" | "all">("all")
+  const [applicationsPage, setApplicationsPage] = useState(1)
+  const [matchRequestedLimit, setMatchRequestedLimit] = useState(10)
+  const [isCandidateMatchingStarting, setIsCandidateMatchingStarting] = useState(false)
+  const [isCandidateMatchingLoading, setIsCandidateMatchingLoading] = useState(false)
+  const [candidateMatchingError, setCandidateMatchingError] = useState<string | null>(null)
+  const [candidateMatchingJob, setCandidateMatchingJob] = useState<CandidateMatchJobResponse | null>(null)
+  const [matchedResumeOpeningId, setMatchedResumeOpeningId] = useState<number | null>(null)
+  const [matchedChatStartingId, setMatchedChatStartingId] = useState<number | null>(null)
   const [expandedApplicationId, setExpandedApplicationId] = useState<number | null>(null)
   const [applicationResumeLoadingId, setApplicationResumeLoadingId] = useState<number | null>(null)
   const [applicationStatusUpdatingId, setApplicationStatusUpdatingId] = useState<number | null>(null)
@@ -419,6 +454,7 @@ const EmployerDashboard = () => {
   const [isAIFilling, setIsAIFilling] = useState(false)
   const [showAIPromptEditor, setShowAIPromptEditor] = useState(false)
   const aiTextareaRef = useRef<HTMLTextAreaElement | null>(null)
+  const candidateMatchingPollingRef = useRef(false)
 
   useEffect(() => {
     if (!selectedApplicationResume) {
@@ -489,11 +525,117 @@ const EmployerDashboard = () => {
       setEmployerApplicationsError(null)
       const data = await listEmployerApplications(vacancyId)
       setEmployerApplications(data)
+      setApplicationsPage(1)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося завантажити відгуки"
       setEmployerApplicationsError(message)
     } finally {
       setIsEmployerApplicationsLoading(false)
+    }
+  }
+
+  const loadLatestCandidateMatching = async (vacancyId: number) => {
+    try {
+      setIsCandidateMatchingLoading(true)
+      setCandidateMatchingError(null)
+      const job = await getLatestCandidateMatchingJob(vacancyId)
+      setCandidateMatchingJob(job)
+    } catch (err) {
+      const statusCode = (err as { status?: number } | null)?.status
+      if (statusCode === 404) {
+        setCandidateMatchingJob(null)
+        setCandidateMatchingError(null)
+      } else {
+        const message = err instanceof Error ? err.message : "Не вдалося завантажити AI матчинг"
+        setCandidateMatchingError(message)
+      }
+    } finally {
+      setIsCandidateMatchingLoading(false)
+    }
+  }
+
+  const handleStartCandidateMatching = async () => {
+    if (!applicationsVacancyFilter) {
+      setCandidateMatchingError("Оберіть вакансію у фільтрі, щоб запустити матчинг")
+      return
+    }
+
+    try {
+      setShowCandidateMatchPanel(true)
+      setCandidateSectionsView("ai")
+      setCandidateMatchingError(null)
+      setIsCandidateMatchingStarting(true)
+      const run = await startCandidateMatching(applicationsVacancyFilter, {
+        requested_limit: matchRequestedLimit,
+      })
+      const job = await getCandidateMatchingJob(applicationsVacancyFilter, run.job_id)
+      setCandidateMatchingJob(job)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося запустити AI матчинг"
+      setCandidateMatchingError(message)
+    } finally {
+      setIsCandidateMatchingStarting(false)
+    }
+  }
+
+  const handleOpenMatchedResume = async (item: CandidateMatchResultItem) => {
+    try {
+      setApplicationResumeError(null)
+      setMatchedResumeOpeningId(item.application_id)
+      const resume = await getApplicationResume(item.application_id)
+      const vacancyTitle =
+        vacancies.find((vacancy) => vacancy.id === candidateMatchingJob?.vacancy_id)?.title
+        ?? `Вакансія #${candidateMatchingJob?.vacancy_id ?? "?"}`
+
+      setSelectedApplicationResume({
+        resume,
+        vacancyTitle,
+        candidateLabel: `Кандидат: ${item.candidate_name}`,
+      })
+
+      const appInList = employerApplications.find((application) => application.id === item.application_id)
+      if (appInList && appInList.status === "applied") {
+        try {
+          const updated = await updateApplicationStatus(item.application_id, { status: "viewed" })
+          setEmployerApplications((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
+        } catch {
+          // Keep resume modal visible even if status update failed.
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме кандидата"
+      setApplicationResumeError(message)
+    } finally {
+      setMatchedResumeOpeningId(null)
+    }
+  }
+
+  const handleWriteToMatchedCandidate = async (item: CandidateMatchResultItem) => {
+    try {
+      setMatchedChatStartingId(item.application_id)
+      const appInList = employerApplications.find((application) => application.id === item.application_id)
+      if (appInList && appInList.status !== "chat_started") {
+        try {
+          const updated = await updateApplicationStatus(item.application_id, { status: "chat_started" })
+          setEmployerApplications((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)))
+        } catch {
+          // Do not block navigation if status update failed.
+        }
+      }
+      const targetVacancyId = candidateMatchingJob?.vacancy_id ?? applicationsVacancyFilter
+      if (!targetVacancyId) {
+        throw new Error("Не вдалося визначити вакансію для чату")
+      }
+      const params = new URLSearchParams({
+        resumeId: String(item.resume_id),
+        vacancyId: String(targetVacancyId),
+      })
+      navigate(`/messages?${params.toString()}`)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося відкрити чат із кандидатом"
+      setApplicationResumeError(message)
+    } finally {
+      setMatchedChatStartingId(null)
     }
   }
 
@@ -617,6 +759,10 @@ const EmployerDashboard = () => {
       setSavedResumes([])
       setEmployerApplications([])
       setApplicationsVacancyFilter(null)
+      setShowCandidateMatchPanel(false)
+      setCandidateSectionsView("all")
+      setCandidateMatchingJob(null)
+      setCandidateMatchingError(null)
       setExpandedApplicationId(null)
       setSelectedApplicationResume(null)
       setApplicationResumeError(null)
@@ -642,6 +788,13 @@ const EmployerDashboard = () => {
   }, [vacancies.length, vacancyPage])
 
   useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(employerApplications.length / APPLICATIONS_PER_PAGE))
+    if (applicationsPage > maxPage) {
+      setApplicationsPage(maxPage)
+    }
+  }, [applicationsPage, employerApplications])
+
+  useEffect(() => {
     if (!company) {
       return
     }
@@ -659,6 +812,50 @@ const EmployerDashboard = () => {
     }
     void loadEmployerApplications(applicationsVacancyFilter ?? undefined)
   }, [company, applicationsVacancyFilter])
+
+  useEffect(() => {
+    if (!company || rightPanelView !== "applications") {
+      return
+    }
+    if (!applicationsVacancyFilter) {
+      setCandidateMatchingJob(null)
+      setCandidateMatchingError(null)
+      return
+    }
+    void loadLatestCandidateMatching(applicationsVacancyFilter)
+  }, [company, rightPanelView, applicationsVacancyFilter])
+
+  useEffect(() => {
+    if (!applicationsVacancyFilter || !candidateMatchingJob) {
+      return
+    }
+    if (
+      candidateMatchingJob.status !== "pending"
+      && candidateMatchingJob.status !== "running"
+    ) {
+      return
+    }
+
+    const interval = window.setInterval(async () => {
+      if (candidateMatchingPollingRef.current) {
+        return
+      }
+      candidateMatchingPollingRef.current = true
+      try {
+        const refreshed = await getCandidateMatchingJob(applicationsVacancyFilter, candidateMatchingJob.job_id)
+        setCandidateMatchingJob(refreshed)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Не вдалося оновити статус AI матчингу"
+        setCandidateMatchingError(message)
+      } finally {
+        candidateMatchingPollingRef.current = false
+      }
+    }, 2500)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [applicationsVacancyFilter, candidateMatchingJob])
 
   const setCompanyField = (key: keyof CompanyFormState, value: string) => {
     setCompanyForm((prev) => ({ ...prev, [key]: value }))
@@ -834,6 +1031,108 @@ const EmployerDashboard = () => {
   const totalVacancyPages = Math.max(1, Math.ceil(vacancies.length / VACANCIES_PER_PAGE))
   const vacancyPageStart = (vacancyPage - 1) * VACANCIES_PER_PAGE
   const paginatedVacancies = vacancies.slice(vacancyPageStart, vacancyPageStart + VACANCIES_PER_PAGE)
+
+  const totalApplicationsPages = Math.max(1, Math.ceil(employerApplications.length / APPLICATIONS_PER_PAGE))
+  const applicationsPageStart = (applicationsPage - 1) * APPLICATIONS_PER_PAGE
+  const paginatedApplications = employerApplications.slice(
+    applicationsPageStart,
+    applicationsPageStart + APPLICATIONS_PER_PAGE,
+  )
+  const candidatesInSelectionCount = applicationsVacancyFilter ? employerApplications.length : 0
+
+  const renderApplicationCard = (application: JobApplication) => {
+    const isExpanded = expandedApplicationId === application.id
+    const sortedHistory = [...(application.history ?? [])].sort(
+      (a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime(),
+    )
+
+    return (
+      <article
+        key={application.id}
+        className="relative rounded-2xl border border-slate-200 bg-white p-4 pr-36 shadow-soft"
+      >
+        <span
+          className={`absolute right-4 top-4 rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+        >
+          {applicationStatusLabel[application.status]}
+        </span>
+
+        <div className="flex flex-wrap items-start gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">
+              {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
+            </h3>
+            <p className="mt-1 text-sm text-slate-600">
+              {`Кандидат: ${application.candidate_name || "Невідомий кандидат"}`}
+            </p>
+            <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
+              <span>Резюме: {application.resume_title ?? "Без назви"}</span>
+              <span>Подано: {formatDateTime(application.created_at)}</span>
+            </div>
+          </div>
+        </div>
+
+        {application.cover_letter && (
+          <p className="mt-3 text-sm text-slate-600">
+            {application.cover_letter}
+          </p>
+        )}
+
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+          <button
+            className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
+            type="button"
+            onClick={() => void handleWriteToCandidate(application)}
+            disabled={!application.resume_id || applicationStatusUpdatingId === application.id}
+          >
+            {applicationStatusUpdatingId === application.id ? "Оновлення..." : "Написати кандидату"}
+          </button>
+          <button
+            className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+            type="button"
+            onClick={() => void handleOpenApplicationResume(application)}
+            disabled={applicationResumeLoadingId === application.id}
+          >
+            {applicationResumeLoadingId === application.id ? "Відкриваємо..." : "Відкрити резюме"}
+          </button>
+          <button
+            className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
+            type="button"
+            onClick={() => setExpandedApplicationId(isExpanded ? null : application.id)}
+          >
+            {isExpanded ? "Сховати історію" : "Історія статусів"}
+          </button>
+        </div>
+
+        {isExpanded && (
+          <ol className="mt-4 space-y-3 border-l border-slate-200 pl-4">
+            {sortedHistory.map((item) => (
+              <li key={item.id} className="relative">
+                <span className="absolute -left-[22px] mt-1.5 h-2.5 w-2.5 rounded-full bg-slate-500" />
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[item.status]}`}
+                    >
+                      {applicationStatusLabel[item.status]}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {formatDateTime(item.changed_at)}
+                    </span>
+                  </div>
+                  {item.comment && (
+                    <p className="mt-2 text-sm text-slate-600">
+                      {item.comment}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </article>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#edf2f8]">
@@ -1136,6 +1435,9 @@ const EmployerDashboard = () => {
                     return
                   }
                   void loadEmployerApplications(applicationsVacancyFilter ?? undefined)
+                  if (applicationsVacancyFilter) {
+                    void loadLatestCandidateMatching(applicationsVacancyFilter)
+                  }
                 }}
                 disabled={
                   !company
@@ -1369,7 +1671,7 @@ const EmployerDashboard = () => {
                   <>
                     <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Фільтр по вакансії
+                        Вакансія для відбору
                       </label>
                       <select
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-orange-500/60"
@@ -1377,7 +1679,11 @@ const EmployerDashboard = () => {
                         onChange={(event) => {
                           const raw = event.target.value
                           setApplicationsVacancyFilter(raw ? Number(raw) : null)
+                          setApplicationsPage(1)
+                          setCandidateSectionsView("all")
                           setExpandedApplicationId(null)
+                          setCandidateMatchingError(null)
+                          setCandidateMatchingJob(null)
                         }}
                       >
                         <option value="">Усі вакансії</option>
@@ -1389,106 +1695,325 @@ const EmployerDashboard = () => {
                       </select>
                     </div>
 
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                      <button
+                        className={`rounded-xl border bg-gradient-to-r from-[#0f1f46] via-[#172c62] to-[#2c3f82] px-3 py-2 text-xs font-semibold leading-none text-white transition ${
+                          showCandidateMatchPanel
+                            ? "border-[#35579f] shadow-sm"
+                            : "border-[#28467f] hover:brightness-110"
+                        }`}
+                        type="button"
+                        onClick={() => setShowCandidateMatchPanel((prev) => !prev)}
+                      >
+                        <span className="inline-flex translate-y-[1px] items-center gap-1.5 whitespace-nowrap">
+                          <AISparkleIcon className="h-5 w-5 text-cyan-200" />
+                          AI Candidate Match
+                        </span>
+                      </button>
+                      {candidateMatchingJob && (
+                        <span
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                            candidateMatchStatusClassName[candidateMatchingJob.status]
+                          }`}
+                        >
+                          {candidateMatchStatusLabel[candidateMatchingJob.status]}
+                        </span>
+                      )}
+                    </div>
+
+                    {showCandidateMatchPanel && (
+                      <div className="mt-4 overflow-hidden rounded-2xl border border-[#2c4f98]/20 bg-gradient-to-r from-[#f5f8ff] via-white to-[#f8fbff] p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#35579f]">AI Candidate Match</p>
+                          <h3 className="mt-1 text-base font-semibold text-slate-900">Автоматичний рейтинг кандидатів</h3>
+                          <p className="mt-1 text-sm text-slate-600">
+                            ШІ аналізує відгуки, оцінює релевантність і формує рейтинг кандидатів для швидкого найму.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr,auto,auto]">
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                            Кількість кандидатів у AI-топі
+                          </label>
+                          <input
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-500/60"
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={matchRequestedLimit}
+                            onChange={(event) => setMatchRequestedLimit(Math.max(1, Math.min(100, Number(event.target.value) || 1)))}
+                            placeholder="Наприклад: 10"
+                          />
+                        </div>
+                        <button
+                          className="rounded-xl bg-[#1f2f5e] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1a2750] disabled:cursor-not-allowed disabled:opacity-60"
+                          type="button"
+                          onClick={() => void handleStartCandidateMatching()}
+                          disabled={!applicationsVacancyFilter || isCandidateMatchingStarting}
+                        >
+                          {isCandidateMatchingStarting ? "Запуск..." : "Згенерувати матч"}
+                        </button>
+                        <button
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          type="button"
+                          onClick={() => {
+                            if (applicationsVacancyFilter) {
+                              void loadLatestCandidateMatching(applicationsVacancyFilter)
+                            }
+                          }}
+                          disabled={!applicationsVacancyFilter || isCandidateMatchingLoading}
+                        >
+                          {isCandidateMatchingLoading ? "Оновлення..." : "Оновити матч"}
+                        </button>
+                      </div>
+
+                      {!applicationsVacancyFilter && (
+                        <p className="mt-2 text-xs text-amber-700">Оберіть конкретну вакансію у фільтрі кандидатів, щоб запустити матчинг.</p>
+                      )}
+                      {candidateMatchingError && (
+                        <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {candidateMatchingError}
+                        </div>
+                      )}
+                      {candidateMatchingJob?.error && (
+                        <div className="mt-3 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {candidateMatchingJob.error}
+                        </div>
+                      )}
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-[11px] uppercase tracking-wide text-slate-500">Кандидатів у відборі</div>
+                          <div className="mt-1 text-sm font-semibold text-slate-900">
+                            {candidatesInSelectionCount}
+                          </div>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-[11px] uppercase tracking-wide text-slate-500">Оновлено</div>
+                          <div className="mt-1 text-sm font-semibold text-slate-900">
+                            {candidateMatchingJob ? formatDateTime(candidateMatchingJob.updated_at) : "—"}
+                          </div>
+                        </div>
+                      </div>
+                      </div>
+                    )}
+
+                    {showCandidateMatchPanel && (candidateMatchingJob?.status === "pending" || candidateMatchingJob?.status === "running") && (
+                      <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50/70 p-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-sky-800">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-sky-300 border-t-sky-700" />
+                          AI аналізує кандидатів і формує рейтинг
+                        </div>
+                        <p className="mt-1 text-xs text-sky-700">
+                          ШІ обробляє профілі та рахує релевантність. Результат оновиться автоматично.
+                        </p>
+                        <div className="mt-3 space-y-2">
+                          <div className="h-2 overflow-hidden rounded-full bg-white">
+                            <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500" />
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-white">
+                            <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-indigo-400 via-blue-500 to-sky-500" />
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-white">
+                            <div className="h-full w-4/5 animate-pulse rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-sky-500" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {showCandidateMatchPanel && candidateMatchingJob?.status === "done" && (
+                      <div className="mt-4 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+                        <button
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                            candidateSectionsView === "ai"
+                              ? "bg-white text-slate-900 shadow-soft"
+                              : "text-slate-600 hover:text-slate-800"
+                          }`}
+                          type="button"
+                          onClick={() => setCandidateSectionsView("ai")}
+                        >
+                          AI-рекомендації кандидатів
+                        </button>
+                        <button
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                            candidateSectionsView === "all"
+                              ? "bg-white text-slate-900 shadow-soft"
+                              : "text-slate-600 hover:text-slate-800"
+                          }`}
+                          type="button"
+                          onClick={() => setCandidateSectionsView("all")}
+                        >
+                          Всі кандидати
+                        </button>
+                      </div>
+                    )}
+
+                    {showCandidateMatchPanel && candidateMatchingJob?.status === "done" && candidateSectionsView === "ai" && (
+                      <div className="mt-4">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <h4 className="text-sm font-semibold text-slate-900">AI-рекомендації кандидатів</h4>
+                          <span className="text-xs text-slate-500">
+                            Топ {candidateMatchingJob.result.length} кандидатів
+                          </span>
+                        </div>
+
+                        {candidateMatchingJob.result.length === 0 ? (
+                          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+                            Підходящих кандидатів не знайдено.
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {candidateMatchingJob.result.map((item) => (
+                              <article
+                                key={`match-${candidateMatchingJob.job_id}-${item.application_id}`}
+                                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft"
+                              >
+                                <div className="flex flex-wrap items-start gap-3">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="rounded-full border border-[#2c4f98]/30 bg-[#eef3ff] px-2.5 py-1 text-xs font-semibold text-[#1f3f86]">
+                                        #{item.rank}
+                                      </span>
+                                      <h5 className="truncate text-sm font-semibold text-slate-900">
+                                        {item.candidate_name}
+                                      </h5>
+                                    </div>
+                                    <p className="mt-1 text-sm text-slate-600">
+                                      {item.title}
+                                      {item.desired_role ? ` · ${item.desired_role}` : ""}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-500">
+                                      {[item.location, item.years_experience != null ? `${item.years_experience} р.` : null]
+                                        .filter(Boolean)
+                                        .join(" · ")}
+                                    </p>
+                                    <div className="mt-2">
+                                      <div className="text-xs text-slate-500">Score</div>
+                                      <div className="text-2xl font-semibold text-slate-900">{item.score_total}</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-[#1f3f86] via-[#345fb8] to-[#4a7de3]"
+                                    style={{ width: `${Math.max(0, Math.min(100, item.score_total))}%` }}
+                                  />
+                                </div>
+
+                                <p className="mt-3 text-sm text-slate-700">{item.summary}</p>
+
+                                {(item.matched_skills.length > 0 || item.missing_skills.length > 0) && (
+                                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
+                                      <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Matched</div>
+                                      <div className="mt-1 flex flex-wrap gap-1.5">
+                                        {item.matched_skills.length === 0 ? (
+                                          <span className="text-xs text-emerald-700/80">—</span>
+                                        ) : (
+                                          item.matched_skills.map((skill) => (
+                                            <span
+                                              key={`${item.application_id}-m-${skill}`}
+                                              className="rounded-full border border-emerald-300/60 bg-white px-2 py-0.5 text-[11px] font-medium text-emerald-700"
+                                            >
+                                              {skill}
+                                            </span>
+                                          ))
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-2.5">
+                                      <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">Missing</div>
+                                      <div className="mt-1 flex flex-wrap gap-1.5">
+                                        {item.missing_skills.length === 0 ? (
+                                          <span className="text-xs text-amber-700/80">—</span>
+                                        ) : (
+                                          item.missing_skills.map((skill) => (
+                                            <span
+                                              key={`${item.application_id}-x-${skill}`}
+                                              className="rounded-full border border-amber-300/60 bg-white px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                                            >
+                                              {skill}
+                                            </span>
+                                          ))
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+                                  <button
+                                    className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
+                                    type="button"
+                                    onClick={() => void handleWriteToMatchedCandidate(item)}
+                                    disabled={matchedChatStartingId === item.application_id}
+                                  >
+                                    {matchedChatStartingId === item.application_id ? "Відкриття..." : "Написати кандидату"}
+                                  </button>
+                                  <button
+                                    className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+                                    type="button"
+                                    onClick={() => void handleOpenMatchedResume(item)}
+                                    disabled={matchedResumeOpeningId === item.application_id}
+                                  >
+                                    {matchedResumeOpeningId === item.application_id ? "Відкриваємо..." : "Відкрити резюме"}
+                                  </button>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {isEmployerApplicationsLoading ? (
                       <div className="mt-6 text-sm text-slate-500">Завантаження відгуків...</div>
                     ) : employerApplications.length === 0 ? (
                       <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
                         По обраній вакансії поки немає відгуків.
                       </div>
-                    ) : (
-                      <div className="mt-4 space-y-3">
-                        {employerApplications.map((application) => {
-                          const isExpanded = expandedApplicationId === application.id
-                          const sortedHistory = [...(application.history ?? [])].sort(
-                            (a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime(),
-                          )
-                          return (
-                            <article
-                              key={application.id}
-                              className="relative rounded-2xl border border-slate-200 bg-white p-4 pr-36 shadow-soft"
-                            >
-                              <span
-                                className={`absolute right-4 top-4 rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+                    ) : showCandidateMatchPanel && candidateMatchingJob?.status === "done" && candidateSectionsView === "ai" ? null : (
+                      <div className="mt-4">
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <h4 className="text-sm font-semibold text-slate-900">Всі кандидати</h4>
+                          <span className="text-xs text-slate-500">
+                            Показано {paginatedApplications.length} з {employerApplications.length}
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          {paginatedApplications.map((application) => renderApplicationCard(application))}
+                        </div>
+
+                        {totalApplicationsPages > 1 && (
+                          <div className="mt-4">
+                            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                              <button
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                type="button"
+                                onClick={() => setApplicationsPage((prev) => Math.max(1, prev - 1))}
+                                disabled={applicationsPage === 1}
                               >
-                                {applicationStatusLabel[application.status]}
-                              </span>
-
-                              <div className="flex flex-wrap items-start gap-3">
-                                <div>
-                                  <h3 className="text-base font-semibold text-slate-900">
-                                    {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
-                                  </h3>
-                                  <p className="mt-1 text-sm text-slate-600">
-                                    {`Кандидат: ${application.candidate_name || "Невідомий кандидат"}`}
-                                  </p>
-                                  <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
-                                    <span>Резюме: {application.resume_title ?? "Без назви"}</span>
-                                    <span>Подано: {formatDateTime(application.created_at)}</span>
-                                  </div>
-                                </div>
+                                Попередня
+                              </button>
+                              <div className="text-xs font-semibold text-slate-600">
+                                Сторінка {applicationsPage} з {totalApplicationsPages}
                               </div>
-
-                              {application.cover_letter && (
-                                <p className="mt-3 text-sm text-slate-600">
-                                  {application.cover_letter}
-                                </p>
-                              )}
-
-                              <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
-                                <button
-                                  className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
-                                  type="button"
-                                  onClick={() => void handleWriteToCandidate(application)}
-                                  disabled={!application.resume_id || applicationStatusUpdatingId === application.id}
-                                >
-                                  {applicationStatusUpdatingId === application.id ? "Оновлення..." : "Написати кандидату"}
-                                </button>
-                                <button
-                                  className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
-                                  type="button"
-                                  onClick={() => void handleOpenApplicationResume(application)}
-                                  disabled={applicationResumeLoadingId === application.id}
-                                >
-                                  {applicationResumeLoadingId === application.id ? "Відкриваємо..." : "Відкрити резюме"}
-                                </button>
-                                <button
-                                  className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400"
-                                  type="button"
-                                  onClick={() => setExpandedApplicationId(isExpanded ? null : application.id)}
-                                >
-                                  {isExpanded ? "Сховати історію" : "Історія статусів"}
-                                </button>
-                              </div>
-
-                              {isExpanded && (
-                                <ol className="mt-4 space-y-3 border-l border-slate-200 pl-4">
-                                  {sortedHistory.map((item) => (
-                                    <li key={item.id} className="relative">
-                                      <span className="absolute -left-[22px] mt-1.5 h-2.5 w-2.5 rounded-full bg-slate-500" />
-                                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                          <span
-                                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[item.status]}`}
-                                          >
-                                            {applicationStatusLabel[item.status]}
-                                          </span>
-                                          <span className="text-xs text-slate-500">
-                                            {formatDateTime(item.changed_at)}
-                                          </span>
-                                        </div>
-                                        {item.comment && (
-                                          <p className="mt-2 text-sm text-slate-600">
-                                            {item.comment}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </li>
-                                  ))}
-                                </ol>
-                              )}
-                            </article>
-                          )
-                        })}
+                              <button
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                type="button"
+                                onClick={() => setApplicationsPage((prev) => Math.min(totalApplicationsPages, prev + 1))}
+                                disabled={applicationsPage === totalApplicationsPages}
+                              >
+                                Наступна
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>

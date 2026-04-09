@@ -355,7 +355,7 @@ job_applications_table = Table(
         onupdate=func.now(),
         nullable=False,
     ),
-    Index("uq_job_applications_user_vacancy", "user_id", "vacancy_id", unique=True),
+    Index("uq_job_applications_vacancy_resume", "vacancy_id", "resume_id", unique=True),
     Index("ix_job_applications_user_id", "user_id"),
     Index("ix_job_applications_vacancy_id", "vacancy_id"),
     Index("ix_job_applications_resume_id", "resume_id"),

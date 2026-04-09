@@ -68,3 +68,5 @@ class ApplicationResumeOut(BaseModel):
     pdf_uploaded_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+

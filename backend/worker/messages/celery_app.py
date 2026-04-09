@@ -15,7 +15,7 @@ celery_app = Celery(
     "talentup_messages",
     broker=BROKER_URL,
     backend=RESULT_BACKEND,
-    include=["worker.messages.tasks"],
+    include=["worker.messages.tasks", "employer.candidate_matching.tasks"],
 )
 
 celery_app.conf.update(

@@ -1,12 +1,51 @@
 import re
 
-from sqlalchemy import Select, or_, select
+from sqlalchemy import Select, case, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import cities_table, city_aliases_table
 
 
 class CityService:
+    TOP_PRIORITY_CITIES = (
+        "Київ",
+        "Харків",
+        "Одеса",
+        "Львів",
+        "Дніпро",
+        "Запоріжжя",
+        "Кривий Ріг",
+        "Миколаїв",
+        "Вінниця",
+        "Полтава",
+    )
+    OBLAST_CENTERS = (
+        "Київ",
+        "Вінниця",
+        "Луцьк",
+        "Дніпро",
+        "Житомир",
+        "Ужгород",
+        "Запоріжжя",
+        "Івано-Франківськ",
+        "Кропивницький",
+        "Львів",
+        "Миколаїв",
+        "Одеса",
+        "Полтава",
+        "Рівне",
+        "Суми",
+        "Тернопіль",
+        "Харків",
+        "Херсон",
+        "Хмельницький",
+        "Черкаси",
+        "Чернівці",
+        "Чернігів",
+        "Краматорськ",
+        "Сєвєродонецьк",
+    )
+
     TRANSLITERATION_MAP = {
         "а": "a",
         "б": "b",
@@ -109,7 +148,27 @@ class CityService:
         aliases.update(cls.EXTRA_ALIASES.get(normalized_name, ()))
         return [alias for alias in aliases if alias]
 
+    @classmethod
+    def _priority_order_case(cls):
+        priority_cities = list(cls.TOP_PRIORITY_CITIES)
+        for city_name in cls.OBLAST_CENTERS:
+            if city_name not in priority_cities:
+                priority_cities.append(city_name)
+        priority_rank = {
+            city_name: rank
+            for rank, city_name in enumerate(priority_cities, start=1)
+        }
+
+        return case(
+            *(
+                (cities_table.c.name_uk == city_name, rank)
+                for city_name, rank in priority_rank.items()
+            ),
+            else_=10_000,
+        )
+
     async def list_options(self, query: str | None, limit: int) -> list[dict]:
+        priority_order = self._priority_order_case()
         stmt = (
             select(
                 cities_table.c.id,
@@ -118,7 +177,7 @@ class CityService:
                 cities_table.c.oblast,
             )
             .where(cities_table.c.is_active.is_(True))
-            .order_by(cities_table.c.name_uk.asc())
+            .order_by(priority_order.asc(), cities_table.c.name_uk.asc())
             .limit(limit)
         )
 
@@ -126,6 +185,17 @@ class CityService:
             trimmed_query = query.strip()
             if trimmed_query:
                 normalized_query = self.normalize_text(trimmed_query)
+                alias_match_exists = (
+                    select(city_aliases_table.c.id)
+                    .where(city_aliases_table.c.city_id == cities_table.c.id)
+                    .where(
+                        or_(
+                            city_aliases_table.c.alias.ilike(f"%{trimmed_query}%"),
+                            city_aliases_table.c.normalized_alias.ilike(f"%{normalized_query}%"),
+                        )
+                    )
+                    .exists()
+                )
                 stmt = (
                     select(
                         cities_table.c.id,
@@ -133,17 +203,14 @@ class CityService:
                         cities_table.c.name_en,
                         cities_table.c.oblast,
                     )
-                    .select_from(cities_table.join(city_aliases_table, city_aliases_table.c.city_id == cities_table.c.id))
                     .where(cities_table.c.is_active.is_(True))
                     .where(
                         or_(
-                            city_aliases_table.c.alias.ilike(f"%{trimmed_query}%"),
-                            city_aliases_table.c.normalized_alias.ilike(f"%{normalized_query}%"),
+                            alias_match_exists,
                             cities_table.c.oblast.ilike(f"%{trimmed_query}%"),
                         )
                     )
-                    .distinct()
-                    .order_by(cities_table.c.name_uk.asc())
+                    .order_by(priority_order.asc(), cities_table.c.name_uk.asc())
                     .limit(limit)
                 )
 

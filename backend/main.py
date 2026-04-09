@@ -14,6 +14,7 @@ app = FastAPI()
 
 from cities.views import router as cities_router
 from employer.company.views import router as company_router
+from employer.candidate_matching.views import router as candidate_matching_router
 from employer.vacancy.views import router as vacancy_router
 from chat.views import router as chat_router
 from search.resume_search.views import router as search_router
@@ -49,6 +50,7 @@ app.include_router(worker_applications_router)
 app.include_router(worker_messages_router)
 app.include_router(cities_router)
 app.include_router(company_router)
+app.include_router(candidate_matching_router)
 app.include_router(vacancy_router)
 app.include_router(chat_router)
 app.include_router(search_router)

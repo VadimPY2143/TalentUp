@@ -28,13 +28,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 bearer_scheme = HTTPBearer(auto_error=False)
 
 def _normalize_bearer_token(token: str) -> str:
-    """
-    Be tolerant to clients that accidentally send "Bearer Bearer <jwt>".
-    Swagger UI for HTTP bearer auth prepends "Bearer " automatically, so if a
-    user pastes "Bearer <jwt>" into the modal it becomes duplicated.
-    """
     t = (token or "").strip()
-    # Strip one or more leading "Bearer " (case-insensitive).
     while t.lower().startswith("bearer "):
         t = t[7:].lstrip()
     return t
