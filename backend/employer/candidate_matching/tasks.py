@@ -1,6 +1,7 @@
 import asyncio
 import os
-from typing import Any, Coroutine, TypeVar
+import logging
+from typing import Any
 
 import redis.asyncio as redis
 from redis.exceptions import RedisError
@@ -10,6 +11,7 @@ from employer.candidate_matching.ai_rerank import rerank_candidate
 from employer.candidate_matching.cache import (
     build_job_payload,
     dumps_payload,
+    loads_payload,
     match_job_key,
     match_latest_job_key,
     utcnow_iso,
@@ -17,20 +19,12 @@ from employer.candidate_matching.cache import (
 from employer.candidate_matching.repository import CandidateMatchingRepository
 from worker.messages.celery_app import celery_app
 
-_T = TypeVar("_T")
-_EVENT_LOOP: asyncio.AbstractEventLoop | None = None
+LOGGER = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = int(os.getenv("CANDIDATE_MATCH_CACHE_TTL_SECONDS", "3600"))
 AI_CONCURRENCY = int(os.getenv("CANDIDATE_MATCH_AI_CONCURRENCY", "4"))
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
-
-
-def _run_async(coro: Coroutine[object, object, _T]) -> _T:
-    global _EVENT_LOOP
-    if _EVENT_LOOP is None or _EVENT_LOOP.is_closed():
-        _EVENT_LOOP = asyncio.new_event_loop()
-    return _EVENT_LOOP.run_until_complete(coro)
 
 
 def _normalize_work_formats(values: list[str] | None) -> set[str]:
@@ -107,6 +101,36 @@ async def _store_payload(payload: dict[str, Any]) -> None:
         return
 
 
+async def _mark_job_failed(
+    *,
+    job_id: str,
+    vacancy_id: int,
+    employer_user_id: int,
+    requested_limit: int,
+    error: str,
+) -> None:
+    payload: dict[str, Any] | None = None
+    try:
+        raw = await redis_client.get(match_job_key(job_id))
+        payload = loads_payload(raw)
+    except RedisError:
+        payload = None
+
+    if payload is None:
+        payload = build_job_payload(
+            job_id=job_id,
+            vacancy_id=vacancy_id,
+            created_by_user_id=employer_user_id,
+            status="failed",
+            requested_limit=requested_limit,
+        )
+
+    payload["status"] = "failed"
+    payload["updated_at"] = utcnow_iso()
+    payload["error"] = error[:500]
+    await _store_payload(payload)
+
+
 async def _set_status(
     *,
     payload: dict[str, Any],
@@ -175,14 +199,36 @@ def run_candidate_matching(
     **_unused: Any,
 ) -> dict[str, Any]:
     del self
-    return _run_async(
-        _run_candidate_matching(
-            job_id=job_id,
-            vacancy_id=vacancy_id,
-            employer_user_id=employer_user_id,
-            requested_limit=requested_limit,
+    try:
+        return asyncio.run(
+            _run_candidate_matching(
+                job_id=job_id,
+                vacancy_id=vacancy_id,
+                employer_user_id=employer_user_id,
+                requested_limit=requested_limit,
+            )
         )
-    )
+    except Exception as exc:  # noqa: BLE001
+        error_message = f"Candidate matching failed: {exc}"
+        LOGGER.exception(
+            "Candidate matching crashed for vacancy_id=%s, employer_user_id=%s, job_id=%s",
+            vacancy_id,
+            employer_user_id,
+            job_id,
+        )
+        try:
+            asyncio.run(
+                _mark_job_failed(
+                    job_id=job_id,
+                    vacancy_id=vacancy_id,
+                    employer_user_id=employer_user_id,
+                    requested_limit=requested_limit,
+                    error=error_message,
+                )
+            )
+        except Exception:  # noqa: BLE001
+            LOGGER.exception("Failed to persist failed status for candidate matching job_id=%s", job_id)
+        raise
 
 
 async def _run_candidate_matching(

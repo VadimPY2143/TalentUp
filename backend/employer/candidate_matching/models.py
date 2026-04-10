@@ -8,7 +8,7 @@ MatchJobStatus = Literal["pending", "running", "done", "failed"]
 
 
 class CandidateMatchRunRequest(BaseModel):
-    requested_limit: int = Field(default=10, ge=1, le=100)
+    requested_limit: int = Field(default=3, ge=1, le=10)
 
 
 class CandidateMatchRunResponse(BaseModel):

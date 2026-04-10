@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime, timezone
 
 import redis.asyncio as redis
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,6 +14,7 @@ from employer.candidate_matching.cache import (
     loads_payload,
     match_job_key,
     match_latest_job_key,
+    utcnow_iso,
 )
 from employer.candidate_matching.models import (
     CandidateMatchJobResponse,
@@ -27,6 +29,7 @@ router = APIRouter(tags=["candidate_matching"])
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 MATCH_CACHE_TTL_SECONDS = int(os.getenv("CANDIDATE_MATCH_CACHE_TTL_SECONDS", "3600"))
+MATCH_STALE_SECONDS = int(os.getenv("CANDIDATE_MATCH_STALE_SECONDS", "600"))
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 
@@ -54,6 +57,30 @@ async def _get_job_payload(job_id: str) -> dict:
     payload = loads_payload(raw)
     if payload is None:
         raise HTTPException(status_code=404, detail="Matching job not found")
+
+    status_value = str(payload.get("status") or "")
+    updated_at_raw = payload.get("updated_at")
+    if status_value in {"pending", "running"} and isinstance(updated_at_raw, str):
+        try:
+            updated_at = datetime.fromisoformat(updated_at_raw.replace("Z", "+00:00"))
+            if updated_at.tzinfo is None:
+                updated_at = updated_at.replace(tzinfo=timezone.utc)
+            age_seconds = (datetime.now(timezone.utc) - updated_at).total_seconds()
+            if age_seconds > MATCH_STALE_SECONDS:
+                payload["status"] = "failed"
+                payload["updated_at"] = utcnow_iso()
+                payload["error"] = "Matching job timed out. Please run candidate matching again."
+                try:
+                    await redis_client.set(
+                        match_job_key(job_id),
+                        dumps_payload(payload),
+                        ex=MATCH_CACHE_TTL_SECONDS,
+                    )
+                except RedisError:
+                    pass
+        except ValueError:
+            pass
+
     return payload
 
 
