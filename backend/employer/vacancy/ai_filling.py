@@ -10,7 +10,7 @@ from .models import Vacancy
 load_dotenv()
 
 SYSTEM_PROMPT = """
-You are a senior Ukrainian HR/recruiter assistant.
+You are a senior Ukrainian HR assistant.
 Generate one complete vacancy JSON from user description.
 
 Hard rules:

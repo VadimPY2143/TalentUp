@@ -82,8 +82,8 @@ def _build_agent() -> Agent:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model_name = os.getenv("CANDIDATE_MATCH_MODEL", "openai/gpt-4o-mini")
-    model = OpenAIModel(model_name, provider=provider)
+    model_name = os.getenv("CANDIDATE_MATCH_MODEL", "openai/gpt-4o")
+    model = OpenAIModel("openai/gpt-4o", provider=provider)
     return Agent(model, system_prompt=SYSTEM_PROMPT)
 
 
@@ -98,7 +98,7 @@ async def rerank_candidate(
     )
     result = await agent.run(prompt,
                              output_type=CandidateRerankOutput,
-                             model_settings={"max_tokens": 3072})
+                             model_settings={"max_tokens": 2048})
     output = result.output
     if isinstance(output, CandidateRerankOutput):
         return output

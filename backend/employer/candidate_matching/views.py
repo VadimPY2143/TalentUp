@@ -28,8 +28,8 @@ from worker.messages.celery_app import celery_app
 router = APIRouter(tags=["candidate_matching"])
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-MATCH_CACHE_TTL_SECONDS = int(os.getenv("CANDIDATE_MATCH_CACHE_TTL_SECONDS", "3600"))
-MATCH_STALE_SECONDS = int(os.getenv("CANDIDATE_MATCH_STALE_SECONDS", "600"))
+MATCH_CACHE_TTL_SECONDS = 3600
+MATCH_STALE_SECONDS = 600
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 

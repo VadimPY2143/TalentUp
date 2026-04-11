@@ -25,7 +25,7 @@ _T = TypeVar("_T")
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = int(os.getenv("CANDIDATE_MATCH_CACHE_TTL_SECONDS", "3600"))
-AI_CONCURRENCY = int(os.getenv("CANDIDATE_MATCH_AI_CONCURRENCY", "4"))
+AI_CONCURRENCY = int(os.getenv("CANDIDATE_MATCH_AI_CONCURRENCY", "2"))
 
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -337,6 +337,7 @@ async def _run_candidate_matching(
     async def _score_row(row: dict[str, Any]) -> dict[str, Any]:
         sql_score = _heuristic_score(vacancy, row)
         async with semaphore:
+            await asyncio.sleep(0.3)  # затримка між запитами для стабільності
             ai_payload = await _score_single_candidate(vacancy=vacancy, candidate=row, sql_score=sql_score)
         merged = {
             "application_id": int(row["application_id"]),
