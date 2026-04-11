@@ -1,10 +1,11 @@
 import asyncio
-import os
 import logging
-from typing import Any
+import os
+from typing import Any, Coroutine, TypeVar
 
 import redis.asyncio as redis
 from redis.exceptions import RedisError
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from database import async_session_factory
 from employer.candidate_matching.ai_rerank import rerank_candidate
@@ -20,11 +21,52 @@ from employer.candidate_matching.repository import CandidateMatchingRepository
 from worker.messages.celery_app import celery_app
 
 LOGGER = logging.getLogger(__name__)
+_T = TypeVar("_T")
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = int(os.getenv("CANDIDATE_MATCH_CACHE_TTL_SECONDS", "3600"))
 AI_CONCURRENCY = int(os.getenv("CANDIDATE_MATCH_AI_CONCURRENCY", "4"))
-redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+
+CELERY_DATABASE_URL = (
+    f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+)
+
+
+def _run_async(coro: Coroutine[object, object, _T]) -> _T:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
+
+
+async def _get_redis_client():
+    return redis.from_url(REDIS_URL, decode_responses=True)
+
+
+async def _get_celery_session() -> AsyncSession:
+    engine = create_async_engine(
+        CELERY_DATABASE_URL,
+        echo=False,
+        pool_size=1,
+        max_overflow=0,
+        pool_pre_ping=False,
+        pool_recycle=300,
+    )
+    session_factory = async_sessionmaker(
+        bind=engine,
+        expire_on_commit=False,
+    )
+    return session_factory()
 
 
 def _normalize_work_formats(values: list[str] | None) -> set[str]:
@@ -87,16 +129,18 @@ def _heuristic_score(vacancy: dict[str, Any], candidate: dict[str, Any]) -> int:
 
 async def _store_payload(payload: dict[str, Any]) -> None:
     try:
-        await redis_client.set(
+        client = await _get_redis_client()
+        await client.set(
             match_job_key(payload["job_id"]),
             dumps_payload(payload),
             ex=MATCH_CACHE_TTL_SECONDS,
         )
-        await redis_client.set(
+        await client.set(
             match_latest_job_key(payload["vacancy_id"], payload["created_by_user_id"]),
             payload["job_id"],
             ex=MATCH_CACHE_TTL_SECONDS,
         )
+        await client.close()
     except RedisError:
         return
 
@@ -111,8 +155,10 @@ async def _mark_job_failed(
 ) -> None:
     payload: dict[str, Any] | None = None
     try:
-        raw = await redis_client.get(match_job_key(job_id))
+        client = await _get_redis_client()
+        raw = await client.get(match_job_key(job_id))
         payload = loads_payload(raw)
+        await client.close()
     except RedisError:
         payload = None
 
@@ -200,7 +246,7 @@ def run_candidate_matching(
 ) -> dict[str, Any]:
     del self
     try:
-        return asyncio.run(
+        return _run_async(
             _run_candidate_matching(
                 job_id=job_id,
                 vacancy_id=vacancy_id,
@@ -217,7 +263,7 @@ def run_candidate_matching(
             job_id,
         )
         try:
-            asyncio.run(
+            _run_async(
                 _mark_job_failed(
                     job_id=job_id,
                     vacancy_id=vacancy_id,
@@ -248,20 +294,26 @@ async def _run_candidate_matching(
     await _store_payload(payload)
 
     repository = CandidateMatchingRepository()
-    async with async_session_factory() as session:
-        vacancy = await repository.get_owned_vacancy(
-            session=session,
-            vacancy_id=vacancy_id,
-            employer_user_id=employer_user_id,
-        )
-        if vacancy is None:
-            await _set_status(payload=payload, status="failed", error="Vacancy not found")
-            return payload
+    session = await _get_celery_session()
+    try:
+        async with session.begin():
+            vacancy = await repository.get_owned_vacancy(
+                session=session,
+                vacancy_id=vacancy_id,
+                employer_user_id=employer_user_id,
+            )
+            if vacancy is None:
+                await _set_status(payload=payload, status="failed", error="Vacancy not found")
+                return payload
 
-        candidates = await repository.list_vacancy_candidates(
-            session=session,
-            vacancy=vacancy,
-        )
+            candidates = await repository.list_vacancy_candidates(
+                session=session,
+                vacancy=vacancy,
+            )
+    finally:
+        await session.close()
+        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
+            await session.bind.dispose()
 
     if not candidates:
         await _set_status(
