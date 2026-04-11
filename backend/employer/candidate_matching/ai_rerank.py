@@ -79,7 +79,7 @@ def _build_agent() -> Agent:
         raise RuntimeError("OPENAI_API_KEY is required for candidate matching")
 
     provider = OpenAIProvider(
-        base_url=os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
+        base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
     model_name = os.getenv("CANDIDATE_MATCH_MODEL", "openai/gpt-4o-mini")
@@ -96,7 +96,9 @@ async def rerank_candidate(
         f"Vacancy:\n{_format_vacancy(vacancy)}\n\n"
         f"Candidate resume:\n{_format_candidate(candidate)}"
     )
-    result = await agent.run(prompt, output_type=CandidateRerankOutput)
+    result = await agent.run(prompt,
+                             output_type=CandidateRerankOutput,
+                             model_settings={"max_tokens": 3072})
     output = result.output
     if isinstance(output, CandidateRerankOutput):
         return output

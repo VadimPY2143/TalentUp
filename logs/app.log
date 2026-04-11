@@ -552,3 +552,14 @@
 2026-04-11 14:17:39 - moodshare - INFO - User 4 connected to chat 13
 2026-04-11 14:17:39 - moodshare - INFO - User 4 disconnected from chat 13
 2026-04-11 14:30:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
+2026-04-11 19:12:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 19:12:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 19:14:21 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 19:14:31 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 19:15:51 - moodshare - INFO - User 4 connected to chat 13
+2026-04-11 19:15:52 - moodshare - INFO - User 4 disconnected from chat 13
+2026-04-11 19:15:53 - moodshare - INFO - User 4 connected to chat 13
+2026-04-11 19:22:57 - moodshare - INFO - User 4 disconnected from chat 13
+2026-04-11 19:24:47 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
+2026-04-11 19:36:55 - moodshare - INFO - User 4 connected to chat 13
+2026-04-11 19:36:57 - moodshare - INFO - User 4 disconnected from chat 13

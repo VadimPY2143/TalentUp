@@ -94,6 +94,7 @@ async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:
     agent = Agent(
         model,
         system_prompt=SYSTEM_PROMPT,
+        model_settings={"max_tokens": 2048},
     )
 
     result = await agent.run(

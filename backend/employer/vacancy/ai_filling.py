@@ -53,6 +53,7 @@ async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
     result = await agent.run(
         f"Description: {vacancy_description}",
         output_type=Vacancy,
+        model_settings={"max_tokens": 3072},
     )
     output = result.output
     if isinstance(output, Vacancy):
