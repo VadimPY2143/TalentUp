@@ -26,22 +26,28 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 router = APIRouter(tags=["oauth"])
 oauth = OAuth()
-
-oauth.register(
-    name="google",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid email profile"},
+GOOGLE_OAUTH_ENABLED = bool(os.getenv("GOOGLE_CLIENT_ID") and os.getenv("GOOGLE_CLIENT_SECRET"))
+LINKEDIN_OAUTH_ENABLED = bool(
+    os.getenv("LINKEDIN_CLIENT_ID") and os.getenv("LINKEDIN_CLIENT_SECRET")
 )
 
-oauth.register(
-    name="linkedin",
-    client_id=os.getenv("LINKEDIN_CLIENT_ID"),
-    client_secret=os.getenv("LINKEDIN_CLIENT_SECRET"),
-    server_metadata_url="https://www.linkedin.com/oauth/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid profile email"},
-)
+if GOOGLE_OAUTH_ENABLED:
+    oauth.register(
+        name="google",
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+
+if LINKEDIN_OAUTH_ENABLED:
+    oauth.register(
+        name="linkedin",
+        client_id=os.getenv("LINKEDIN_CLIENT_ID"),
+        client_secret=os.getenv("LINKEDIN_CLIENT_SECRET"),
+        server_metadata_url="https://www.linkedin.com/oauth/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid profile email"},
+    )
 
 
 def _redirect_frontend(path: str, **params: str) -> RedirectResponse:
@@ -123,6 +129,8 @@ def _get_server_origin(request: Request) -> str:
 
 @router.get("/auth/google/login")
 async def login_google(request: Request):
+    if not GOOGLE_OAUTH_ENABLED:
+        return _redirect_frontend("/login", oauth_error="Google OAuth is unavailable")
     redirect_uri = f"{_get_server_origin(request)}/auth/google/callback"
     print(f"Google OAuth redirect_uri: {redirect_uri}")
     return await oauth.google.authorize_redirect(request, redirect_uri)
@@ -133,6 +141,8 @@ async def auth_google_callback(
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
+    if not GOOGLE_OAUTH_ENABLED:
+        return _redirect_frontend("/login", oauth_error="Google OAuth is unavailable")
     print(f"Google OAuth callback reached with query params: {dict(request.query_params)}")
     try:
         token = await oauth.google.authorize_access_token(request)
@@ -163,6 +173,8 @@ async def auth_google_callback(
 
 @router.get("/auth/linkedin/login")
 async def login_linkedin(request: Request):
+    if not LINKEDIN_OAUTH_ENABLED:
+        return _redirect_frontend("/login", oauth_error="LinkedIn OAuth is unavailable")
     redirect_uri = f"{_get_server_origin(request)}/auth/linkedin/callback"
     print(f"LinkedIn OAuth redirect_uri: {redirect_uri}")
     return await oauth.linkedin.authorize_redirect(request, redirect_uri)
@@ -173,6 +185,8 @@ async def auth_linkedin_callback(
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
+    if not LINKEDIN_OAUTH_ENABLED:
+        return _redirect_frontend("/login", oauth_error="LinkedIn OAuth is unavailable")
     print(f"LinkedIn OAuth callback reached with query params: {dict(request.query_params)}")
     if request.query_params.get("error"):
         error_code = request.query_params.get("error", "")

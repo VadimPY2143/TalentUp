@@ -532,3 +532,17 @@
 2026-04-10 07:38:26 - moodshare - INFO - User 4 disconnected from chat 11
 2026-04-10 07:38:26 - moodshare - INFO - User 4 connected to chat 10
 2026-04-10 07:38:34 - moodshare - INFO - User 4 disconnected from chat 10
+2026-04-10 11:10:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
+2026-04-10 11:10:06 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:07 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:08 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:09 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:10 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:11 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:12 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:13 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-10 11:10:14 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
+2026-04-11 12:43:04 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 12:43:04 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-11 12:52:11 - moodshare - INFO - User 4 connected to chat 13
+2026-04-11 12:52:13 - moodshare - INFO - User 4 disconnected from chat 13

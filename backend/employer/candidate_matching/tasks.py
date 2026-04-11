@@ -208,7 +208,7 @@ def run_candidate_matching(
                 requested_limit=requested_limit,
             )
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         error_message = f"Candidate matching failed: {exc}"
         LOGGER.exception(
             "Candidate matching crashed for vacancy_id=%s, employer_user_id=%s, job_id=%s",
@@ -226,7 +226,7 @@ def run_candidate_matching(
                     error=error_message,
                 )
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             LOGGER.exception("Failed to persist failed status for candidate matching job_id=%s", job_id)
         raise
 

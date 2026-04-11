@@ -11,6 +11,34 @@ from database import (
 )
 
 
+def _normalize_work_formats(values: list[str] | None) -> set[str]:
+    if not values:
+        return set()
+
+    normalized: set[str] = set()
+    for value in values:
+        token = str(value).strip().lower().replace("-", "").replace("_", "").replace(" ", "")
+        if token == "remote":
+            normalized.add("Remote")
+        elif token == "hybrid":
+            normalized.add("Hybrid")
+        elif token in {"office", "onsite", "offline"}:
+            normalized.add("Office")
+    return normalized
+
+
+def _should_prefilter_by_city(vacancy: dict[str, Any]) -> bool:
+    vacancy_city_id = vacancy.get("city_id")
+    if vacancy_city_id is None:
+        return False
+
+    work_formats = _normalize_work_formats(vacancy.get("work_format"))
+    if "Remote" in work_formats:
+        return False
+
+    return "Office" in work_formats
+
+
 class CandidateMatchingRepository:
     @staticmethod
     async def get_owned_vacancy(
@@ -65,6 +93,9 @@ class CandidateMatchingRepository:
                 job_applications_table.c.resume_id.isnot(None),
             )
         )
+
+        if _should_prefilter_by_city(vacancy):
+            stmt = stmt.where(resumes_table.c.city_id == vacancy["city_id"])
 
         stmt = stmt.order_by(
             resumes_table.c.updated_at.desc(),
