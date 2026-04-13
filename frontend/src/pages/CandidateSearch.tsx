@@ -357,7 +357,7 @@ const CandidateCard = ({
   const role = candidate.desired_role || "Позиція не вказана"
   const employment = normalizeEmploymentTypes(candidate.employment_type)
   const summaryLength = candidate.summary?.trim().length ?? 0
-  const showAiSummary = summaryLength >= 120
+  const showAiSummary = summaryLength >= 500
 
   return (
     <article className="flex h-[430px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">

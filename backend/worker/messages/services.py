@@ -1,44 +1,28 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from html import escape
 import os
 from typing import Any
 from urllib.parse import urlencode
 
 from fastapi import HTTPException
-from pydantic import ValidationError
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import vacancies_table
 from search.vacancy_search.filters import (
-    EmploymentKind,
     VacancySearchFilters,
-    WorkFormat,
     apply_vacancy_search_filters,
 )
 from search.vacancy_search.views import _build_vacancy_conditions
 
 from .models import (
-    INT32_MAX,
     VacancySubscriptionCreateIn,
     VacancySubscriptionFilters,
     VacancySubscriptionOut,
     VacancySubscriptionUpdateIn,
 )
 from .repositories import VacancySubscriptionRepository
-
-
-def _ensure_utc(dt: datetime) -> datetime:
-    if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
-
-
-def _subscription_interval() -> timedelta:
-    minutes = int(os.getenv("VACANCY_DIGEST_INTERVAL_MINUTES", "10080"))
-    if minutes <= 0:
-        minutes = 10080
-    return timedelta(minutes=minutes)
+from .repositories import ensure_utc, subscription_interval
 
 
 def _frontend_origin() -> str:
@@ -53,81 +37,6 @@ def _vacancy_url(vacancy_id: int, search_text: str) -> str:
 def _jobs_url(search_text: str) -> str:
     query = urlencode({"query": search_text})
     return f"{_frontend_origin()}/jobs?{query}"
-
-
-def _clamp_int(value: Any, *, min_value: int, max_value: int) -> int | None:
-    try:
-        parsed = int(value)
-    except (TypeError, ValueError):
-        return None
-    if parsed < min_value:
-        return min_value
-    if parsed > max_value:
-        return max_value
-    return parsed
-
-
-def _normalize_legacy_filters(raw: Any) -> dict[str, Any]:
-    if not isinstance(raw, dict):
-        return {}
-
-    normalized: dict[str, Any] = {}
-
-    city_id = _clamp_int(raw.get("city_id"), min_value=1, max_value=INT32_MAX)
-    if city_id is not None:
-        normalized["city_id"] = city_id
-
-    company_id = _clamp_int(raw.get("company_id"), min_value=1, max_value=INT32_MAX)
-    if company_id is not None:
-        normalized["company_id"] = company_id
-
-    location = raw.get("location")
-    if isinstance(location, str):
-        location = location.strip()
-        if location:
-            normalized["location"] = location[:255]
-
-    salary_min = _clamp_int(raw.get("salary_min"), min_value=0, max_value=INT32_MAX)
-    salary_max = _clamp_int(raw.get("salary_max"), min_value=0, max_value=INT32_MAX)
-    if salary_min is not None:
-        normalized["salary_min"] = salary_min
-    if salary_max is not None:
-        normalized["salary_max"] = salary_max
-
-    experience_years_min = _clamp_int(raw.get("experience_years_min"), min_value=0, max_value=80)
-    experience_years_max = _clamp_int(raw.get("experience_years_max"), min_value=0, max_value=80)
-    if experience_years_min is not None:
-        normalized["experience_years_min"] = experience_years_min
-    if experience_years_max is not None:
-        normalized["experience_years_max"] = experience_years_max
-
-    salary_currency = raw.get("salary_currency")
-    if isinstance(salary_currency, str):
-        salary_currency = salary_currency.strip()
-        if salary_currency:
-            normalized["salary_currency"] = salary_currency[:10]
-
-    raw_employment = raw.get("employment_kind")
-    if isinstance(raw_employment, list):
-        allowed = {item.value for item in EmploymentKind}
-        values = [value for value in raw_employment if isinstance(value, str) and value in allowed]
-        if values:
-            normalized["employment_kind"] = values
-
-    raw_work_format = raw.get("work_format")
-    if isinstance(raw_work_format, list):
-        allowed = {item.value for item in WorkFormat}
-        values = [value for value in raw_work_format if isinstance(value, str) and value in allowed]
-        if values:
-            normalized["work_format"] = values
-
-    exclude_expired = raw.get("exclude_expired")
-    if isinstance(exclude_expired, bool):
-        normalized["exclude_expired"] = exclude_expired
-    else:
-        normalized["exclude_expired"] = True
-
-    return normalized
 
 
 class VacancySubscriptionService:
@@ -145,12 +54,7 @@ class VacancySubscriptionService:
     def _build_out(row: dict[str, Any]) -> VacancySubscriptionOut:
         payload = dict(row)
         raw_filters = payload.get("filters") or {}
-        try:
-            payload["filters"] = VacancySubscriptionFilters.model_validate(raw_filters)
-        except ValidationError:
-            payload["filters"] = VacancySubscriptionFilters.model_validate(
-                _normalize_legacy_filters(raw_filters)
-            )
+        payload["filters"] = VacancySubscriptionFilters.model_validate(raw_filters)
         return VacancySubscriptionOut(**payload)
 
     async def create(
@@ -164,8 +68,8 @@ class VacancySubscriptionService:
         if not email:
             raise HTTPException(status_code=400, detail="Email is required")
 
-        next_run_at = payload.next_run_at or (datetime.now(timezone.utc) + _subscription_interval())
-        next_run_at = _ensure_utc(next_run_at)
+        next_run_at = payload.next_run_at or (datetime.now(timezone.utc) + subscription_interval())
+        next_run_at = ensure_utc(next_run_at)
 
         row = await self.repository.create_subscription(
             session=session,
@@ -222,7 +126,7 @@ class VacancySubscriptionService:
         if payload.filters is not None:
             values["filters"] = payload.filters.model_dump(mode="json", exclude_none=True)
         if "next_run_at" in values and values["next_run_at"] is not None:
-            values["next_run_at"] = _ensure_utc(values["next_run_at"])
+            values["next_run_at"] = ensure_utc(values["next_run_at"])
 
         row = await self.repository.update_owned_subscription(
             session=session,
@@ -267,9 +171,9 @@ class VacancyDigestService:
             return []
 
         conditions = _build_vacancy_conditions(tokens)
-        filters_payload = _normalize_legacy_filters(subscription.get("filters") or {})
+        normalized_filters = VacancySubscriptionFilters.model_validate(subscription.get("filters") or {})
+        filters_payload = normalized_filters.model_dump(mode="json", exclude_none=True)
         filters_payload["exclude_expired"] = True
-        filters_payload.pop("published_within", None)
         filters = VacancySearchFilters.model_validate(filters_payload)
 
         stmt = select(vacancies_table)

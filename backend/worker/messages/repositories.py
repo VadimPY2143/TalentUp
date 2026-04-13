@@ -11,7 +11,7 @@ from database import (
 )
 
 
-def _ensure_utc(dt: datetime | None) -> datetime | None:
+def ensure_utc(dt: datetime | None) -> datetime | None:
     if dt is None:
         return None
     if dt.tzinfo is None:
@@ -19,10 +19,10 @@ def _ensure_utc(dt: datetime | None) -> datetime | None:
     return dt.astimezone(timezone.utc)
 
 
-def _subscription_interval() -> timedelta:
-    minutes = int(os.getenv("VACANCY_DIGEST_INTERVAL_MINUTES", "10080"))
+def subscription_interval() -> timedelta:
+    minutes = 1
     if minutes <= 0:
-        minutes = 10080
+        minutes = 1
     return timedelta(minutes=minutes)
 
 
@@ -150,10 +150,10 @@ class VacancySubscriptionRepository:
             return []
 
         delivery_ids: list[int] = []
-        interval = _subscription_interval()
+        interval = subscription_interval()
         next_run_at = now_utc + interval
         for row in rows:
-            period_start = _ensure_utc(row.get("last_processed_at")) or (now_utc - interval)
+            period_start = ensure_utc(row.get("last_processed_at")) or (now_utc - interval)
             delivery_stmt = (
                 insert(vacancy_subscription_deliveries_table)
                 .values(

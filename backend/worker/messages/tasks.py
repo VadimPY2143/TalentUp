@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timezone
 import logging
 import os
-from typing import Awaitable, TypeVar
+from typing import Coroutine, TypeVar
 
 from database import async_session_factory
 
@@ -13,13 +13,18 @@ from .smtp import SMTPPermanentError, SMTPTemporaryError, send_smtp_email
 
 LOGGER = logging.getLogger(__name__)
 _T = TypeVar("_T")
+_EVENT_LOOP: asyncio.AbstractEventLoop | None = None
 SMTP_MAX_RETRIES = int(os.getenv("SMTP_MAX_RETRIES", "5"))
 SMTP_RETRY_BASE_DELAY_SECONDS = int(os.getenv("SMTP_RETRY_BASE_DELAY_SECONDS", "10"))
 SMTP_RETRY_MAX_DELAY_SECONDS = int(os.getenv("SMTP_RETRY_MAX_DELAY_SECONDS", "300"))
 
 
-def _run_async(coro: Awaitable[_T]) -> _T:
-    return asyncio.run(coro)
+def _run_async(coro: Coroutine[object, object, _T]) -> _T:
+    global _EVENT_LOOP
+    if _EVENT_LOOP is None or _EVENT_LOOP.is_closed():
+        _EVENT_LOOP = asyncio.new_event_loop()
+    asyncio.set_event_loop(_EVENT_LOOP)
+    return _EVENT_LOOP.run_until_complete(coro)
 
 
 def _retry_delay_seconds(retries: int) -> int:
