@@ -19,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from employer.vacancy.models import VacancyResponse
 from database import (
     application_history_table,
     companies_table,
@@ -26,6 +27,7 @@ from database import (
     job_applications_table,
     resumes_table,
     saved_resumes_table,
+    saved_vacancies_table,
     vacancies_table,
 )
 from users.auth import get_current_user
@@ -41,7 +43,7 @@ from .tools import (
     remove_pdf_from_disk,
 )
 
-router = APIRouter(tags=["resumes", "applications"])
+router = APIRouter(tags=["resumes", "applications", "saved vacancies"])
 
 
 class ApplicationStatus(str, Enum):
@@ -86,12 +88,128 @@ class JobApplicationStatusUpdateIn(BaseModel):
     comment: str | None = None
 
 
+class SavedVacancyCreateIn(BaseModel):
+    vacancy_id: int = Field(ge=1)
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class SavedVacancyUpdateIn(BaseModel):
+    note: str | None = Field(default=None, max_length=1000)
+
+
+class SavedVacancyOut(BaseModel):
+    id: int
+    user_id: int
+    vacancy_id: int
+    note: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    is_applied: bool
+    application_id: int | None = None
+    application_status: ApplicationStatus | None = None
+    vacancy: VacancyResponse
+
+
 async def _ensure_vacancy_exists(session: AsyncSession, vacancy_id: int) -> dict:
     stmt = select(vacancies_table).where(vacancies_table.c.id == vacancy_id)
     result = await session.execute(stmt)
     row = result.mappings().first()
     if not row:
         raise HTTPException(status_code=404, detail="Vacancy not found")
+    return dict(row)
+
+
+def _saved_vacancy_stmt(user_id: int):
+    return (
+        select(
+            saved_vacancies_table.c.id,
+            saved_vacancies_table.c.user_id,
+            saved_vacancies_table.c.vacancy_id,
+            saved_vacancies_table.c.note,
+            saved_vacancies_table.c.created_at,
+            saved_vacancies_table.c.updated_at,
+            vacancies_table.c.company_id.label("company_id"),
+            vacancies_table.c.created_by_user_id.label("created_by_user_id"),
+            vacancies_table.c.title.label("vacancy_title"),
+            vacancies_table.c.description.label("vacancy_description"),
+            vacancies_table.c.responsibilities.label("vacancy_responsibilities"),
+            vacancies_table.c.requirements.label("vacancy_requirements"),
+            vacancies_table.c.is_active.label("vacancy_is_active"),
+            vacancies_table.c.employment_type.label("vacancy_employment_type"),
+            vacancies_table.c.location.label("vacancy_location"),
+            vacancies_table.c.salary_min.label("vacancy_salary_min"),
+            vacancies_table.c.salary_max.label("vacancy_salary_max"),
+            vacancies_table.c.salary_currency.label("vacancy_salary_currency"),
+            vacancies_table.c.experience_years_min.label("vacancy_experience_years_min"),
+            vacancies_table.c.experience_years_max.label("vacancy_experience_years_max"),
+            vacancies_table.c.work_format.label("vacancy_work_format"),
+            vacancies_table.c.expires_at.label("vacancy_expires_at"),
+            vacancies_table.c.created_at.label("vacancy_created_at"),
+            vacancies_table.c.updated_at.label("vacancy_updated_at"),
+            job_applications_table.c.id.label("application_id"),
+            job_applications_table.c.status.label("application_status"),
+        )
+        .select_from(
+            saved_vacancies_table.join(
+                vacancies_table,
+                vacancies_table.c.id == saved_vacancies_table.c.vacancy_id,
+            ).outerjoin(
+                job_applications_table,
+                (job_applications_table.c.vacancy_id == saved_vacancies_table.c.vacancy_id)
+                & (job_applications_table.c.user_id == saved_vacancies_table.c.user_id),
+            )
+        )
+        .where(saved_vacancies_table.c.user_id == user_id)
+    )
+
+
+def _build_saved_vacancy_out(row: dict) -> SavedVacancyOut:
+    vacancy = VacancyResponse(
+        id=row["vacancy_id"],
+        company_id=row["company_id"],
+        created_by_user_id=row["created_by_user_id"],
+        title=row["vacancy_title"],
+        description=row["vacancy_description"],
+        responsibilities=row.get("vacancy_responsibilities"),
+        requirements=row.get("vacancy_requirements"),
+        is_active=row["vacancy_is_active"],
+        employment_type=row.get("vacancy_employment_type"),
+        location=row.get("vacancy_location"),
+        salary_min=row.get("vacancy_salary_min"),
+        salary_max=row.get("vacancy_salary_max"),
+        salary_currency=row.get("vacancy_salary_currency"),
+        experience_years_min=row.get("vacancy_experience_years_min"),
+        experience_years_max=row.get("vacancy_experience_years_max"),
+        work_format=row.get("vacancy_work_format"),
+        expires_at=row.get("vacancy_expires_at"),
+        created_at=row["vacancy_created_at"],
+        updated_at=row["vacancy_updated_at"],
+    )
+    application_status = row.get("application_status")
+    return SavedVacancyOut(
+        id=row["id"],
+        user_id=row["user_id"],
+        vacancy_id=row["vacancy_id"],
+        note=row.get("note"),
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        is_applied=row.get("application_id") is not None,
+        application_id=row.get("application_id"),
+        application_status=ApplicationStatus(application_status) if application_status else None,
+        vacancy=vacancy,
+    )
+
+
+async def _get_saved_vacancy_for_user(
+    session: AsyncSession,
+    saved_vacancy_id: int,
+    user_id: int,
+) -> dict:
+    stmt = _saved_vacancy_stmt(user_id=user_id).where(saved_vacancies_table.c.id == saved_vacancy_id)
+    result = await session.execute(stmt)
+    row = result.mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Saved vacancy not found")
     return dict(row)
 
 
@@ -175,6 +293,139 @@ async def list_resumes(
     stmt = select(resumes_table).where(resumes_table.c.user_id == current_user["id"])
     result = await session.execute(stmt)
     return [dict(row) for row in result.mappings().all()]
+
+
+@router.post(
+    "/saved-vacancies",
+    response_model=SavedVacancyOut,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_saved_vacancy(
+    payload: SavedVacancyCreateIn,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker"])),
+) -> SavedVacancyOut:
+    await _ensure_vacancy_exists(session=session, vacancy_id=payload.vacancy_id)
+
+    async with session.begin():
+        duplicate_stmt = select(saved_vacancies_table.c.id).where(
+            saved_vacancies_table.c.user_id == current_user["id"],
+            saved_vacancies_table.c.vacancy_id == payload.vacancy_id,
+        )
+        duplicate = (await session.execute(duplicate_stmt)).scalar_one_or_none()
+        if duplicate is not None:
+            raise HTTPException(status_code=409, detail="Vacancy is already saved")
+
+        try:
+            stmt = (
+                insert(saved_vacancies_table)
+                .values(
+                    user_id=current_user["id"],
+                    vacancy_id=payload.vacancy_id,
+                    note=payload.note,
+                )
+                .returning(saved_vacancies_table.c.id)
+            )
+            result = await session.execute(stmt)
+            saved_vacancy_id = result.scalar_one()
+        except IntegrityError as exc:
+            msg = str(getattr(exc, "orig", exc))
+            if "uq_saved_vacancies_user_vacancy" in msg or "saved_vacancies" in msg:
+                raise HTTPException(status_code=409, detail="Vacancy is already saved") from exc
+            raise
+
+    row = await _get_saved_vacancy_for_user(
+        session=session,
+        saved_vacancy_id=saved_vacancy_id,
+        user_id=current_user["id"],
+    )
+    return _build_saved_vacancy_out(row)
+
+
+@router.get("/saved-vacancies", response_model=list[SavedVacancyOut])
+async def list_saved_vacancies(
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker"])),
+) -> list[SavedVacancyOut]:
+    stmt = _saved_vacancy_stmt(user_id=current_user["id"]).order_by(
+        saved_vacancies_table.c.created_at.desc(),
+        saved_vacancies_table.c.id.desc(),
+    )
+    result = await session.execute(stmt)
+    return [_build_saved_vacancy_out(dict(row)) for row in result.mappings().all()]
+
+
+@router.get("/saved-vacancies/{saved_vacancy_id}", response_model=SavedVacancyOut)
+async def get_saved_vacancy(
+    saved_vacancy_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker"])),
+) -> SavedVacancyOut:
+    row = await _get_saved_vacancy_for_user(
+        session=session,
+        saved_vacancy_id=saved_vacancy_id,
+        user_id=current_user["id"],
+    )
+    return _build_saved_vacancy_out(row)
+
+
+@router.patch("/saved-vacancies/{saved_vacancy_id}", response_model=SavedVacancyOut)
+async def update_saved_vacancy(
+    saved_vacancy_id: int,
+    payload: SavedVacancyUpdateIn,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker"])),
+) -> SavedVacancyOut:
+    values = payload.model_dump(exclude_unset=True)
+    if not values:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    stmt = (
+        update(saved_vacancies_table)
+        .where(
+            saved_vacancies_table.c.id == saved_vacancy_id,
+            saved_vacancies_table.c.user_id == current_user["id"],
+        )
+        .values(**values, updated_at=func.now())
+        .returning(saved_vacancies_table.c.id)
+    )
+    result = await session.execute(stmt)
+    updated_id = result.scalar_one_or_none()
+    if updated_id is None:
+        await session.rollback()
+        raise HTTPException(status_code=404, detail="Saved vacancy not found")
+
+    await session.commit()
+    row = await _get_saved_vacancy_for_user(
+        session=session,
+        saved_vacancy_id=updated_id,
+        user_id=current_user["id"],
+    )
+    return _build_saved_vacancy_out(row)
+
+
+@router.delete("/saved-vacancies/{saved_vacancy_id}")
+async def delete_saved_vacancy(
+    saved_vacancy_id: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["worker"])),
+):
+    stmt = (
+        delete(saved_vacancies_table)
+        .where(
+            saved_vacancies_table.c.id == saved_vacancy_id,
+            saved_vacancies_table.c.user_id == current_user["id"],
+        )
+        .returning(saved_vacancies_table.c.id)
+    )
+    result = await session.execute(stmt)
+    deleted = result.scalar_one_or_none()
+    if deleted is None:
+        await session.rollback()
+        raise HTTPException(status_code=404, detail="Saved vacancy not found")
+
+    await session.commit()
+    return {"status": "ok"}
 
 
 @router.post("/resumes")
