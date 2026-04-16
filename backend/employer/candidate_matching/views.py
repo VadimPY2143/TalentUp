@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from payments.billing import CreditBillingService, get_candidate_matching_credits
 from database import get_session
 from employer.candidate_matching.cache import (
     build_job_payload,
@@ -26,6 +27,7 @@ from users.define_roles import require_roles
 from worker.messages.celery_app import celery_app
 
 router = APIRouter(tags=["candidate_matching"])
+billing_service = CreditBillingService()
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 MATCH_CACHE_TTL_SECONDS = 3600
@@ -109,6 +111,18 @@ async def start_candidate_matching(
         status="pending",
         requested_limit=payload.requested_limit,
     )
+    required_credits = get_candidate_matching_credits(payload.requested_limit)
+    await billing_service.charge_for_feature(
+        session=session,
+        user_id=int(current_user["id"]),
+        feature_code="candidate_matching",
+        amount=required_credits,
+        idempotency_key=f"candidate_matching:{current_user['id']}:{vacancy_id}:{job_id}",
+        reference_type="matching_job",
+        reference_id=job_id,
+        meta={"requested_limit": payload.requested_limit},
+    )
+    await session.commit()
 
     try:
         await redis_client.set(
@@ -122,6 +136,20 @@ async def start_candidate_matching(
             ex=MATCH_CACHE_TTL_SECONDS,
         )
     except RedisError as exc:
+        try:
+            await billing_service.refund_feature_charge(
+                session=session,
+                user_id=int(current_user["id"]),
+                amount=required_credits,
+                idempotency_key=f"refund:{job_id}",
+                feature_code="candidate_matching",
+                reference_type="matching_job",
+                reference_id=job_id,
+                meta={"reason": "redis_unavailable"},
+            )
+            await session.commit()
+        except Exception:
+            await session.rollback()
         raise HTTPException(status_code=503, detail="Redis is unavailable") from exc
 
     try:
@@ -132,9 +160,24 @@ async def start_candidate_matching(
                 "vacancy_id": vacancy_id,
                 "employer_user_id": current_user["id"],
                 "requested_limit": payload.requested_limit,
+                "charged_credits": required_credits,
             },
         )
     except Exception as exc:
+        try:
+            await billing_service.refund_feature_charge(
+                session=session,
+                user_id=int(current_user["id"]),
+                amount=required_credits,
+                idempotency_key=f"refund:{job_id}",
+                feature_code="candidate_matching",
+                reference_type="matching_job",
+                reference_id=job_id,
+                meta={"reason": "enqueue_failed"},
+            )
+            await session.commit()
+        except Exception:
+            await session.rollback()
         job_payload["status"] = "failed"
         job_payload["error"] = f"Failed to enqueue celery task: {exc}"
         try:

@@ -139,7 +139,7 @@ async def get_current_user_by_token(token: str, session: AsyncSession) -> dict:
 
     stmt = select(users_table).where(users_table.c.email == email)
     result = await session.execute(stmt)
-    user = result.fetchone()
+    user = result.mappings().first()
 
     if user is None:
         raise HTTPException(
@@ -149,9 +149,10 @@ async def get_current_user_by_token(token: str, session: AsyncSession) -> dict:
         )
 
     return {
-        'id': user[0],
-        'username': user[1],
-        'email': user[2],
-        'password': user[3],
-        'role': user[4],
+        'id': user["id"],
+        'username': user["username"],
+        'email': user["email"],
+        'password': user["password"],
+        'credits': user["credits"],
+        'role': user["role"],
     }

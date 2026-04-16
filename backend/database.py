@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from sqlalchemy import (
     ARRAY,
     Boolean,
+    CheckConstraint,
     Column,
     Date,
     DateTime,
@@ -94,12 +95,96 @@ users_table = Table(
     Column('username', String(50), unique=True, nullable=False),
     Column('email', String(255), unique=True, nullable=False),
     Column('password', String(255), nullable=False),
+    Column('credits', Integer, nullable=False, default=0, server_default='0'),
     Column(
         'role',
         Enum('employer', 'worker', name='user_role'),
         nullable=False,
         server_default='worker',
     ),
+    CheckConstraint('credits >= 0', name='ck_users_credits_non_negative'),
+)
+
+payment_status_enum = Enum(
+    'pending',
+    'success',
+    'failed',
+    'expired',
+    name='payment_order_status',
+)
+
+credit_transaction_type_enum = Enum(
+    'purchase',
+    'debit',
+    'refund',
+    'manual_adjustment',
+    name='credit_transaction_type',
+)
+
+credit_packages_table = Table(
+    'credit_packages',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('code', String(64), unique=True, nullable=False),
+    Column('name', String(128), nullable=False),
+    Column('credits', Integer, nullable=False),
+    Column('price_uah', Integer, nullable=False),
+    Column('is_active', Boolean, nullable=False, server_default='true'),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    CheckConstraint('credits > 0', name='ck_credit_packages_credits_positive'),
+    CheckConstraint('price_uah > 0', name='ck_credit_packages_price_positive'),
+)
+
+payment_orders_table = Table(
+    'payment_orders',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('package_id', Integer, ForeignKey('credit_packages.id', ondelete='RESTRICT'), nullable=False),
+    Column('provider', String(32), nullable=False, server_default='wayforpay'),
+    Column('provider_order_id', String(128), unique=True, nullable=False),
+    Column('amount_uah', Integer, nullable=False),
+    Column('status', payment_status_enum, nullable=False, server_default='pending'),
+    Column('idempotency_key', String(128), unique=True, nullable=False),
+    Column('provider_payload', JSON),
+    Column('paid_at', DateTime(timezone=True)),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        'updated_at',
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    CheckConstraint('amount_uah > 0', name='ck_payment_orders_amount_positive'),
+    Index('ix_payment_orders_user_id', 'user_id'),
+    Index('ix_payment_orders_status', 'status'),
+)
+
+credit_transactions_table = Table(
+    'credit_transactions',
+    metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False),
+    Column('type', credit_transaction_type_enum, nullable=False),
+    Column('amount', Integer, nullable=False),
+    Column('balance_after', Integer, nullable=False),
+    Column('feature_code', String(64)),
+    Column('reference_type', String(64)),
+    Column('reference_id', String(128)),
+    Column('idempotency_key', String(128), unique=True, nullable=False),
+    Column('meta', JSON),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    CheckConstraint('balance_after >= 0', name='ck_credit_transactions_balance_non_negative'),
+    Index('ix_credit_transactions_user_id_created_at', 'user_id', 'created_at'),
+    Index('ix_credit_transactions_feature_code', 'feature_code'),
 )
 
 user_profiles_table = Table(

@@ -11,6 +11,7 @@ import Messages from "./pages/Messages"
 import Analytics from "./pages/Analytics"
 import OAuthCallback from "./pages/OAuthCallback"
 import CompanyProfile from "./pages/CompanyProfile"
+import PaymentTest from "./pages/PaymentTest"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import RoleRoute from "./routes/RoleRoute"
 import Footer from "./components/layout/Footer"
@@ -28,6 +29,7 @@ const App = () => {
               <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/jobs" element={<JobSearchNew />} />
               <Route path="/companies/:companyId" element={<CompanyProfile />} />
+              <Route path="/payment-test" element={<PaymentTest />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/messages" element={<Messages />} />

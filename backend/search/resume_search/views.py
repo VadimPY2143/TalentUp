@@ -14,9 +14,11 @@ from search.resume_search.ai_summary import (
 )
 from search.resume_search.filters import ResumeSearchFilters, apply_resume_search_filters
 from search.resume_search.models import ResumeSummaryResponse
+from payments.billing import CreditBillingService, RESUME_SUMMARY_CREDITS
 from users.define_roles import require_roles
 
 router = APIRouter(tags=["resume_search"])
+billing_service = CreditBillingService()
 
 
 def _build_token_conditions(term: str) -> list[Any]:
@@ -155,6 +157,7 @@ async def resumes_recommendations(
 async def resume_summary(
     resume_id: int,
     session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(require_roles(["employer"])),
 ):
     stmt = select(resumes_table).where(resumes_table.c.id == resume_id)
     result = await session.execute(stmt)
@@ -171,5 +174,17 @@ async def resume_summary(
         return ResumeSummaryResponse(**cached_summary, cached=True)
 
     summary = await summarize_resume(dict(resume_row))
+    resume_updated_at = resume_row.get("updated_at")
+    version = resume_updated_at.isoformat() if resume_updated_at else "none"
+    await billing_service.charge_for_feature(
+        session=session,
+        user_id=int(current_user["id"]),
+        feature_code="resume_summary",
+        amount=RESUME_SUMMARY_CREDITS,
+        idempotency_key=f"resume_summary:{current_user['id']}:{resume_id}:{version}",
+        reference_type="resume",
+        reference_id=str(resume_id),
+    )
+    await session.commit()
     await set_cached_resume_summary(cache_key, summary)
     return ResumeSummaryResponse(**summary, cached=False)

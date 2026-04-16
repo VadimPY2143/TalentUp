@@ -1,18 +1,22 @@
 from datetime import datetime, timezone
+import hashlib
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy import delete, insert, or_, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cities.service import CityService
 from database import companies_table, get_session, vacancies_table
+from payments.billing import CreditBillingService, VACANCY_AI_FILL_CREDITS
 from users.define_roles import require_roles
 
 from .ai_filling import generate_vacancy
 from .models import Vacancy, VacancyAIFillRequest, VacancyResponse, VacancyUpdate
 
 router = APIRouter(tags=["vacancies"])
+billing_service = CreditBillingService()
 
 
 async def _ensure_owned_company(
@@ -81,7 +85,19 @@ async def fill_vacancy_with_ai(
     await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
     try:
         generated = await generate_vacancy(payload.description)
-        return Vacancy.model_validate(generated)
+        vacancy = Vacancy.model_validate(generated)
+        description_hash = hashlib.sha256(payload.description.strip().encode("utf-8")).hexdigest()
+        await billing_service.charge_for_feature(
+            session=session,
+            user_id=int(current_user["id"]),
+            feature_code="vacancy_ai_fill",
+            amount=VACANCY_AI_FILL_CREDITS,
+            idempotency_key=f"vacancy_ai_fill:{current_user['id']}:{company_id}:{description_hash}",
+            reference_type="company",
+            reference_id=str(company_id),
+        )
+        await session.commit()
+        return vacancy
     except ValidationError as exc:
         raise HTTPException(status_code=502, detail=f"Failed to parse AI vacancy response: {exc}") from exc
 
@@ -196,7 +212,7 @@ async def delete_vacancy_by_id(
 ):
     await _ensure_owned_company(company_id=company_id, session=session, current_user=current_user)
 
-    stmt = (
+    delete_stmt = (
         delete(vacancies_table)
         .where(
             vacancies_table.c.id == vacancy_id,
@@ -204,8 +220,35 @@ async def delete_vacancy_by_id(
         )
         .returning(vacancies_table.c.id)
     )
-    result = await session.execute(stmt)
-    await session.commit()
+    try:
+        result = await session.execute(delete_stmt)
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        now_utc = datetime.now(timezone.utc)
+        archive_stmt = (
+            update(vacancies_table)
+            .where(
+                vacancies_table.c.id == vacancy_id,
+                vacancies_table.c.company_id == company_id,
+            )
+            .values(
+                is_active=False,
+                expires_at=now_utc,
+                updated_at=now_utc,
+            )
+            .returning(vacancies_table.c.id)
+        )
+        archived_result = await session.execute(archive_stmt)
+        await session.commit()
+        archived = archived_result.first()
+        if not archived:
+            raise HTTPException(status_code=404, detail="Vacancy not found")
+        return {
+            "status": "archived",
+            "detail": "Vacancy has applications and was archived instead of deleted",
+        }
+
     deleted = result.first()
 
     if not deleted:

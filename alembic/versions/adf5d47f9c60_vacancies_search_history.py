@@ -24,13 +24,13 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_index(op.f('ix_companies_industry'), table_name='companies')
-    op.drop_index(op.f('ix_companies_name'), table_name='companies')
-    op.drop_index(op.f('ix_refresh_tokens_user_id'), table_name='refresh_tokens')
-    op.drop_index(op.f('ix_resumes_desired_role'), table_name='resumes')
-    op.drop_index(op.f('ix_vacancies_company_id'), table_name='vacancies')
-    op.drop_index(op.f('ix_vacancies_is_active'), table_name='vacancies')
-    op.drop_index(op.f('ix_vacancies_title'), table_name='vacancies')
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_companies_industry'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_companies_name'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_refresh_tokens_user_id'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_resumes_desired_role'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_vacancies_company_id'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_vacancies_is_active'))
+    op.execute(sa.text('DROP INDEX IF EXISTS ix_vacancies_title'))
     # ### end Alembic commands ###
 
 

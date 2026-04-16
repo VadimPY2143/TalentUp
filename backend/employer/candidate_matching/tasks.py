@@ -7,7 +7,7 @@ import redis.asyncio as redis
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from database import async_session_factory
+from payments.billing import CreditBillingService
 from employer.candidate_matching.ai_rerank import rerank_candidate
 from employer.candidate_matching.cache import (
     build_job_payload,
@@ -22,6 +22,7 @@ from worker.messages.celery_app import celery_app
 
 LOGGER = logging.getLogger(__name__)
 _T = TypeVar("_T")
+billing_service = CreditBillingService()
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = 3600
@@ -177,6 +178,39 @@ async def _mark_job_failed(
     await _store_payload(payload)
 
 
+async def _refund_candidate_matching_credits(
+    *,
+    employer_user_id: int,
+    vacancy_id: int,
+    job_id: str,
+    amount: int,
+    reason: str,
+) -> None:
+    if amount <= 0:
+        return
+
+    session = await _get_celery_session()
+    try:
+        async with session.begin():
+            await billing_service.refund_feature_charge(
+                session=session,
+                user_id=employer_user_id,
+                amount=amount,
+                idempotency_key=f"refund:{job_id}",
+                feature_code="candidate_matching",
+                reference_type="matching_job",
+                reference_id=job_id,
+                meta={
+                    "reason": reason,
+                    "vacancy_id": vacancy_id,
+                },
+            )
+    finally:
+        await session.close()
+        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
+            await session.bind.dispose()
+
+
 async def _set_status(
     *,
     payload: dict[str, Any],
@@ -242,6 +276,7 @@ def run_candidate_matching(
     vacancy_id: int,
     employer_user_id: int,
     requested_limit: int,
+    charged_credits: int,
     **_unused: Any,
 ) -> dict[str, Any]:
     del self
@@ -252,6 +287,7 @@ def run_candidate_matching(
                 vacancy_id=vacancy_id,
                 employer_user_id=employer_user_id,
                 requested_limit=requested_limit,
+                charged_credits=charged_credits,
             )
         )
     except Exception as exc:
@@ -274,6 +310,18 @@ def run_candidate_matching(
             )
         except Exception:
             LOGGER.exception("Failed to persist failed status for candidate matching job_id=%s", job_id)
+        try:
+            _run_async(
+                _refund_candidate_matching_credits(
+                    employer_user_id=employer_user_id,
+                    vacancy_id=vacancy_id,
+                    job_id=job_id,
+                    amount=charged_credits,
+                    reason="task_failed",
+                )
+            )
+        except Exception:
+            LOGGER.exception("Failed to refund credits for candidate matching job_id=%s", job_id)
         raise
 
 
@@ -283,6 +331,7 @@ async def _run_candidate_matching(
     vacancy_id: int,
     employer_user_id: int,
     requested_limit: int,
+    charged_credits: int,
 ) -> dict[str, Any]:
     payload = build_job_payload(
         job_id=job_id,
@@ -304,6 +353,13 @@ async def _run_candidate_matching(
             )
             if vacancy is None:
                 await _set_status(payload=payload, status="failed", error="Vacancy not found")
+                await _refund_candidate_matching_credits(
+                    employer_user_id=employer_user_id,
+                    vacancy_id=vacancy_id,
+                    job_id=job_id,
+                    amount=charged_credits,
+                    reason="vacancy_not_found",
+                )
                 return payload
 
             candidates = await repository.list_vacancy_candidates(
