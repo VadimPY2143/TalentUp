@@ -48,9 +48,14 @@
 2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
 2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 01:34:53 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-06 01:34:58 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-06 01:35:03 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-06 01:35:08 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-06 08:50:10 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-06 08:50:15 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:21:35 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:21:40 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:21:45 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:21:50 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:21:55 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:22:00 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:22:06 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
+2026-04-04 21:31:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-04 21:31:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-04 22:02:17 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-04 22:02:17 - moodshare - ERROR - JWT expired: Signature has expired.
