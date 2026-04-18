@@ -64,6 +64,35 @@ services:
       sh -c "alembic upgrade head &&
       uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/backend"
 
+  celery_worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: talentup-celery-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: talentup
+      POSTGRES_USER: talentup
+      POSTGRES_PASSWORD: talentup
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      CELERY_ENABLED: "1"
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      JWT_SECRET_KEY: change-me-in-production
+    volumes:
+      - ./:/app
+      - backend_uploads:/app/backend/uploads
+    command: >
+      sh -c "alembic upgrade head &&
+      celery -A notifications.tasks worker -l info"
+
   frontend:
     build:
       context: ./frontend

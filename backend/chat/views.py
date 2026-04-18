@@ -26,6 +26,7 @@ from database import get_session
 from logger import logger
 from users.auth import get_current_user, get_current_user_by_token
 from users.define_roles import require_roles
+from notifications.events import notify_chat_message
 
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -317,6 +318,19 @@ async def websocket_endpoint(
                 sender_user_id=user["id"],
                 text=parsed.text,
             )
+
+            if to_user_id != user["id"]:
+                try:
+                    await notify_chat_message(
+                        session=session,
+                        to_user_id=to_user_id,
+                        from_user_id=user["id"],
+                        chat_id=chat_id,
+                        message_id=int(created_message["id"]),
+                        text_preview=str(created_message.get("message") or ""),
+                    )
+                except Exception as exc:
+                    logger.warning(f"Failed to create chat notification: {exc}")
 
             message_payload = {
                 "type": "message",

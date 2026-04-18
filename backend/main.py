@@ -24,6 +24,7 @@ from users.views import router as user_profile_router
 from worker.applications.views import router as worker_applications_router
 from worker.resumes.views import router as worker_resumes_router
 from analytics.crud import router as analytics_router
+from notifications.views import router as notifications_router
 
 
 app.add_middleware(
@@ -53,6 +54,7 @@ app.include_router(search_router)
 app.include_router(vacancy_search_router)
 app.include_router(oauth_router)
 app.include_router(analytics_router)
+app.include_router(notifications_router)
 
 
 if __name__ == "__main__":
