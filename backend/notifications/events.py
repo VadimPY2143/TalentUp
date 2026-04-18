@@ -63,7 +63,7 @@ async def notify_chat_message(
         session=session,
         user_id=to_user_id,
         type="chat_message",
-        title="New message",
+        title="Нове повідомлення",
         body=preview or None,
         entity_type="chat",
         entity_id=chat_id,
@@ -121,7 +121,7 @@ async def notify_resume_saved(
     company_id: int,
     company_name: str | None,
 ) -> None:
-    title = "Your resume was saved"
+    title = "Ваше резюме збережено"
     body = company_name or None
     await _create_and_publish(
         session=session,

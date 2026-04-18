@@ -981,3 +981,75 @@
 2026-04-16 15:11:40 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
 2026-04-16 15:11:40 - moodshare - INFO - WFP duplicate callback order_id=21 order_reference=wfp_88680cc369754f5792320a7feb31662e
 2026-04-16 15:12:43 - moodshare - INFO - WFP order created order_id=24 provider_order_id=wfp_66946446f9b349bb84d8b24ff03482dc user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:18 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:23 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:25 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:27 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-18 13:47:01 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:47:09 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:47:09 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:47:13 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:47:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:47:17 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 13:47:26 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:47:39 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:47:39 - moodshare - INFO - User 6 connected to chat 15
+2026-04-18 13:47:50 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 13:47:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:47:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:47:58 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:48:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:48:22 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-18 13:48:22 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:48:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:48:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:48:36 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 13:48:38 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 13:48:38 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:50:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:50:43 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 13:50:45 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 13:50:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:50:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:51:01 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:52:21 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:52:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:52:31 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 13:52:32 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 13:52:32 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:52:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:52:33 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 13:52:34 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 13:52:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 13:52:37 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:52:37 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to chat 15
+2026-04-18 13:54:01 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:02 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:03 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:14 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:34 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 13:54:54 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 14:02:03 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-18 14:02:03 - moodshare - INFO - User 6 connected to chat 15
+2026-04-18 14:02:40 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-18 14:04:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 14:04:52 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 14:04:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 14:04:53 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 14:07:53 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 14:11:55 - moodshare - INFO - User 4 connected to chat 15
+2026-04-18 14:14:24 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to chat 15
