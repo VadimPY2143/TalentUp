@@ -1,3 +1,5 @@
+import { useState, useMemo } from "react"
+import { Search, MessageCircle } from "lucide-react"
 import type { ChatMessageResponse, MyChatResponse } from "../../types/chat"
 
 interface ConversationListProps {
@@ -7,22 +9,41 @@ interface ConversationListProps {
   isLoading: boolean
   onSelect: (chatId: number) => void
   getParticipantLabel: (chat: MyChatResponse) => string
+  currentUserRole?: "employer" | "worker" | null
 }
 
 const formatConversationTime = (value?: string | null) => {
-  if (!value) {
-    return ""
-  }
+  if (!value) return ""
   const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) {
-    return ""
+  if (Number.isNaN(parsed.getTime())) return ""
+  
+  const now = new Date()
+  const isToday = parsed.toDateString() === now.toDateString()
+  const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === parsed.toDateString()
+  
+  if (isToday) {
+    return new Intl.DateTimeFormat("uk-UA", { hour: "2-digit", minute: "2-digit" }).format(parsed)
   }
-  return new Intl.DateTimeFormat("uk-UA", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short",
-  }).format(parsed)
+  if (isYesterday) {
+    return "Вчора"
+  }
+  return new Intl.DateTimeFormat("uk-UA", { day: "2-digit", month: "short" }).format(parsed)
+}
+
+const getAvatarUrl = (chat: MyChatResponse, role?: "employer" | "worker" | null) => {
+  if (role === "worker") {
+    return chat.employer_avatar_url
+  }
+  return chat.worker_avatar_url
+}
+
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 export const ConversationList = ({
@@ -32,53 +53,137 @@ export const ConversationList = ({
   isLoading,
   onSelect,
   getParticipantLabel,
+  currentUserRole,
 }: ConversationListProps) => {
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) return chats
+    const query = searchQuery.toLowerCase()
+    return chats.filter((chat) => {
+      const label = getParticipantLabel(chat).toLowerCase()
+      const preview = previewByChatId[chat.id]?.message?.toLowerCase() || ""
+      return label.includes(query) || preview.includes(query)
+    })
+  }, [chats, searchQuery, previewByChatId, getParticipantLabel])
+
+  const totalUnread = useMemo(() => {
+    return chats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0)
+  }, [chats])
+
   return (
-    <aside className="flex h-full min-h-0 w-full max-w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-soft lg:max-w-[360px]">
-      <div className="border-b border-slate-200 px-4 py-3">
-        <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Messages</p>
-        <h2 className="mt-1 font-display text-lg font-semibold text-slate-900">Conversations</h2>
+    <aside className="flex h-full min-h-0 w-full max-w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-soft lg:max-w-[380px]">
+      {/* Header */}
+      <div className="border-b border-slate-200 px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-[#1f2f5e]" />
+            <h2 className="font-display text-lg font-semibold text-slate-900">Повідомлення</h2>
+            {totalUnread > 0 && (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[11px] font-semibold text-white">
+                {totalUnread}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="relative mt-3">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Пошук чатів..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2 text-sm text-slate-800 outline-none focus:border-[#1f2f5e]/30 focus:bg-white transition"
+          />
+        </div>
       </div>
 
+      {/* Chat List */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading && (
-          <div className="px-4 py-4 text-sm text-slate-500">Завантаження діалогів...</div>
-        )}
-        {!isLoading && chats.length === 0 && (
-          <div className="px-4 py-4 text-sm text-slate-500">
-            У вас ще немає чатів. Почніть розмову з картки кандидата.
+          <div className="px-4 py-6 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
+            <p className="mt-2 text-sm text-slate-500">Завантаження діалогів...</p>
           </div>
         )}
+
+        {!isLoading && filteredChats.length === 0 && (
+          <div className="px-4 py-6 text-center">
+            <MessageCircle className="mx-auto h-10 w-10 text-slate-300" />
+            <p className="mt-2 text-sm text-slate-500">
+              {searchQuery ? "Немає результатів пошуку" : "У вас ще немає чатів"}
+            </p>
+            {!searchQuery && (
+              <p className="mt-1 text-xs text-slate-400">
+                Почніть розмову з картки кандидата або вакансії
+              </p>
+            )}
+          </div>
+        )}
+
         {!isLoading &&
-          chats.map((chat) => {
+          filteredChats.map((chat) => {
             const isActive = chat.id === selectedChatId
             const preview = previewByChatId[chat.id]
             const previewText = preview?.message ?? "Немає повідомлень"
             const previewTimestamp = preview?.created_at ?? chat.last_message_at ?? chat.created_at
+            const avatarUrl = getAvatarUrl(chat, currentUserRole)
+            const label = getParticipantLabel(chat)
+            const hasUnread = (chat.unread_count || 0) > 0
+
             return (
               <button
                 key={chat.id}
                 type="button"
                 onClick={() => onSelect(chat.id)}
-                className={`w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 ${
+                className={`group w-full border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 ${
                   isActive
-                    ? "bg-[#eef3ff]"
+                    ? "bg-gradient-to-r from-[#eef3ff] to-[#f8faff]"
                     : "bg-white hover:bg-slate-50"
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="truncate text-sm font-semibold text-slate-900">{getParticipantLabel(chat)}</p>
-                  <span className="shrink-0 text-[11px] text-slate-500">
-                    {formatConversationTime(previewTimestamp)}
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="line-clamp-1 text-xs text-slate-600">{previewText}</p>
-                  {chat.unread_count > 0 && (
-                    <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-semibold text-white">
-                      {chat.unread_count}
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={label}
+                        className="h-12 w-12 rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#1f2f5e] to-[#3b4d7c] text-sm font-semibold text-white border-2 border-white shadow-sm">
+                        {getInitials(label)}
+                      </div>
+                    )}
+                    {hasUnread && !isActive && (
+                      <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-orange-500 border-2 border-white" />
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`truncate text-sm font-semibold ${hasUnread && !isActive ? "text-slate-900" : "text-slate-700"}`}>
+                        {label}
+                      </p>
+                      <span className="shrink-0 text-[11px] text-slate-400">
+                        {formatConversationTime(previewTimestamp)}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <p className={`line-clamp-1 text-xs ${hasUnread && !isActive ? "text-slate-700 font-medium" : "text-slate-500"}`}>
+                        {previewText}
+                      </p>
+                      {chat.unread_count > 0 && (
+                        <span className="ml-auto inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-semibold text-white">
+                          {chat.unread_count > 99 ? "99+" : chat.unread_count}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </button>
             )
