@@ -25,6 +25,7 @@ from .models import (
     JobApplicationStatusUpdateIn,
 )
 from .services import ApplicationService
+from notifications.events import notify_application_status_changed
 
 router = APIRouter(tags=["applications"])
 
@@ -325,6 +326,21 @@ async def update_application_status(
     except Exception:
         await session.rollback()
         raise
+
+    try:
+        await notify_application_status_changed(
+            session=session,
+            worker_user_id=int(app_row["user_id"]),
+            application_id=int(application_id),
+            vacancy_id=int(app_row["vacancy_id"]),
+            vacancy_title=app_row.get("vacancy_title"),
+            from_status=current_status.value,
+            to_status=payload.status.value,
+            comment=payload.comment,
+        )
+    except Exception:
+        # Notifications must not break core business flow.
+        pass
 
     merged = {
         **updated,

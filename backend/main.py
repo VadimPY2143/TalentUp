@@ -27,6 +27,7 @@ from worker.messages.views import router as worker_messages_router
 from worker.resumes.views import router as worker_resumes_router
 from analytics.crud import router as analytics_router
 from payments.views import router as payments_router
+from notifications.views import router as notifications_router
 
 
 app.add_middleware(
@@ -59,6 +60,7 @@ app.include_router(vacancy_search_router)
 app.include_router(oauth_router)
 app.include_router(analytics_router)
 app.include_router(payments_router)
+app.include_router(notifications_router)
 
 
 if __name__ == "__main__":

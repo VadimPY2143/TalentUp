@@ -9,6 +9,7 @@ import JobSearch from "./pages/JobSearch"
 import JobSearchNew from "./pages/JobSearchNew"
 import Messages from "./pages/Messages"
 import Analytics from "./pages/Analytics"
+import Notifications from "./pages/Notifications"
 import OAuthCallback from "./pages/OAuthCallback"
 import CompanyProfile from "./pages/CompanyProfile"
 import PaymentTest from "./pages/PaymentTest"
@@ -33,6 +34,7 @@ const App = () => {
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/messages" element={<Messages />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/jobs-old" element={<JobSearch />} />
                 <Route element={<RoleRoute allowed={["employer"]} />}>
                   <Route path="/candidates" element={<CandidateSearch />} />

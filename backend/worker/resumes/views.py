@@ -16,6 +16,7 @@ from database import (
 from logger import logger as LOGGER
 from users.auth import get_current_user
 from users.define_roles import require_roles
+from notifications.events import notify_resume_saved
 
 from .models import Resume, ResumeUpdate
 from .services import ResumeService
@@ -223,17 +224,17 @@ async def save_resume(
     if current_user["role"] != "employer":
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    company_stmt = select(companies_table.c.id).where(
+    company_stmt = select(companies_table.c.id, companies_table.c.name).where(
         companies_table.c.id == company_id,
         companies_table.c.user_id == current_user["id"],
     )
-    company_exists = (await session.execute(company_stmt)).scalar_one_or_none()
-    if not company_exists:
+    company_row = (await session.execute(company_stmt)).mappings().first()
+    if not company_row:
         raise HTTPException(status_code=404, detail="Company not found")
 
-    resume_stmt = select(resumes_table.c.id).where(resumes_table.c.id == resume_id)
-    resume_exists = (await session.execute(resume_stmt)).scalar_one_or_none()
-    if not resume_exists:
+    resume_stmt = select(resumes_table.c.id, resumes_table.c.user_id).where(resumes_table.c.id == resume_id)
+    resume_row = (await session.execute(resume_stmt)).mappings().first()
+    if not resume_row:
         raise HTTPException(status_code=404, detail="Resume not found")
 
     duplicate_stmt = select(saved_resumes_table.c.id).where(
@@ -247,6 +248,17 @@ async def save_resume(
     stmt = insert(saved_resumes_table).values(company_id=company_id, saved_resume_id=resume_id)
     await session.execute(stmt)
     await session.commit()
+
+    try:
+        await notify_resume_saved(
+            session=session,
+            worker_user_id=int(resume_row["user_id"]),
+            resume_id=int(resume_id),
+            company_id=int(company_row["id"]),
+            company_name=company_row.get("name"),
+        )
+    except Exception:
+        pass
 
     return {"status": "ok"}
 

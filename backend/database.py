@@ -19,6 +19,7 @@ from sqlalchemy import (
     func,
     Index,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -525,6 +526,34 @@ analytics_events_table = Table(
         "event_type",
         "occurred_at",
     ),
+)
+
+notifications_table = Table(
+    "notifications",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("type", String(100), nullable=False),
+    Column("title", String(255), nullable=False),
+    Column("body", Text),
+    Column("entity_type", String(100)),
+    Column("entity_id", Integer),
+    Column("payload_json", JSONB),
+    Column("is_read", Boolean, nullable=False, server_default="false"),
+    Column("read_at", DateTime(timezone=True)),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
+
+Index(
+    "ix_notifications_user_is_read_created_at_desc",
+    notifications_table.c.user_id,
+    notifications_table.c.is_read,
+    notifications_table.c.created_at.desc(),
+)
+Index(
+    "ix_notifications_user_created_at_desc",
+    notifications_table.c.user_id,
+    notifications_table.c.created_at.desc(),
 )
 
 
