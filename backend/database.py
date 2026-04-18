@@ -380,6 +380,26 @@ saved_resumes_table = Table(
     Column('saved_resume_id', Integer, ForeignKey('resumes.id'), nullable=False),
 )
 
+saved_vacancies_table = Table(
+    "saved_vacancies",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("vacancy_id", Integer, ForeignKey("vacancies.id", ondelete="CASCADE"), nullable=False),
+    Column("note", Text),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    Index("uq_saved_vacancies_user_vacancy", "user_id", "vacancy_id", unique=True),
+    Index("ix_saved_vacancies_user_id", "user_id"),
+    Index("ix_saved_vacancies_vacancy_id", "vacancy_id"),
+)
+
 refresh_tokens_table = Table(
     'refresh_tokens',
     metadata,
