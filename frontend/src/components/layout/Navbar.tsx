@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom"
+import { Bell } from "lucide-react"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
-import { Bell } from "lucide-react"
 import { useUnreadNotifications } from "../../notifications/useUnreadNotifications"
 
 const Navbar = () => {
@@ -26,7 +26,11 @@ const Navbar = () => {
 
       <div className="relative mx-auto flex h-20 max-w-[1120px] items-center justify-between px-1">
         <Link to="/" className="flex h-full items-center gap-3">
-          <img src={logo} alt="TalentUp" className="relative top-3 block h-16 w-auto object-contain md:h-[120px]" />
+          <img
+            src={logo}
+            alt="TalentUp"
+            className="relative top-3 block h-16 w-auto object-contain md:h-[120px]"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-white/90 md:flex">
@@ -56,6 +60,9 @@ const Navbar = () => {
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
                 База резюме
+              </Link>
+              <Link className="transition hover:text-orange-300" to="/payment-test?return_to=/dashboard">
+                Купити кредити
               </Link>
               <Link className="transition hover:text-orange-300" to="/messages">
                 Повідомлення

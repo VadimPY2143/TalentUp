@@ -23,6 +23,7 @@ import {
   listCompanyVacancies,
   updateCompanyVacancy,
 } from "../api/vacancies"
+import { redirectToPaymentOnInsufficientCredits } from "../payments/insufficientCredits"
 import type { CityOption } from "../types/city"
 import type { CompanyPayload, CompanyResponse } from "../types/company"
 import type { ApplicationResume, ApplicationStatus, JobApplication } from "../types/application"
@@ -456,6 +457,15 @@ const EmployerDashboard = () => {
   const aiTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const candidateMatchingPollingRef = useRef(false)
 
+  const openPaymentsPage = (feature?: string) => {
+    const params = new URLSearchParams()
+    params.set("return_to", "/dashboard")
+    if (feature) {
+      params.set("feature", feature)
+    }
+    navigate(`/payment-test?${params.toString()}`)
+  }
+
   useEffect(() => {
     if (!selectedApplicationResume) {
       return
@@ -541,6 +551,17 @@ const EmployerDashboard = () => {
       const job = await getLatestCandidateMatchingJob(vacancyId)
       setCandidateMatchingJob(job)
     } catch (err) {
+      const returnTo = `${window.location.pathname}${window.location.search}`
+      if (
+        redirectToPaymentOnInsufficientCredits({
+          error: err,
+          navigate,
+          feature: "candidate_matching",
+          returnTo,
+        })
+      ) {
+        return
+      }
       const statusCode = (err as { status?: number } | null)?.status
       if (statusCode === 404) {
         setCandidateMatchingJob(null)
@@ -571,6 +592,17 @@ const EmployerDashboard = () => {
       const job = await getCandidateMatchingJob(applicationsVacancyFilter, run.job_id)
       setCandidateMatchingJob(job)
     } catch (err) {
+      const returnTo = `${window.location.pathname}${window.location.search}`
+      if (
+        redirectToPaymentOnInsufficientCredits({
+          error: err,
+          navigate,
+          feature: "candidate_matching",
+          returnTo,
+        })
+      ) {
+        return
+      }
       const message = err instanceof Error ? err.message : "Не вдалося запустити AI матчинг"
       setCandidateMatchingError(message)
     } finally {
@@ -920,6 +952,17 @@ const EmployerDashboard = () => {
       setShowAIPromptEditor(false)
       setEditingVacancyId(null)
     } catch (err) {
+      const returnTo = `${window.location.pathname}${window.location.search}`
+      if (
+        redirectToPaymentOnInsufficientCredits({
+          error: err,
+          navigate,
+          feature: "vacancy_ai_fill",
+          returnTo,
+        })
+      ) {
+        return
+      }
       const message = err instanceof Error ? err.message : "AI не зміг заповнити вакансію"
       setVacancyError(message)
     } finally {
@@ -1733,7 +1776,7 @@ const EmployerDashboard = () => {
                         </div>
                       </div>
 
-                      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr,auto,auto]">
+                      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr,auto,auto,auto]">
                         <div>
                           <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                             Кількість кандидатів у AI-топі
@@ -1755,6 +1798,13 @@ const EmployerDashboard = () => {
                           disabled={!applicationsVacancyFilter || isCandidateMatchingStarting}
                         >
                           {isCandidateMatchingStarting ? "Запуск..." : "Згенерувати матч"}
+                        </button>
+                        <button
+                          className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:bg-emerald-100"
+                          type="button"
+                          onClick={() => openPaymentsPage("candidate_matching")}
+                        >
+                          Buy credits
                         </button>
                         <button
                           className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
@@ -2048,6 +2098,13 @@ const EmployerDashboard = () => {
                   <AISparkleIcon className="h-5 w-5 text-cyan-200" />
                   AI допомога
                 </span>
+              </button>
+              <button
+                className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:bg-emerald-100"
+                type="button"
+                onClick={() => openPaymentsPage("vacancy_ai_fill")}
+              >
+                Buy credits
               </button>
               <button
                 className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"

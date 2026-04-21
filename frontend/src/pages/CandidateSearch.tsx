@@ -20,6 +20,7 @@ import {
 import { trackAnalyticsEvent } from "../api/analytics"
 import { listCompanies } from "../api/companies"
 import { listCompanyVacancies } from "../api/vacancies"
+import { redirectToPaymentOnInsufficientCredits } from "../payments/insufficientCredits"
 import type { ChatResumeResponse } from "../types/chat"
 import type { CityOption } from "../types/city"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
@@ -821,6 +822,17 @@ const CandidateSearch = () => {
         cached: Boolean(data?.cached),
       })
     } catch (err) {
+      const returnTo = `${window.location.pathname}${window.location.search}`
+      if (
+        redirectToPaymentOnInsufficientCredits({
+          error: err,
+          navigate,
+          feature: "resume_summary",
+          returnTo,
+        })
+      ) {
+        return
+      }
       const message = err instanceof Error ? err.message : "Не вдалося отримати вижимку"
       setSummaryError(message)
     } finally {

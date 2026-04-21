@@ -128,10 +128,18 @@ async def list_credit_transactions(
 @router.post("/return")
 @router.get("/return")
 async def payment_return(request: Request) -> RedirectResponse:
-    return_url = (
+    frontend_base = (
         os.getenv("FRONTEND_URL")
         or os.getenv("FRONTEND_ORIGIN")
-        or "http://localhost:5173/"
-    )
+        or "http://localhost:5173"
+    ).rstrip("/")
+    frontend_path = (os.getenv("WFP_FRONTEND_RETURN_PATH") or "/payment-test").strip()
+    if not frontend_path.startswith("/"):
+        frontend_path = f"/{frontend_path}"
+
+    return_url = f"{frontend_base}{frontend_path}"
+    if request.url.query:
+        return_url = f"{return_url}?{request.url.query}"
+
     # WFP may call returnUrl with POST, so force GET redirect for SPA.
     return RedirectResponse(url=return_url, status_code=303)

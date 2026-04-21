@@ -2,6 +2,18 @@ const API_URL_OVERRIDE_STORAGE_KEY = "api_url_override"
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
 
+export class ApiError extends Error {
+  status: number
+  detail: unknown
+
+  constructor(message: string, status: number, detail: unknown) {
+    super(message)
+    this.name = "ApiError"
+    this.status = status
+    this.detail = detail
+  }
+}
+
 const resolveDefaultApiUrl = (): string => {
   const configured = (import.meta.env.VITE_API_URL ?? "").trim()
   if (configured) {
@@ -72,6 +84,12 @@ const parseErrorDetail = (detail: unknown): string => {
         return `${path}: ${item?.msg ?? "Request failed"}`
       })
       .join("; ")
+  }
+  if (detail && typeof detail === "object") {
+    const message = (detail as { message?: unknown }).message
+    if (typeof message === "string" && message.trim()) {
+      return message
+    }
   }
   if (typeof detail === "string") {
     return detail
@@ -152,7 +170,11 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
       }
       const retryData = await retry.json().catch(() => null)
       if (!retry.ok) {
-        throw new Error(parseErrorDetail(retryData?.detail))
+        throw new ApiError(
+          parseErrorDetail(retryData?.detail),
+          retry.status,
+          retryData?.detail ?? null,
+        )
       }
 
       return retryData as T
@@ -164,10 +186,11 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
   }
   const data = await response.json().catch(() => null)
   if (!response.ok) {
-    const errorMessage = parseErrorDetail(data?.detail)
-    const error = new Error(errorMessage)
-    ;(error as Error & { status?: number }).status = response.status
-    throw error
+    throw new ApiError(
+      parseErrorDetail(data?.detail),
+      response.status,
+      data?.detail ?? null,
+    )
   }
 
   return data as T
@@ -191,7 +214,11 @@ export const apiFetchBlob = async (path: string, options?: RequestInit): Promise
       })
       if (!retry.ok) {
         const data = await retry.json().catch(() => null)
-        throw new Error(parseErrorDetail(data?.detail))
+        throw new ApiError(
+          parseErrorDetail(data?.detail),
+          retry.status,
+          data?.detail ?? null,
+        )
       }
       return retry.blob()
     }
@@ -199,7 +226,11 @@ export const apiFetchBlob = async (path: string, options?: RequestInit): Promise
 
   if (!response.ok) {
     const data = await response.json().catch(() => null)
-    throw new Error(parseErrorDetail(data?.detail))
+    throw new ApiError(
+      parseErrorDetail(data?.detail),
+      response.status,
+      data?.detail ?? null,
+    )
   }
   return response.blob()
 }
