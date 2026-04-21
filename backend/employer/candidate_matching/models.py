@@ -67,3 +67,11 @@ class CandidateRerankOutput(BaseModel):
     strengths: list[str] = Field(default_factory=list)
     risks: list[str] = Field(default_factory=list)
     summary: str = Field(min_length=10, max_length=400)
+
+
+class CandidateBatchRerankItem(CandidateRerankOutput):
+    application_id: int = Field(ge=1)
+
+
+class CandidateBatchRerankOutput(BaseModel):
+    results: list[CandidateBatchRerankItem] = Field(default_factory=list)

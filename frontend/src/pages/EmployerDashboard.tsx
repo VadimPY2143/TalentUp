@@ -463,7 +463,7 @@ const EmployerDashboard = () => {
     if (feature) {
       params.set("feature", feature)
     }
-    navigate(`/payment-test?${params.toString()}`)
+    navigate(`/payment?${params.toString()}`)
   }
 
   useEffect(() => {
@@ -578,6 +578,10 @@ const EmployerDashboard = () => {
   const handleStartCandidateMatching = async () => {
     if (!applicationsVacancyFilter) {
       setCandidateMatchingError("Оберіть вакансію у фільтрі, щоб запустити матчинг")
+      return
+    }
+    if (candidateMatchingJob?.status === "pending" || candidateMatchingJob?.status === "running") {
+      setCandidateMatchingError("Матчинг уже виконується. Дочекайтеся завершення поточного запуску.")
       return
     }
 
@@ -1795,9 +1799,18 @@ const EmployerDashboard = () => {
                           className="rounded-xl bg-[#1f2f5e] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#1a2750] disabled:cursor-not-allowed disabled:opacity-60"
                           type="button"
                           onClick={() => void handleStartCandidateMatching()}
-                          disabled={!applicationsVacancyFilter || isCandidateMatchingStarting}
+                          disabled={
+                            !applicationsVacancyFilter
+                            || isCandidateMatchingStarting
+                            || candidateMatchingJob?.status === "pending"
+                            || candidateMatchingJob?.status === "running"
+                          }
                         >
-                          {isCandidateMatchingStarting ? "Запуск..." : "Згенерувати матч"}
+                          {(candidateMatchingJob?.status === "pending" || candidateMatchingJob?.status === "running")
+                            ? "У процесі..."
+                            : isCandidateMatchingStarting
+                              ? "Запуск..."
+                              : "Згенерувати матч"}
                         </button>
                         <button
                           className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 hover:bg-emerald-100"

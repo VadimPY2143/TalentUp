@@ -1,4 +1,6 @@
 import os
+import logging
+import sys
 
 from celery import Celery
 
@@ -35,4 +37,13 @@ celery_app.conf.update(
             "schedule": DISPATCH_INTERVAL_SECONDS,
         }
     },
+    worker_log_format='[%(asctime)s: %(levelname)s/%(processName)s] %(message)s',
+    worker_task_log_format='[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s',
+)
+
+# Configure Celery logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s: %(levelname)s/%(processName)s] %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
 )

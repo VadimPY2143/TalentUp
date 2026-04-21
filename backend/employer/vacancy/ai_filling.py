@@ -6,6 +6,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from .models import Vacancy
+from logger import logger
 
 load_dotenv()
 
@@ -47,7 +48,9 @@ async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
+    model_name = os.getenv("VACANCY_AI_FILL_MODEL", "google/gemma-3-12b-it")
+    logger.info(f"Using vacancy AI fill model: {model_name}")
+    model = OpenAIModel(model_name, provider=provider)
     agent = Agent(model, system_prompt=SYSTEM_PROMPT)
 
     result = await agent.run(

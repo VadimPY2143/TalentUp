@@ -30,7 +30,7 @@ const App = () => {
               <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/jobs" element={<JobSearchNew />} />
               <Route path="/companies/:companyId" element={<CompanyProfile />} />
-              <Route path="/payment-test" element={<PaymentTest />} />
+              <Route path="/payment" element={<PaymentTest />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/messages" element={<Messages />} />

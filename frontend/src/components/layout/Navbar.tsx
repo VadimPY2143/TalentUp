@@ -61,7 +61,7 @@ const Navbar = () => {
               <Link className="transition hover:text-orange-300" to="/candidates">
                 База резюме
               </Link>
-              <Link className="transition hover:text-orange-300" to="/payment-test?return_to=/dashboard">
+              <Link className="transition hover:text-orange-300" to="/payment?return_to=/dashboard">
                 Купити кредити
               </Link>
               <Link className="transition hover:text-orange-300" to="/messages">

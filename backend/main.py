@@ -7,12 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 import uvicorn
 
-try:
-    from backend.app_config import load_http_settings
-except ModuleNotFoundError as exc:
-    if exc.name != "backend":
-        raise
-    from app_config import load_http_settings
+from app_config import load_http_settings
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 

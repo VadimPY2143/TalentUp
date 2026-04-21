@@ -1,82 +1,185 @@
-2026-02-22 15:12:31 - moodshare - INFO - User Vadim registered
-2026-02-22 15:12:31 - moodshare - INFO - password hash: $2b$12$FGXgil0C8ay08UrwBB2BWeXGbZQ4dHyQH/ELfwXAtFKlbsv.Mjmcm
-2026-02-28 22:23:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-02-28 22:23:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-02-28 23:16:58 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-02-28 23:16:58 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 10:53:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 10:53:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 12:02:54 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 12:02:54 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 12:03:38 - moodshare - DEBUG - Normalizing employment type [<EmploymentType.remote: 'Remote'>, <EmploymentType.hybrid: 'Hybrid'>]
-2026-03-01 12:03:38 - moodshare - DEBUG - ['Remote', 'Hybrid']
-2026-03-01 14:27:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 14:27:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-01 14:29:38 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6
-2026-03-01 14:38:32 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6
-2026-03-01 14:39:03 - moodshare - INFO - Resume PDF uploaded: resume_id=1 user_id=6
-2026-03-02 09:29:19 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-02 09:29:19 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-02 21:08:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-02 21:08:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-04 10:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-04 10:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-21 21:36:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-21 21:36:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-21 21:36:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 17:00:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 22:09:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 22:09:44 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 22:09:44 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 13:13:02 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:20 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:25 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:30 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:35 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:40 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:45 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:50 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:20:56 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-03-29 14:50:09 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 16:47:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 16:47:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 16:47:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 17:26:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 17:26:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 08:43:11 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 21:21:35 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:21:40 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:21:45 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:21:50 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:21:55 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:22:00 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:22:06 - moodshare - ERROR - Redis pubsub listener error: Error Multiple exceptions: [Errno 10061] Connect call failed ('::1', 6379, 0, 0), [Errno 10061] Connect call failed ('127.0.0.1', 6379) connecting to localhost:6379.
-2026-04-04 21:31:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 21:31:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 22:02:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 22:02:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-21 18:36:02 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:02 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:07 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:07 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:10 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:15 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:16 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:20 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:20 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:25 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:25 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:27 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:27 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:28 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:28 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:30 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:30 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:31 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:31 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:36 - moodshare - INFO - User 2 connected to notifications ws
-2026-04-21 18:36:36 - moodshare - INFO - User 2 connected to notifications ws
+2026-04-21 22:08:36 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:09:01 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:09:23 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:09:23 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:09:23 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:09:23 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:09:23 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:09:23 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:09:23 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:09:23 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:09:23 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:09:23 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:09:23 - moodshare - INFO - Currency: UAH
+2026-04-21 22:09:23 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:09:23 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:09:23 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:09:23 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:09:23 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:09:23 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:09:23 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:09:23 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:09:23 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:09:23 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:09:23 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:09:23 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:09:23 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:09:23 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:09:23 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:09:23 - moodshare - INFO - Currency: UAH
+2026-04-21 22:09:23 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:09:23 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-04-21 22:23:44 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:23:44 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:23:44 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:23:44 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:23:44 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:23:44 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:23:44 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:23:44 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:23:44 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:23:44 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:23:44 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:23:44 - moodshare - INFO - Currency: UAH
+2026-04-21 22:23:44 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:23:44 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:23:44 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:23:44 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:23:44 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:23:44 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:23:44 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:23:44 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:23:44 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:23:44 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:23:44 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:23:44 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:23:44 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:23:44 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:23:44 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:23:44 - moodshare - INFO - Currency: UAH
+2026-04-21 22:23:44 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:23:44 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-04-21 22:24:29 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:24:29 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:24:29 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:24:29 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:24:29 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:24:29 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:24:29 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:24:29 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:24:29 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:24:29 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:24:29 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:24:29 - moodshare - INFO - Currency: UAH
+2026-04-21 22:24:29 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:24:29 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:24:29 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:24:29 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:24:29 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:24:29 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:24:29 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:24:29 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:24:29 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:24:29 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:24:29 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:24:29 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:24:29 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:24:29 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:24:29 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:24:29 - moodshare - INFO - Currency: UAH
+2026-04-21 22:24:29 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:24:29 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-04-21 22:42:35 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:35 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:35 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:35 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:35 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:42:35 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:42:35 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:35 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:42:35 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:42:35 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:42:35 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:42:35 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:42:35 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:42:35 - moodshare - INFO - Currency: UAH
+2026-04-21 22:42:35 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:42:35 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:42:35 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:35 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:42:35 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:42:35 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:42:35 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:42:35 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:42:35 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:35 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:42:35 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:42:35 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:42:35 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:42:35 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:42:35 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:42:35 - moodshare - INFO - Currency: UAH
+2026-04-21 22:42:35 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:42:35 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-04-21 22:42:47 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:47 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:47 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:47 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:42:47 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:42:47 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:42:47 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:47 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:42:47 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:42:47 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:42:47 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:42:47 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:42:47 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:42:47 - moodshare - INFO - Currency: UAH
+2026-04-21 22:42:47 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:42:47 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:42:47 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:47 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:42:47 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:42:47 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:42:47 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:42:47 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:42:47 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:42:47 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:42:47 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:42:47 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:42:47 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:42:47 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:42:47 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:42:47 - moodshare - INFO - Currency: UAH
+2026-04-21 22:42:47 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:42:47 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-04-21 22:47:54 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:47:54 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 22:47:54 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-04-21 22:47:54 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:47:54 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:47:54 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:47:54 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:47:54 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:47:54 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:47:54 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-04-21 22:47:54 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:47:54 - moodshare - INFO - Currency: UAH
+2026-04-21 22:47:54 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:47:54 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 22:47:54 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:47:54 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 22:47:54 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-04-21 22:47:54 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 22:47:54 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-04-21 22:47:54 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 22:47:54 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-04-21 22:47:54 - moodshare - INFO - Order reference: wfp_order_1
+2026-04-21 22:47:54 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-04-21 22:47:54 - moodshare - INFO - Verifying callback signature...
+2026-04-21 22:47:54 - moodshare - INFO - Signature verified successfully
+2026-04-21 22:47:54 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-04-21 22:47:54 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-04-21 22:47:54 - moodshare - INFO - Currency: UAH
+2026-04-21 22:47:54 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 22:47:54 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1

@@ -6,8 +6,7 @@ import { normalizeReturnTo } from "../payments/insufficientCredits"
 
 const RESUME_SUMMARY_CREDITS = 4
 const VACANCY_AI_FILL_CREDITS = 12
-const CANDIDATE_MATCHING_BASE_CREDITS = 8
-const CANDIDATE_MATCHING_PER_LIMIT_CREDITS = 2
+const CANDIDATE_MATCHING_PER_CANDIDATE_CREDITS = 2
 
 type PaymentStatus = "success" | "failed" | "returned" | null
 
@@ -16,6 +15,14 @@ const formatUah = (amount: number) =>
     style: "currency",
     currency: "UAH",
     maximumFractionDigits: 0,
+  }).format(amount)
+
+const formatUahPerCredit = (amount: number) =>
+  new Intl.NumberFormat("uk-UA", {
+    style: "currency",
+    currency: "UAH",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount)
 
 const formatNumber = (value: number) =>
@@ -71,8 +78,15 @@ const getFeatureLabel = (feature: string | null): string | null => {
   return feature.replace(/_/g, " ")
 }
 
-const getCandidateMatchingCredits = (requestedLimit: number) =>
-  CANDIDATE_MATCHING_BASE_CREDITS + (CANDIDATE_MATCHING_PER_LIMIT_CREDITS * requestedLimit)
+const getPackageCardDescription = (pkg: CreditPackage): string => {
+  if (pkg.credits <= 80) {
+    return "Для швидкого старту: протестувати AI-функції, закрити точкові задачі та оцінити результат."
+  }
+  if (pkg.credits <= 500) {
+    return "Для регулярного найму: стабільний запас кредитів на щоденні задачі рекрутера та команди."
+  }
+  return "Для масштабного рекрутингу: максимальна вигода за кредит і достатній обсяг для багатьох вакансій."
+}
 
 export default function PaymentTest() {
   const navigate = useNavigate()
@@ -88,7 +102,6 @@ export default function PaymentTest() {
   const requiredCredits = parsePositiveInt(searchParams.get("required"))
   const currentCredits = parsePositiveInt(searchParams.get("current"))
   const requestedMissing = parsePositiveInt(searchParams.get("missing"))
-  const requestedLimit = parsePositiveInt(searchParams.get("requested_limit")) ?? 10
   const feature = searchParams.get("feature")
   const featureLabel = getFeatureLabel(feature)
   const returnTo = normalizeReturnTo(searchParams.get("return_to"), "/dashboard")
@@ -200,8 +213,8 @@ export default function PaymentTest() {
   const selectedVacancyAIFills = selectedPackage
     ? Math.floor(selectedPackage.credits / VACANCY_AI_FILL_CREDITS)
     : 0
-  const selectedCandidateMatches = selectedPackage
-    ? Math.floor(selectedPackage.credits / getCandidateMatchingCredits(requestedLimit))
+  const selectedCandidateResumeScans = selectedPackage
+    ? Math.floor(selectedPackage.credits / CANDIDATE_MATCHING_PER_CANDIDATE_CREDITS)
     : 0
 
   const showDeficitBanner = reason === "insufficient_credits" || missingCredits > 0
@@ -227,10 +240,10 @@ export default function PaymentTest() {
 
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold md:text-sm">
                 <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
-                  Захищена оплата WayForPay
+                  Безпечна онлайн-оплата
                 </span>
                 <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
-                  Миттєва готовність до AI-функцій
+                  Миттєва активація кредитів
                 </span>
                 <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5">
                   Прозорі пакети без прихованих комісій
@@ -307,64 +320,6 @@ export default function PaymentTest() {
           )}
         </section>
 
-        {recommendedPackage && (
-          <section className="mt-6 rounded-[30px] border border-orange-200 bg-gradient-to-r from-orange-50 via-white to-amber-50 p-5 shadow-soft md:p-6">
-            <div className="grid gap-5 md:grid-cols-[1.05fr,0.95fr] md:items-center">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-700">
-                  Рекомендовано для вашого запиту
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-                  {recommendedPackage.name}
-                </h2>
-                <p className="mt-2 text-sm text-slate-600">
-                  Закриває поточну потребу в кредитах і дозволяє продовжити процес найму без затримки.
-                </p>
-
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                    <div className="text-[11px] uppercase tracking-wide text-slate-500">Кредити</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900">{formatNumber(recommendedPackage.credits)}</div>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                    <div className="text-[11px] uppercase tracking-wide text-slate-500">Вартість</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900">{formatUah(recommendedPackage.price_uah)}</div>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                    <div className="text-[11px] uppercase tracking-wide text-slate-500">Ціна/кредит</div>
-                    <div className="mt-1 text-lg font-semibold text-slate-900">
-                      {formatUah(Math.round(recommendedPackage.price_uah / Math.max(1, recommendedPackage.credits)))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-orange-200 bg-white p-4 shadow-soft">
-                <div className="text-sm text-slate-600">
-                  {recommendedPackage.credits >= missingCredits
-                    ? "Цей пакет повністю покриває ваш поточний дефіцит кредитів."
-                    : "Це найбільший доступний пакет, який суттєво поповнить ваш баланс."}
-                </div>
-                <button
-                  className="mt-4 w-full rounded-xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-                  type="button"
-                  onClick={() => void handlePurchase(recommendedPackage)}
-                  disabled={processingCode !== null}
-                >
-                  {processingCode === recommendedPackage.code ? "Переадресація..." : "Завершити оплату"}
-                </button>
-                <button
-                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
-                  type="button"
-                  onClick={handleBack}
-                >
-                  Повернутись до підбору
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
-
         <section className="mt-6">
           {loading ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -386,6 +341,7 @@ export default function PaymentTest() {
                 const isSelected = selectedPackage?.id === pkg.id
                 const pricePerCredit = pkg.price_uah / Math.max(1, pkg.credits)
                 const shouldBadgePopular = !isRecommended && index === 1
+                const shouldBadgeBestValue = !isRecommended && !shouldBadgePopular && pkg.code === "PRO_900"
                 return (
                   <article
                     key={pkg.id}
@@ -408,9 +364,14 @@ export default function PaymentTest() {
                         Популярний
                       </span>
                     )}
+                    {shouldBadgeBestValue && (
+                      <span className="absolute right-4 top-4 rounded-full bg-[#5b3aa3] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                        Макс вигода
+                      </span>
+                    )}
 
                     <h3 className="relative text-xl font-semibold text-slate-900">{pkg.name}</h3>
-                    <p className="mt-2 text-sm text-slate-600">Пакет для активних команд, що регулярно використовують AI.</p>
+                    <p className="mt-2 text-sm text-slate-600">{getPackageCardDescription(pkg)}</p>
 
                     <div className="mt-4 space-y-1 text-sm text-slate-700">
                       <div className="flex items-center justify-between">
@@ -423,7 +384,7 @@ export default function PaymentTest() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span>Ціна за 1 кредит</span>
-                        <span className="font-semibold text-slate-900">{formatUah(Math.round(pricePerCredit))}</span>
+                        <span className="font-semibold text-slate-900">{formatUahPerCredit(pricePerCredit)}</span>
                       </div>
                     </div>
 
@@ -463,7 +424,7 @@ export default function PaymentTest() {
             <p className="mt-1 text-sm text-slate-600">
               Обрано: <span className="font-semibold text-slate-900">{formatNumber(selectedPackage.credits)} кредитів</span> за{" "}
               <span className="font-semibold text-slate-900">{formatUah(selectedPackage.price_uah)}</span>
-              {" "}({formatUah(Math.round(selectedPricePerCredit))} / кредит)
+              {" "}({formatUahPerCredit(selectedPricePerCredit)} / кредит)
             </p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -479,9 +440,9 @@ export default function PaymentTest() {
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="text-xs uppercase tracking-wide text-slate-500">AI Candidate Match</div>
-                <div className="mt-1 text-2xl font-semibold text-slate-900">~{formatNumber(selectedCandidateMatches)}</div>
+                <div className="mt-1 text-2xl font-semibold text-slate-900">~{formatNumber(selectedCandidateResumeScans)}</div>
                 <div className="mt-1 text-xs text-slate-500">
-                  по {getCandidateMatchingCredits(requestedLimit)} кредитів (limit {requestedLimit})
+                  резюме кандидатів можна просканувати (по {CANDIDATE_MATCHING_PER_CANDIDATE_CREDITS} кредити за 1 резюме)
                 </div>
               </div>
             </div>
@@ -495,7 +456,7 @@ export default function PaymentTest() {
               Миттєвий доступ до AI-функцій для рекрутера.
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              Захищена платіжна форма WayForPay, без збереження картки в TalentUp.
+              Захищена оплата через сертифікований платіжний шлюз, без збереження картки в TalentUp.
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
               Швидке повернення в сценарій найму одразу після оплати.
@@ -530,4 +491,3 @@ export default function PaymentTest() {
     </div>
   )
 }
-

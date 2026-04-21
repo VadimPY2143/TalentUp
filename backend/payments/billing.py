@@ -13,13 +13,13 @@ from database import credit_transactions_table, users_table
 
 RESUME_SUMMARY_CREDITS = 4
 VACANCY_AI_FILL_CREDITS = 12
-MATCHING_BASE_CREDITS = 8
-MATCHING_PER_LIMIT_CREDITS = 2
-MATCHING_MAX_CREDITS = 80
+MATCHING_PER_CANDIDATE_CREDITS = 2
 
 
-def get_candidate_matching_credits(requested_limit: int) -> int:
-    return min(MATCHING_MAX_CREDITS, MATCHING_BASE_CREDITS + (MATCHING_PER_LIMIT_CREDITS * requested_limit))
+def get_candidate_matching_credits(analyzed_candidates: int) -> int:
+    if analyzed_candidates <= 0:
+        return 0
+    return MATCHING_PER_CANDIDATE_CREDITS * analyzed_candidates
 
 
 @dataclass(slots=True)

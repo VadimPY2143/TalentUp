@@ -88,7 +88,7 @@ export const buildPaymentRedirectQuery = ({ info, feature, returnTo }: PaymentRe
 
 export const buildPaymentRedirectPath = (options: PaymentRedirectOptions): string => {
   const query = buildPaymentRedirectQuery(options)
-  return query ? `/payment-test?${query}` : "/payment-test"
+  return query ? `/payment?${query}` : "/payment"
 }
 
 interface RedirectOnInsufficientCreditsOptions {

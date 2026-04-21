@@ -1,1238 +1,454 @@
-2026-03-22 17:19:18 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-22 17:19:18 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-23 06:50:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-23 06:50:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-24 08:02:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-24 08:02:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-25 19:15:26 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-25 19:15:26 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 09:15:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 09:15:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 09:49:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-03-28 09:59:01 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 10:00:28 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-03-28 10:03:59 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:04:02 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:04:03 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:04:06 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:04:27 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:05:10 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:05:12 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:05:17 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:05:20 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:05:53 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:05:54 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:05:56 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:06:29 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:09:04 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:09:04 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:09:39 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:09:41 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:10:01 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:10:04 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:12:30 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:12:30 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:12:35 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:12:35 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:12:41 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:12:41 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:12:55 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:13:10 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:13:10 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:13:10 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:13:22 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:13:37 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:13:42 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:13:43 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:14:01 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:14:01 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:14:01 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:16:21 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:16:21 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:16:25 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:16:25 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:17:03 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:17:03 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:17:03 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:17:03 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:17:03 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:17:03 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:17:03 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:17:03 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:17:15 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:17:15 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:17:15 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:17:15 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:18:05 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:18:05 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:18:09 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:18:09 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:18:30 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:18:40 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:18:54 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:18:56 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:19:04 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:19:07 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:19:09 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:19:34 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:19:34 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:19:36 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:19:36 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 10:19:38 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 10:19:38 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:19:40 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:19:40 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:19:44 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:19:48 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:19:48 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:19:50 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:21:27 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:21:27 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:21:50 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:22:46 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:22:46 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:25:59 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:25:59 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:27:06 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:27:06 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:27:07 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:27:07 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:28:05 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:28:05 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:37:15 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 10:38:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 10:43:06 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:43:31 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:45:50 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:45:50 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:45:50 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:45:50 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:45:51 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:46:06 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:46:09 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:46:09 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:46:10 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:46:10 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:46:13 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:46:13 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:46:26 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:47:24 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 10:54:07 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:54:12 - moodshare - INFO - User 4 connected to chat 3
-2026-03-28 10:54:15 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-28 10:54:15 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 10:54:22 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 10:54:24 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 10:58:45 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-28 11:07:16 - moodshare - INFO - User 7 connected to chat 2
-2026-03-28 11:07:21 - moodshare - INFO - User 7 disconnected from chat 2
-2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:07:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:07:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:07:25 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:08:05 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:30:10 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 14:30:15 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:17:33 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:34 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:35 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:36 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:37 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:38 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:39 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:40 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:41 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:42 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:17:43 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:05 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:08 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:34:28 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 20:52:37 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 21:19:04 - moodshare - INFO - User 6 connected to chat 3
-2026-03-28 21:19:05 - moodshare - INFO - User 6 disconnected from chat 3
-2026-03-28 21:20:53 - moodshare - INFO - User 4 connected to chat 2
-2026-03-28 21:20:53 - moodshare - INFO - User 4 connected to chat 4
-2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:21:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:21:31 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:22:03 - moodshare - INFO - User 4 disconnected from chat 4
-2026-03-28 21:22:37 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:22:45 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:22:46 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:25:29 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:26:27 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:26:30 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:33 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:41 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:44 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:46 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:27:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:29:41 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:29:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:30:06 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-28 21:30:27 - moodshare - INFO - User 4 connected to chat 4
-2026-03-28 21:30:29 - moodshare - INFO - User 4 connected to chat 1
-2026-03-28 21:30:46 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-28 21:31:31 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:31:32 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:40:38 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:40:40 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:41:25 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:41:25 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:42:06 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:42:08 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:42:08 - moodshare - INFO - User 6 connected to chat 3
-2026-03-28 21:42:08 - moodshare - INFO - User 6 disconnected from chat 3
-2026-03-28 21:42:08 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:42:09 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:42:09 - moodshare - INFO - User 6 connected to chat 3
-2026-03-28 21:42:10 - moodshare - INFO - User 6 disconnected from chat 3
-2026-03-28 21:42:10 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:42:15 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-28 21:42:15 - moodshare - INFO - User 6 connected to chat 3
-2026-03-28 21:42:19 - moodshare - INFO - User 6 disconnected from chat 3
-2026-03-28 21:42:20 - moodshare - INFO - User 6 connected to chat 4
-2026-03-28 21:42:21 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-29 09:53:24 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-29 09:53:24 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 04:39:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 04:39:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 04:40:29 - moodshare - INFO - User 4 connected to chat 4
-2026-03-30 04:40:29 - moodshare - INFO - User 4 disconnected from chat 4
-2026-03-30 04:40:32 - moodshare - INFO - User 4 connected to chat 3
-2026-03-30 04:40:35 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-30 04:40:35 - moodshare - INFO - User 4 connected to chat 2
-2026-03-30 04:40:56 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-30 04:41:28 - moodshare - INFO - User 6 connected to chat 4
-2026-03-30 04:41:31 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-30 04:41:58 - moodshare - INFO - User 6 connected to chat 4
-2026-03-30 04:41:58 - moodshare - INFO - User 6 disconnected from chat 4
-2026-03-30 05:38:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 05:38:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 05:38:18 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:12:08 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:12:08 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:16:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:19:38 - moodshare - INFO - User 4 connected to chat 2
-2026-03-30 06:19:38 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-30 06:19:38 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 06:19:52 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:20:03 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:20:25 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 06:38:56 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:35 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:35 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:36 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:36 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:36 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:36 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:49 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:49 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:49 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:50 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:50 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:50 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:56 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:56 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:40:56 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:40:56 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:41:39 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 06:42:23 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 06:42:23 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 06:43:41 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:43:41 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:43:41 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:43:42 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:46:02 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 06:46:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 06:46:15 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 06:46:27 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 06:46:56 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 06:46:56 - moodshare - INFO - User 4 connected to chat 1
-2026-03-30 06:47:02 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-30 06:47:46 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 06:47:46 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:07:35 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:07:38 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:07:38 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:07:41 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:07:44 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:09:44 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:09:49 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:10:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:10:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:27:54 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:27:54 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:28:24 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:28:24 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:29:11 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:29:11 - moodshare - INFO - User 4 connected to chat 4
-2026-03-30 15:29:27 - moodshare - INFO - User 4 disconnected from chat 4
-2026-03-30 15:29:31 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:29:31 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:30:55 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:30:55 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:38:01 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 15:43:58 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:43:59 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:44:23 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:44:23 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:44:23 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:44:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:46:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:46:16 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:46:16 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:46:18 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:46:28 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 15:46:37 - moodshare - INFO - User 4 disconnected from chat 5
-2026-03-30 15:46:37 - moodshare - INFO - User 4 connected to chat 2
-2026-03-30 15:46:38 - moodshare - INFO - User 4 disconnected from chat 2
-2026-03-30 15:46:38 - moodshare - INFO - User 4 connected to chat 4
-2026-03-30 15:46:39 - moodshare - INFO - User 4 disconnected from chat 4
-2026-03-30 15:46:39 - moodshare - INFO - User 4 connected to chat 3
-2026-03-30 15:46:39 - moodshare - INFO - User 4 disconnected from chat 3
-2026-03-30 15:46:39 - moodshare - INFO - User 4 connected to chat 1
-2026-03-30 15:46:50 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 15:48:36 - moodshare - INFO - User 4 disconnected from chat 1
-2026-03-30 15:50:44 - moodshare - INFO - User 4 connected to chat 5
-2026-03-30 15:50:44 - moodshare - INFO - User 4 connected to chat 4
-2026-03-30 15:52:00 - moodshare - INFO - User 4 disconnected from chat 4
-2026-03-30 15:53:19 - moodshare - INFO - User 6 connected to chat 5
-2026-03-30 15:53:19 - moodshare - INFO - User 6 disconnected from chat 5
-2026-03-30 15:56:38 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:57:01 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:57:01 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-30 15:57:09 - moodshare - INFO - User 4 connected to chat 6
-2026-03-30 15:57:28 - moodshare - INFO - User 6 connected to chat 6
-2026-03-30 15:57:39 - moodshare - INFO - User 6 disconnected from chat 6
-2026-03-30 15:57:40 - moodshare - INFO - User 6 connected to chat 6
-2026-03-30 15:57:41 - moodshare - INFO - User 6 disconnected from chat 6
-2026-03-30 15:59:10 - moodshare - INFO - User 4 disconnected from chat 6
-2026-03-30 15:59:11 - moodshare - INFO - User 4 connected to chat 6
-2026-03-31 14:52:42 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 14:52:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 14:52:43 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 14:52:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 14:55:14 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 14:55:18 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:01:02 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 15:01:02 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:01:02 - moodshare - INFO - User 4 connected to chat 8
-2026-03-31 15:01:06 - moodshare - INFO - User 4 disconnected from chat 8
-2026-03-31 15:01:06 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 15:01:07 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:01:07 - moodshare - INFO - User 4 connected to chat 8
-2026-03-31 15:01:53 - moodshare - INFO - User 4 disconnected from chat 8
-2026-03-31 15:02:22 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:02:22 - moodshare - INFO - User 4 connected to chat 8
-2026-03-31 15:02:27 - moodshare - INFO - User 4 disconnected from chat 8
-2026-03-31 15:02:27 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 15:02:34 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:02:34 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:02:35 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 15:03:18 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:03:18 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:03:18 - moodshare - INFO - User 4 connected to chat 7
-2026-03-31 15:03:21 - moodshare - INFO - User 4 disconnected from chat 7
-2026-03-31 15:06:47 - moodshare - INFO - User 4 connected to chat 8
-2026-03-31 15:06:47 - moodshare - INFO - User 4 connected to chat 6
-2026-03-31 15:56:59 - moodshare - INFO - User 4 disconnected from chat 6
-2026-03-31 15:56:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:56:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:56:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:56:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:56:59 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-03-31 15:57:12 - moodshare - INFO - User 4 connected to chat 6
-2026-03-31 15:57:12 - moodshare - INFO - User 4 connected to chat 8
-2026-03-31 15:57:19 - moodshare - INFO - User 4 disconnected from chat 6
-2026-03-31 15:57:20 - moodshare - INFO - User 4 connected to chat 6
-2026-03-31 15:57:20 - moodshare - INFO - User 4 connected to chat 8
-2026-04-01 07:04:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-01 07:04:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-01 07:04:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-01 07:04:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-01 07:05:30 - moodshare - INFO - User 6 connected to chat 8
-2026-04-01 07:05:33 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-01 07:05:33 - moodshare - INFO - User 6 connected to chat 6
-2026-04-01 07:06:20 - moodshare - INFO - User 6 disconnected from chat 6
-2026-04-01 07:07:22 - moodshare - INFO - User 4 connected to chat 8
-2026-04-01 07:07:24 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-01 07:07:24 - moodshare - INFO - User 4 connected to chat 7
-2026-04-01 07:07:29 - moodshare - INFO - User 4 disconnected from chat 7
-2026-04-01 07:07:29 - moodshare - INFO - User 4 connected to chat 6
-2026-04-01 07:07:30 - moodshare - INFO - User 4 disconnected from chat 6
-2026-04-01 07:09:42 - moodshare - INFO - User 4 connected to chat 8
-2026-04-01 07:09:43 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-01 07:28:53 - moodshare - INFO - User 4 connected to chat 6
-2026-04-01 07:28:53 - moodshare - INFO - User 4 connected to chat 8
-2026-04-01 07:35:39 - moodshare - INFO - User 6 connected to chat 8
-2026-04-01 07:35:41 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-01 07:36:06 - moodshare - INFO - User 6 connected to chat 8
-2026-04-01 07:36:07 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-01 07:49:46 - moodshare - INFO - User 6 connected to chat 8
-2026-04-01 07:50:03 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-01 07:50:03 - moodshare - INFO - User 6 connected to chat 7
-2026-04-01 07:50:16 - moodshare - INFO - User 6 disconnected from chat 7
-2026-04-03 07:43:49 - moodshare - INFO - User 6 connected to chat 8
-2026-04-03 07:43:51 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-03 08:13:31 - moodshare - INFO - User 6 connected to chat 8
-2026-04-03 08:13:32 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-03 08:13:34 - moodshare - INFO - User 6 connected to chat 8
-2026-04-03 08:15:26 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-04 14:30:10 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 14:30:10 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 14:30:10 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 14:30:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 14:30:25 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:32:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-04 19:34:11 - moodshare - INFO - User 4 connected to chat 8
-2026-04-04 19:34:12 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-04 19:34:12 - moodshare - INFO - User 4 connected to chat 7
-2026-04-04 19:34:14 - moodshare - INFO - User 4 disconnected from chat 7
-2026-04-04 19:34:14 - moodshare - INFO - User 4 connected to chat 5
-2026-04-04 19:34:15 - moodshare - INFO - User 4 disconnected from chat 5
-2026-04-04 19:34:15 - moodshare - INFO - User 4 connected to chat 2
-2026-04-04 19:34:16 - moodshare - INFO - User 4 disconnected from chat 2
-2026-04-04 19:34:50 - moodshare - INFO - User 4 connected to chat 8
-2026-04-04 19:35:00 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-04 19:35:17 - moodshare - INFO - User 4 connected to chat 8
-2026-04-04 19:35:18 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-04 19:35:40 - moodshare - INFO - User 4 connected to chat 8
-2026-04-04 19:35:40 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-05 12:51:34 - moodshare - INFO - User 6 connected to chat 8
-2026-04-05 12:51:36 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-05 12:59:21 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-05 12:59:36 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-05 13:01:57 - moodshare - ERROR - JWT verification error: Not enough segments
-2026-04-05 13:42:16 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-05 14:44:15 - moodshare - INFO - User 6 connected to chat 8
-2026-04-05 14:44:17 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-05 14:53:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-06 06:09:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 13:14:20 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:14:20 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-09 13:14:42 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:14:44 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:14:45 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:14:46 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-09 13:14:46 - moodshare - INFO - User 4 connected to chat 7
-2026-04-09 13:14:47 - moodshare - INFO - User 4 disconnected from chat 7
-2026-04-09 13:14:47 - moodshare - INFO - User 4 connected to chat 6
-2026-04-09 13:14:47 - moodshare - INFO - User 4 disconnected from chat 6
-2026-04-09 13:14:47 - moodshare - INFO - User 4 connected to chat 5
-2026-04-09 13:14:54 - moodshare - INFO - User 4 disconnected from chat 5
-2026-04-09 13:18:03 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:23:19 - moodshare - INFO - User 4 connected to chat 8
-2026-04-09 13:23:19 - moodshare - INFO - User 4 disconnected from chat 8
-2026-04-09 14:03:58 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 14:03:58 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 14:18:58 - moodshare - ERROR - JWT verification error: Signature verification failed.
-2026-04-09 14:47:00 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 14:47:00 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 14:50:52 - moodshare - INFO - User 6 connected to chat 8
-2026-04-09 14:50:52 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-09 15:01:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:01:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:01:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:02:57 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:13:53 - moodshare - INFO - User 6 connected to chat 8
-2026-04-09 15:13:54 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-09 15:18:14 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:20:14 - moodshare - INFO - User 6 connected to chat 8
-2026-04-09 15:20:16 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-09 15:23:20 - moodshare - INFO - User 6 connected to chat 8
-2026-04-09 15:23:20 - moodshare - INFO - User 6 disconnected from chat 8
-2026-04-09 15:51:09 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 15:51:09 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:30:36 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:30:36 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:34:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:34:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:34:30 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:37:53 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:37:53 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:37:53 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:38:35 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:41:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:44:52 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:44:57 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:55:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:55:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-09 16:55:37 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-10 07:09:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-10 07:09:03 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-10 07:09:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-10 07:09:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-10 07:37:21 - moodshare - INFO - User 4 connected to chat 9
-2026-04-10 07:37:21 - moodshare - INFO - User 4 disconnected from chat 9
-2026-04-10 07:37:21 - moodshare - INFO - User 4 connected to chat 10
-2026-04-10 07:37:29 - moodshare - INFO - User 4 disconnected from chat 10
-2026-04-10 07:37:50 - moodshare - INFO - User 4 connected to chat 10
-2026-04-10 07:37:50 - moodshare - INFO - User 4 disconnected from chat 10
-2026-04-10 07:37:50 - moodshare - INFO - User 4 connected to chat 11
-2026-04-10 07:37:53 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-10 07:38:00 - moodshare - INFO - User 4 connected to chat 11
-2026-04-10 07:38:00 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-10 07:38:00 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:01 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:01 - moodshare - INFO - User 4 connected to chat 11
-2026-04-10 07:38:01 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-10 07:38:01 - moodshare - INFO - User 4 connected to chat 10
-2026-04-10 07:38:02 - moodshare - INFO - User 4 disconnected from chat 10
-2026-04-10 07:38:02 - moodshare - INFO - User 4 connected to chat 9
-2026-04-10 07:38:02 - moodshare - INFO - User 4 disconnected from chat 9
-2026-04-10 07:38:02 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:05 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:17 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:17 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:17 - moodshare - INFO - User 4 connected to chat 13
-2026-04-10 07:38:18 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-10 07:38:18 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:19 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:19 - moodshare - INFO - User 4 connected to chat 13
-2026-04-10 07:38:21 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-10 07:38:21 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:21 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:21 - moodshare - INFO - User 4 connected to chat 11
-2026-04-10 07:38:22 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-10 07:38:22 - moodshare - INFO - User 4 connected to chat 10
-2026-04-10 07:38:22 - moodshare - INFO - User 4 disconnected from chat 10
-2026-04-10 07:38:22 - moodshare - INFO - User 4 connected to chat 13
-2026-04-10 07:38:24 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-10 07:38:25 - moodshare - INFO - User 4 connected to chat 13
-2026-04-10 07:38:25 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-10 07:38:25 - moodshare - INFO - User 4 connected to chat 12
-2026-04-10 07:38:26 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-10 07:38:26 - moodshare - INFO - User 4 connected to chat 11
-2026-04-10 07:38:26 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-10 07:38:26 - moodshare - INFO - User 4 connected to chat 10
-2026-04-10 07:38:34 - moodshare - INFO - User 4 disconnected from chat 10
-2026-04-10 11:10:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-10 11:10:06 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:07 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:08 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:09 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:10 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:11 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:12 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:13 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-10 11:10:14 - moodshare - ERROR - Redis pubsub listener error: Error -2 connecting to redis:6379. Name or service not known.
-2026-04-11 12:43:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 12:43:04 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 12:52:11 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 12:52:13 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 14:17:06 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 14:17:06 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 14:17:08 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 14:17:39 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 14:17:39 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 14:30:05 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-11 19:12:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:12:48 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:14:21 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:14:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:15:51 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 19:15:52 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 19:15:53 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 19:22:57 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 19:24:47 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-11 19:36:55 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 19:36:57 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 19:51:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:51:13 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:56:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:56:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:44 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:49 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:50 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:58:51 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 19:59:09 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 20:04:19 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 20:08:09 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 20:11:27 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:11:58 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:14:14 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:14:14 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 20:15:06 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:15:06 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 20:17:11 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:17:11 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 20:17:39 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:27:01 - moodshare - INFO - User 4 connected to chat 13
-2026-04-11 20:27:01 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-11 20:32:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-11 20:32:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-13 18:30:32 - moodshare - INFO - User 4 connected to chat 13
-2026-04-13 18:30:33 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-13 18:30:35 - moodshare - INFO - User 4 connected to chat 13
-2026-04-13 18:30:38 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-13 18:30:38 - moodshare - INFO - User 4 connected to chat 12
-2026-04-13 18:30:38 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-13 18:30:38 - moodshare - INFO - User 4 connected to chat 11
-2026-04-13 18:30:39 - moodshare - INFO - User 4 disconnected from chat 11
-2026-04-13 18:30:39 - moodshare - INFO - User 4 connected to chat 9
-2026-04-13 18:31:08 - moodshare - INFO - User 4 disconnected from chat 9
-2026-04-13 18:31:27 - moodshare - INFO - User 4 connected to chat 13
-2026-04-13 18:31:28 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-13 18:31:28 - moodshare - INFO - User 4 connected to chat 14
-2026-04-13 18:31:35 - moodshare - INFO - User 4 disconnected from chat 14
-2026-04-15 18:02:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:02:12 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:23:54 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:23:54 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:24:53 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:24:53 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:25:31 - moodshare - INFO - User 11 connected to chat 14
-2026-04-15 18:25:34 - moodshare - INFO - User 11 disconnected from chat 14
-2026-04-15 18:34:41 - moodshare - INFO - User 6 connected to chat 13
-2026-04-15 18:34:47 - moodshare - INFO - User 6 disconnected from chat 13
-2026-04-15 18:34:47 - moodshare - INFO - User 6 connected to chat 3
-2026-04-15 18:34:49 - moodshare - INFO - User 6 disconnected from chat 3
-2026-04-15 18:36:18 - moodshare - INFO - User 6 connected to chat 13
-2026-04-15 18:36:19 - moodshare - INFO - User 6 disconnected from chat 13
-2026-04-15 18:36:46 - moodshare - INFO - User 4 connected to chat 14
-2026-04-15 18:36:46 - moodshare - INFO - User 4 disconnected from chat 14
-2026-04-15 18:42:20 - moodshare - INFO - User 6 connected to chat 13
-2026-04-15 18:42:22 - moodshare - INFO - User 6 disconnected from chat 13
-2026-04-15 18:42:40 - moodshare - INFO - User 6 connected to chat 13
-2026-04-15 18:42:41 - moodshare - INFO - User 6 disconnected from chat 13
-2026-04-15 18:42:47 - moodshare - INFO - User 6 connected to chat 13
-2026-04-15 18:42:56 - moodshare - INFO - User 6 disconnected from chat 13
-2026-04-15 18:49:16 - moodshare - INFO - User 4 connected to chat 14
-2026-04-15 18:49:17 - moodshare - INFO - User 4 disconnected from chat 14
-2026-04-15 18:49:17 - moodshare - INFO - User 4 connected to chat 15
-2026-04-15 18:49:27 - moodshare - INFO - User 6 connected to chat 15
-2026-04-15 18:49:42 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-15 18:52:46 - moodshare - INFO - User 6 disconnected from chat 15
-2026-04-15 18:55:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:55:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-15 18:55:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 06:12:25 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 06:12:25 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 12:13:21 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 12:13:21 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 12:55:34 - moodshare - INFO - WFP order created order_id=1 provider_order_id=wfp_b2706d7bc46b4f1e8a4d6978bd7fd1d9 user_id=4
-2026-04-16 12:57:59 - moodshare - INFO - WFP order created order_id=2 provider_order_id=wfp_c890b359363e4746883685b7cb8a08e8 user_id=4
-2026-04-16 13:13:30 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:13:30 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:13:44 - moodshare - INFO - WFP order created order_id=3 provider_order_id=wfp_502a278f347b4bf792ef0fc33b8ec057 user_id=4
-2026-04-16 13:14:50 - moodshare - INFO - WFP order created order_id=4 provider_order_id=wfp_5987df0eeb324a9a8b2e4a1384d14215 user_id=4
-2026-04-16 13:17:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:17:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:20:43 - moodshare - INFO - WFP order created order_id=5 provider_order_id=wfp_f0a4baa8bef64307aadbb70688770390 user_id=4
-2026-04-16 13:21:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:21:47 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:23:53 - moodshare - INFO - User 4 connected to chat 15
-2026-04-16 13:23:54 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-16 13:23:59 - moodshare - INFO - User 4 connected to chat 15
-2026-04-16 13:24:00 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-16 13:24:02 - moodshare - INFO - User 4 connected to chat 15
-2026-04-16 13:24:05 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-16 13:24:18 - moodshare - INFO - WFP order created order_id=6 provider_order_id=wfp_6412cd6afba543a499cd976e2fd73df1 user_id=4
-2026-04-16 13:26:15 - moodshare - INFO - WFP order created order_id=7 provider_order_id=wfp_2c2a77fa9ac24dc2995c6714c554db32 user_id=4 service_url=http://localhost:8001/payments/webhook/wayforpay
-2026-04-16 13:30:36 - moodshare - INFO - WFP order created order_id=8 provider_order_id=wfp_7b7ac4ee266546d9b7a2da862e2bbd6d user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:30:51 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:30:51 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_7b7ac4ee266546d9b7a2da862e2bbd6d', 'merchantSignature': 'a0dcff2cd24b3c9445067b6ac9979028', 'amount': 5, 'currency': 'UAH', 'authCode': '860576', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776346236, 'processingDate': 1776346250, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:30:51 - moodshare - INFO - Order reference: wfp_7b7ac4ee266546d9b7a2da862e2bbd6d
-2026-04-16 13:30:51 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:30:51 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:30:51 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:30:51 - moodshare - INFO - Order found: id=8, status=pending, user_id=4
-2026-04-16 13:30:51 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:30:51 - moodshare - INFO - Currency: UAH
-2026-04-16 13:30:51 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 13:30:51 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 13:30:51 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_7b7ac4ee266546d9b7a2da862e2bbd6d', 'amount': 5, 'currency': 'UAH', 'authCode': '860576', 'createdDate': 1776346236, 'processingDate': 1776346250, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '0afac25dd7d2625e5bc34122d5e433fe'}
-2026-04-16 13:30:51 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 13:32:03 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:32:03 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_7b7ac4ee266546d9b7a2da862e2bbd6d', 'merchantSignature': 'a0dcff2cd24b3c9445067b6ac9979028', 'amount': 5, 'currency': 'UAH', 'authCode': '860576', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776346236, 'processingDate': 1776346250, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:32:03 - moodshare - INFO - Order reference: wfp_7b7ac4ee266546d9b7a2da862e2bbd6d
-2026-04-16 13:32:03 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:32:03 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:32:03 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:32:03 - moodshare - INFO - Order found: id=8, status=pending, user_id=4
-2026-04-16 13:32:03 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:32:03 - moodshare - INFO - Currency: UAH
-2026-04-16 13:32:03 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 13:32:03 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 13:32:04 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_7b7ac4ee266546d9b7a2da862e2bbd6d', 'amount': 5, 'currency': 'UAH', 'authCode': '860576', 'createdDate': 1776346236, 'processingDate': 1776346250, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '0afac25dd7d2625e5bc34122d5e433fe'}
-2026-04-16 13:32:04 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 13:32:04 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 13:32:04 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 13:32:04 - moodshare - INFO - WFP payment approved order_id=8 order_reference=wfp_7b7ac4ee266546d9b7a2da862e2bbd6d check_status=Approved credits_applied=50
-2026-04-16 13:32:11 - moodshare - INFO - WFP order created order_id=9 provider_order_id=wfp_8586e7e0d0c94a409d1dfe73cefd992b user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:32:18 - moodshare - INFO - WFP order created order_id=10 provider_order_id=wfp_9749d4c319c3405e936a18861772067d user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:32:30 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:32:30 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_9749d4c319c3405e936a18861772067d', 'merchantSignature': 'd6b603878d24e01dfed3973b30e1ff03', 'amount': 5, 'currency': 'UAH', 'authCode': '810577', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776346338, 'processingDate': 1776346349, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:32:30 - moodshare - INFO - Order reference: wfp_9749d4c319c3405e936a18861772067d
-2026-04-16 13:32:30 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:32:30 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:32:30 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:32:30 - moodshare - INFO - Order found: id=10, status=pending, user_id=4
-2026-04-16 13:32:30 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:32:30 - moodshare - INFO - Currency: UAH
-2026-04-16 13:32:30 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 13:32:30 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 13:32:30 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_9749d4c319c3405e936a18861772067d', 'amount': 5, 'currency': 'UAH', 'authCode': '810577', 'createdDate': 1776346338, 'processingDate': 1776346349, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '9e697b4e0f98f296803691f24f724034'}
-2026-04-16 13:32:30 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 13:32:30 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 13:32:30 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 13:32:30 - moodshare - INFO - WFP payment approved order_id=10 order_reference=wfp_9749d4c319c3405e936a18861772067d check_status=Approved credits_applied=50
-2026-04-16 13:36:52 - moodshare - INFO - WFP order created order_id=11 provider_order_id=wfp_2a0645a80ba746cfa417439a64b8eb68 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:37:03 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:37:03 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_2a0645a80ba746cfa417439a64b8eb68', 'merchantSignature': '81a1b1e14b5784e804b47347c63993e0', 'amount': 5, 'currency': 'UAH', 'authCode': '030578', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776346612, 'processingDate': 1776346622, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:37:03 - moodshare - INFO - Order reference: wfp_2a0645a80ba746cfa417439a64b8eb68
-2026-04-16 13:37:03 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:37:03 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:37:03 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:37:03 - moodshare - INFO - Order found: id=11, status=pending, user_id=4
-2026-04-16 13:37:03 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:37:03 - moodshare - INFO - Currency: UAH
-2026-04-16 13:37:03 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 13:37:03 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 13:37:03 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_2a0645a80ba746cfa417439a64b8eb68', 'amount': 5, 'currency': 'UAH', 'authCode': '030578', 'createdDate': 1776346612, 'processingDate': 1776346622, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': 'f515b44090479a76140f9a5377d41fa5'}
-2026-04-16 13:37:03 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 13:37:03 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 13:37:03 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 13:37:03 - moodshare - INFO - WFP payment approved order_id=11 order_reference=wfp_2a0645a80ba746cfa417439a64b8eb68 check_status=Approved credits_applied=50
-2026-04-16 13:42:07 - moodshare - INFO - WFP order created order_id=12 provider_order_id=wfp_7185d139afeb457b81b3c6ef0c9f77de user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:43:17 - moodshare - INFO - WFP order created order_id=13 provider_order_id=wfp_c2f087da00d74377be354f1a2fd655a6 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:43:27 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:43:27 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_c2f087da00d74377be354f1a2fd655a6', 'merchantSignature': 'ebade023659a018913d9589a3df7c54c', 'amount': 5, 'currency': 'UAH', 'authCode': '680579', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776346997, 'processingDate': 1776347007, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:43:27 - moodshare - INFO - Order reference: wfp_c2f087da00d74377be354f1a2fd655a6
-2026-04-16 13:43:27 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:43:27 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:43:27 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:43:27 - moodshare - INFO - Order found: id=13, status=pending, user_id=4
-2026-04-16 13:43:27 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:43:27 - moodshare - INFO - Currency: UAH
-2026-04-16 13:43:27 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 13:43:27 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 13:43:28 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_c2f087da00d74377be354f1a2fd655a6', 'amount': 5, 'currency': 'UAH', 'authCode': '680579', 'createdDate': 1776346997, 'processingDate': 1776347007, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '7e620fd4318f08413a826c99a53bcc18'}
-2026-04-16 13:43:28 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 13:43:28 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 13:43:28 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 13:43:28 - moodshare - INFO - WFP payment approved order_id=13 order_reference=wfp_c2f087da00d74377be354f1a2fd655a6 check_status=Approved credits_applied=50
-2026-04-16 13:44:39 - moodshare - INFO - WFP order created order_id=14 provider_order_id=wfp_33325788a60e4a70b6eec092cb1b42b5 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:44:49 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:44:49 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_33325788a60e4a70b6eec092cb1b42b5', 'merchantSignature': '2e00d65931d7fb89830cf9ca3d3379df', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776347080, 'processingDate': 1776347089, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:44:49 - moodshare - INFO - Order reference: wfp_33325788a60e4a70b6eec092cb1b42b5
-2026-04-16 13:44:49 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:44:49 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:44:49 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:44:50 - moodshare - INFO - Order found: id=14, status=pending, user_id=4
-2026-04-16 13:44:50 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:44:50 - moodshare - INFO - Currency: UAH
-2026-04-16 13:44:50 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 13:44:50 - moodshare - INFO - WFP callback non-approved order_id=14 order_reference=wfp_33325788a60e4a70b6eec092cb1b42b5 status=Declined reason_code=1101
-2026-04-16 13:45:31 - moodshare - INFO - WFP order created order_id=15 provider_order_id=wfp_3a644e2c6ff84faba930c26c84f68c4a user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:45:55 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:45:55 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_3a644e2c6ff84faba930c26c84f68c4a', 'merchantSignature': '485b8061ef49527693d4a22873dc5a42', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776347132, 'processingDate': 1776347154, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:45:55 - moodshare - INFO - Order reference: wfp_3a644e2c6ff84faba930c26c84f68c4a
-2026-04-16 13:45:55 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:45:55 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:45:55 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:45:55 - moodshare - INFO - Order found: id=15, status=pending, user_id=4
-2026-04-16 13:45:55 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:45:55 - moodshare - INFO - Currency: UAH
-2026-04-16 13:45:55 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 13:45:55 - moodshare - INFO - WFP callback non-approved order_id=15 order_reference=wfp_3a644e2c6ff84faba930c26c84f68c4a status=Declined reason_code=1101
-2026-04-16 13:47:09 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-16 13:48:36 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:48:36 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_7b7ac4ee266546d9b7a2da862e2bbd6d', 'merchantSignature': 'e084f80ae49dc46c35a5cdb655bb0045', 'amount': 5, 'currency': 'UAH', 'authCode': '860576', 'email': None, 'phone': None, 'createdDate': 1776346236, 'processingDate': 1776347315, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': None}
-2026-04-16 13:48:36 - moodshare - INFO - Order reference: wfp_7b7ac4ee266546d9b7a2da862e2bbd6d
-2026-04-16 13:48:36 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:48:36 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:48:36 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:48:36 - moodshare - INFO - Order found: id=8, status=success, user_id=4
-2026-04-16 13:48:36 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:48:36 - moodshare - INFO - Currency: UAH
-2026-04-16 13:48:36 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 13:48:36 - moodshare - INFO - WFP duplicate callback order_id=8 order_reference=wfp_7b7ac4ee266546d9b7a2da862e2bbd6d
-2026-04-16 13:48:37 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:48:37 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_9749d4c319c3405e936a18861772067d', 'merchantSignature': 'c3dbdeb42b97061d77ebb140907d36f4', 'amount': 5, 'currency': 'UAH', 'authCode': '810577', 'email': None, 'phone': None, 'createdDate': 1776346338, 'processingDate': 1776347317, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': None}
-2026-04-16 13:48:37 - moodshare - INFO - Order reference: wfp_9749d4c319c3405e936a18861772067d
-2026-04-16 13:48:37 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:48:37 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:48:37 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:48:37 - moodshare - INFO - Order found: id=10, status=success, user_id=4
-2026-04-16 13:48:37 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:48:37 - moodshare - INFO - Currency: UAH
-2026-04-16 13:48:37 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 13:48:37 - moodshare - INFO - WFP duplicate callback order_id=10 order_reference=wfp_9749d4c319c3405e936a18861772067d
-2026-04-16 13:48:45 - moodshare - INFO - WFP order created order_id=16 provider_order_id=wfp_18117bbc8b974c40acebb7ba4128ae2d user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:49:08 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:49:08 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_18117bbc8b974c40acebb7ba4128ae2d', 'merchantSignature': '4b8ac142213d440423b34b0868b087f3', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776347325, 'processingDate': 1776347348, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:49:08 - moodshare - INFO - Order reference: wfp_18117bbc8b974c40acebb7ba4128ae2d
-2026-04-16 13:49:08 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:49:08 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:49:08 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:49:08 - moodshare - INFO - Order found: id=16, status=pending, user_id=4
-2026-04-16 13:49:08 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:49:08 - moodshare - INFO - Currency: UAH
-2026-04-16 13:49:08 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 13:49:08 - moodshare - INFO - WFP callback non-approved order_id=16 order_reference=wfp_18117bbc8b974c40acebb7ba4128ae2d status=Declined reason_code=1101
-2026-04-16 13:53:03 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:53:03 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_8586e7e0d0c94a409d1dfe73cefd992b', 'merchantSignature': '6434ceb7a5b2124789023245b983a041', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': None, 'phone': None, 'createdDate': 1776346332, 'processingDate': 1776347251, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Expired', 'reason': 'Cardholder session expired', 'reasonCode': 1124, 'fee': 0, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'clientName': None}
-2026-04-16 13:53:03 - moodshare - INFO - Order reference: wfp_8586e7e0d0c94a409d1dfe73cefd992b
-2026-04-16 13:53:03 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:53:03 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:53:03 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:53:03 - moodshare - INFO - Order found: id=9, status=pending, user_id=4
-2026-04-16 13:53:03 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:53:03 - moodshare - INFO - Currency: UAH
-2026-04-16 13:53:03 - moodshare - INFO - Transaction status: Expired (normalized: expired)
-2026-04-16 13:53:03 - moodshare - INFO - WFP callback non-approved order_id=9 order_reference=wfp_8586e7e0d0c94a409d1dfe73cefd992b status=Expired reason_code=1124
-2026-04-16 13:53:13 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:53:13 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_2a0645a80ba746cfa417439a64b8eb68', 'merchantSignature': 'f88a612d4e103255586af63001c458ea', 'amount': 5, 'currency': 'UAH', 'authCode': '030578', 'email': None, 'phone': None, 'createdDate': 1776346612, 'processingDate': 1776347593, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': None}
-2026-04-16 13:53:13 - moodshare - INFO - Order reference: wfp_2a0645a80ba746cfa417439a64b8eb68
-2026-04-16 13:53:13 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:53:13 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:53:13 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:53:13 - moodshare - INFO - Order found: id=11, status=success, user_id=4
-2026-04-16 13:53:13 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:53:13 - moodshare - INFO - Currency: UAH
-2026-04-16 13:53:13 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 13:53:13 - moodshare - INFO - WFP duplicate callback order_id=11 order_reference=wfp_2a0645a80ba746cfa417439a64b8eb68
-2026-04-16 13:54:07 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:54:07 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:54:24 - moodshare - INFO - WFP order created order_id=17 provider_order_id=wfp_5be4e7f1328940389fff4a9e4a4d5190 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:54:33 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:54:33 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_5be4e7f1328940389fff4a9e4a4d5190', 'merchantSignature': '4ee103bd6a5703e3db0091c791a91da0', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776347664, 'processingDate': 1776347672, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:54:33 - moodshare - INFO - Order reference: wfp_5be4e7f1328940389fff4a9e4a4d5190
-2026-04-16 13:54:33 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:54:33 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:54:33 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:54:33 - moodshare - INFO - Order found: id=17, status=pending, user_id=4
-2026-04-16 13:54:33 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:54:33 - moodshare - INFO - Currency: UAH
-2026-04-16 13:54:33 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 13:54:33 - moodshare - INFO - WFP callback non-approved order_id=17 order_reference=wfp_5be4e7f1328940389fff4a9e4a4d5190 status=Declined reason_code=1101
-2026-04-16 13:55:47 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:55:47 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_8586e7e0d0c94a409d1dfe73cefd992b', 'merchantSignature': '6434ceb7a5b2124789023245b983a041', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': None, 'phone': None, 'createdDate': 1776346332, 'processingDate': 1776347251, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Expired', 'reason': 'Cardholder session expired', 'reasonCode': 1124, 'fee': 0, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'clientName': None}
-2026-04-16 13:55:47 - moodshare - INFO - Order reference: wfp_8586e7e0d0c94a409d1dfe73cefd992b
-2026-04-16 13:55:47 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:55:47 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:55:47 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:55:47 - moodshare - INFO - Order found: id=9, status=expired, user_id=4
-2026-04-16 13:55:47 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:55:47 - moodshare - INFO - Currency: UAH
-2026-04-16 13:55:47 - moodshare - INFO - Transaction status: Expired (normalized: expired)
-2026-04-16 13:55:47 - moodshare - INFO - WFP callback non-approved order_id=9 order_reference=wfp_8586e7e0d0c94a409d1dfe73cefd992b status=Expired reason_code=1124
-2026-04-16 13:57:57 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:57:57 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 13:58:49 - moodshare - ERROR - Redis pubsub listener error: Connection closed by server.
-2026-04-16 13:59:14 - moodshare - INFO - WFP order created order_id=18 provider_order_id=wfp_c743ee722bfa4a158c959734d1901944 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 13:59:24 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 13:59:24 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_c743ee722bfa4a158c959734d1901944', 'merchantSignature': 'ade760c05997cbdb2f07cc7bff544e3b', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776347955, 'processingDate': 1776347964, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
-2026-04-16 13:59:24 - moodshare - INFO - Order reference: wfp_c743ee722bfa4a158c959734d1901944
-2026-04-16 13:59:24 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 13:59:24 - moodshare - INFO - Verifying callback signature...
-2026-04-16 13:59:24 - moodshare - INFO - Signature verified successfully
-2026-04-16 13:59:24 - moodshare - INFO - Order found: id=18, status=pending, user_id=4
-2026-04-16 13:59:24 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 13:59:24 - moodshare - INFO - Currency: UAH
-2026-04-16 13:59:24 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 13:59:24 - moodshare - INFO - WFP callback non-approved order_id=18 order_reference=wfp_c743ee722bfa4a158c959734d1901944 status=Declined reason_code=1101
-2026-04-16 14:00:17 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 14:00:17 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_c2f087da00d74377be354f1a2fd655a6', 'merchantSignature': 'b1df6207effac52fd9afe03c79c35005', 'amount': 5, 'currency': 'UAH', 'authCode': '680579', 'email': None, 'phone': None, 'createdDate': 1776346997, 'processingDate': 1776348016, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': None}
-2026-04-16 14:00:17 - moodshare - INFO - Order reference: wfp_c2f087da00d74377be354f1a2fd655a6
-2026-04-16 14:00:17 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 14:00:17 - moodshare - INFO - Verifying callback signature...
-2026-04-16 14:00:17 - moodshare - INFO - Signature verified successfully
-2026-04-16 14:00:17 - moodshare - INFO - Order found: id=13, status=success, user_id=4
-2026-04-16 14:00:17 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 14:00:17 - moodshare - INFO - Currency: UAH
-2026-04-16 14:00:17 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 14:00:17 - moodshare - INFO - WFP duplicate callback order_id=13 order_reference=wfp_c2f087da00d74377be354f1a2fd655a6
-2026-04-16 14:40:07 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 14:40:07 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 14:40:09 - moodshare - INFO - WFP order created order_id=19 provider_order_id=wfp_007c7de279184cdeac24b4eb866b7331 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 14:41:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 14:41:31 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 14:41:49 - moodshare - INFO - WFP order created order_id=20 provider_order_id=wfp_a07f0eab3621450f909042ae62594e01 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 14:44:44 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 14:44:44 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_a07f0eab3621450f909042ae62594e01', 'merchantSignature': '770d0d16153a0deba1deffe08b92e5ce', 'amount': 5, 'currency': 'UAH', 'authCode': '', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776350509, 'processingDate': 1776350684, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Declined', 'reason': 'Declined To Card Issuer', 'reasonCode': 1101, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Papusha Vadym'}
-2026-04-16 14:44:44 - moodshare - INFO - Order reference: wfp_a07f0eab3621450f909042ae62594e01
-2026-04-16 14:44:44 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 14:44:44 - moodshare - INFO - Verifying callback signature...
-2026-04-16 14:44:44 - moodshare - INFO - Signature verified successfully
-2026-04-16 14:44:44 - moodshare - INFO - Order found: id=20, status=pending, user_id=4
-2026-04-16 14:44:44 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 14:44:44 - moodshare - INFO - Currency: UAH
-2026-04-16 14:44:44 - moodshare - INFO - Transaction status: Declined (normalized: failed)
-2026-04-16 14:44:44 - moodshare - INFO - WFP callback non-approved order_id=20 order_reference=wfp_a07f0eab3621450f909042ae62594e01 status=Declined reason_code=1101
-2026-04-16 14:48:02 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 14:48:02 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_007c7de279184cdeac24b4eb866b7331', 'merchantSignature': '8740e5f0771fc287c7725386a941d28e', 'amount': 5, 'currency': 'UAH', 'authCode': '819070', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776350410, 'processingDate': 1776350881, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': 'NoCLIENT NAME'}
-2026-04-16 14:48:02 - moodshare - INFO - Order reference: wfp_007c7de279184cdeac24b4eb866b7331
-2026-04-16 14:48:02 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 14:48:02 - moodshare - INFO - Verifying callback signature...
-2026-04-16 14:48:02 - moodshare - INFO - Signature verified successfully
-2026-04-16 14:48:02 - moodshare - INFO - Order found: id=19, status=pending, user_id=4
-2026-04-16 14:48:02 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 14:48:02 - moodshare - INFO - Currency: UAH
-2026-04-16 14:48:02 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 14:48:02 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 14:48:02 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_007c7de279184cdeac24b4eb866b7331', 'amount': 5, 'currency': 'UAH', 'authCode': '819070', 'createdDate': 1776350410, 'processingDate': 1776350881, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '8740e5f0771fc287c7725386a941d28e'}
-2026-04-16 14:48:03 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 14:48:03 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 14:48:03 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 14:48:03 - moodshare - INFO - WFP payment approved order_id=19 order_reference=wfp_007c7de279184cdeac24b4eb866b7331 check_status=Approved credits_applied=50
-2026-04-16 14:53:14 - moodshare - INFO - WFP order created order_id=21 provider_order_id=wfp_88680cc369754f5792320a7feb31662e user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 14:54:09 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 14:54:09 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_88680cc369754f5792320a7feb31662e', 'merchantSignature': 'a5dc0b0435b08f5b85211c14951e3dfb', 'amount': 5, 'currency': 'UAH', 'authCode': '980075', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776351195, 'processingDate': 1776351249, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': 'NoCLIENT NAME'}
-2026-04-16 14:54:09 - moodshare - INFO - Order reference: wfp_88680cc369754f5792320a7feb31662e
-2026-04-16 14:54:09 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 14:54:09 - moodshare - INFO - Verifying callback signature...
-2026-04-16 14:54:09 - moodshare - INFO - Signature verified successfully
-2026-04-16 14:54:09 - moodshare - INFO - Order found: id=21, status=pending, user_id=4
-2026-04-16 14:54:09 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 14:54:09 - moodshare - INFO - Currency: UAH
-2026-04-16 14:54:09 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 14:54:09 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 14:54:10 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_88680cc369754f5792320a7feb31662e', 'amount': 5, 'currency': 'UAH', 'authCode': '980075', 'createdDate': 1776351195, 'processingDate': 1776351249, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': 'a5dc0b0435b08f5b85211c14951e3dfb'}
-2026-04-16 14:54:10 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 14:54:10 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 14:54:10 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 14:54:10 - moodshare - INFO - WFP payment approved order_id=21 order_reference=wfp_88680cc369754f5792320a7feb31662e check_status=Approved credits_applied=50
-2026-04-16 14:57:36 - moodshare - INFO - WFP order created order_id=22 provider_order_id=wfp_9ad5f5d007d9402f9cb5eee289c62c90 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 14:58:18 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 14:58:18 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_9ad5f5d007d9402f9cb5eee289c62c90', 'merchantSignature': 'aac7f88b7787bfbe330fb5f0129d1463', 'amount': 5, 'currency': 'UAH', 'authCode': '145079', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776351456, 'processingDate': 1776351497, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': 'NoCLIENT NAME'}
-2026-04-16 14:58:18 - moodshare - INFO - Order reference: wfp_9ad5f5d007d9402f9cb5eee289c62c90
-2026-04-16 14:58:18 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 14:58:18 - moodshare - INFO - Verifying callback signature...
-2026-04-16 14:58:18 - moodshare - INFO - Signature verified successfully
-2026-04-16 14:58:18 - moodshare - INFO - Order found: id=22, status=pending, user_id=4
-2026-04-16 14:58:18 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 14:58:18 - moodshare - INFO - Currency: UAH
-2026-04-16 14:58:18 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 14:58:18 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 14:58:18 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_9ad5f5d007d9402f9cb5eee289c62c90', 'amount': 5, 'currency': 'UAH', 'authCode': '145079', 'createdDate': 1776351456, 'processingDate': 1776351497, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': 'aac7f88b7787bfbe330fb5f0129d1463'}
-2026-04-16 14:58:18 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 14:58:18 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 14:58:18 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 14:58:18 - moodshare - INFO - WFP payment approved order_id=22 order_reference=wfp_9ad5f5d007d9402f9cb5eee289c62c90 check_status=Approved credits_applied=50
-2026-04-16 15:03:42 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 15:03:42 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_007c7de279184cdeac24b4eb866b7331', 'merchantSignature': 'd3c451d150bc3eec5c71c4da36137d87', 'amount': 5, 'currency': 'UAH', 'authCode': '819070', 'email': None, 'phone': None, 'createdDate': 1776350410, 'processingDate': 1776351822, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': None}
-2026-04-16 15:03:42 - moodshare - INFO - Order reference: wfp_007c7de279184cdeac24b4eb866b7331
-2026-04-16 15:03:42 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 15:03:42 - moodshare - INFO - Verifying callback signature...
-2026-04-16 15:03:42 - moodshare - INFO - Signature verified successfully
-2026-04-16 15:03:43 - moodshare - INFO - Order found: id=19, status=success, user_id=4
-2026-04-16 15:03:43 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 15:03:43 - moodshare - INFO - Currency: UAH
-2026-04-16 15:03:43 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 15:03:43 - moodshare - INFO - WFP duplicate callback order_id=19 order_reference=wfp_007c7de279184cdeac24b4eb866b7331
-2026-04-16 15:09:45 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 15:09:45 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-16 15:10:40 - moodshare - INFO - WFP order created order_id=23 provider_order_id=wfp_bdc7d5c84370409ba08cc07f2462509b user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-16 15:11:21 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 15:11:21 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_bdc7d5c84370409ba08cc07f2462509b', 'merchantSignature': '28e8a01397f48e823f3d5e956676bad9', 'amount': 5, 'currency': 'UAH', 'authCode': '626083', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776352240, 'processingDate': 1776352281, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': 'NoCLIENT NAME'}
-2026-04-16 15:11:21 - moodshare - INFO - Order reference: wfp_bdc7d5c84370409ba08cc07f2462509b
-2026-04-16 15:11:21 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 15:11:21 - moodshare - INFO - Verifying callback signature...
-2026-04-16 15:11:21 - moodshare - INFO - Signature verified successfully
-2026-04-16 15:11:21 - moodshare - INFO - Order found: id=23, status=pending, user_id=4
-2026-04-16 15:11:21 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 15:11:21 - moodshare - INFO - Currency: UAH
-2026-04-16 15:11:21 - moodshare - INFO - Transaction status: Approved (normalized: success)
-2026-04-16 15:11:21 - moodshare - INFO - Payment approved by callback, checking status...
-2026-04-16 15:11:22 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_bdc7d5c84370409ba08cc07f2462509b', 'amount': 5, 'currency': 'UAH', 'authCode': '626083', 'createdDate': 1776352240, 'processingDate': 1776352281, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '28e8a01397f48e823f3d5e956676bad9'}
-2026-04-16 15:11:22 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
-2026-04-16 15:11:22 - moodshare - INFO - Applying credits to user_id=4, credits=50
-2026-04-16 15:11:22 - moodshare - INFO - Package found: Start 50, credits: 50
-2026-04-16 15:11:22 - moodshare - INFO - WFP payment approved order_id=23 order_reference=wfp_bdc7d5c84370409ba08cc07f2462509b check_status=Approved credits_applied=50
-2026-04-16 15:11:40 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
-2026-04-16 15:11:40 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_88680cc369754f5792320a7feb31662e', 'merchantSignature': '350f2fbceb9f58e1e64bd6a4b99b499d', 'amount': 5, 'currency': 'UAH', 'authCode': '980075', 'email': None, 'phone': None, 'createdDate': 1776351195, 'processingDate': 1776352299, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': None}
-2026-04-16 15:11:40 - moodshare - INFO - Order reference: wfp_88680cc369754f5792320a7feb31662e
-2026-04-16 15:11:40 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
-2026-04-16 15:11:40 - moodshare - INFO - Verifying callback signature...
-2026-04-16 15:11:40 - moodshare - INFO - Signature verified successfully
-2026-04-16 15:11:40 - moodshare - INFO - Order found: id=21, status=success, user_id=4
-2026-04-16 15:11:40 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
-2026-04-16 15:11:40 - moodshare - INFO - Currency: UAH
-2026-04-16 15:11:40 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
-2026-04-16 15:11:40 - moodshare - INFO - WFP duplicate callback order_id=21 order_reference=wfp_88680cc369754f5792320a7feb31662e
-2026-04-16 15:12:43 - moodshare - INFO - WFP order created order_id=24 provider_order_id=wfp_66946446f9b349bb84d8b24ff03482dc user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:17 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:18 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:23 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:23 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:25 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:27 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:46:56 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 13:47:01 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:47:09 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:47:09 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:47:13 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:47:17 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:47:17 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 13:47:26 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:47:39 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:47:39 - moodshare - INFO - User 6 connected to chat 15
-2026-04-18 13:47:50 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 13:47:50 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:47:54 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:47:58 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:48:15 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:48:22 - moodshare - INFO - User 6 disconnected from chat 15
-2026-04-18 13:48:22 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:48:34 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:48:36 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:48:36 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 13:48:38 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 13:48:38 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:50:43 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:50:43 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 13:50:45 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 13:50:45 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:50:47 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:51:01 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:52:21 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:52:31 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:52:31 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 13:52:32 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 13:52:32 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:52:33 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:52:33 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 13:52:34 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 13:52:34 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 13:52:37 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:52:37 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to chat 15
-2026-04-18 13:54:01 - moodshare - INFO - User 6 disconnected from chat 15
-2026-04-18 13:54:01 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:02 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:03 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:14 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:34 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 13:54:54 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 14:02:03 - moodshare - INFO - User 6 connected to notifications ws
-2026-04-18 14:02:03 - moodshare - INFO - User 6 connected to chat 15
-2026-04-18 14:02:40 - moodshare - INFO - User 6 disconnected from chat 15
-2026-04-18 14:04:48 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 14:04:52 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 14:04:53 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 14:04:53 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 14:07:53 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 14:11:55 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 14:14:24 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 14:14:24 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:12:40 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:12:40 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 15:12:40 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-18 15:13:18 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:13:18 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:13:20 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:13:20 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:13:28 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:13:28 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:13:28 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:13:32 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:14:47 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:14:48 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:14:48 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:16:33 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:16:38 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:16:42 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:16:42 - moodshare - INFO - User 4 connected to chat 14
-2026-04-18 15:16:43 - moodshare - INFO - User 4 disconnected from chat 14
-2026-04-18 15:16:43 - moodshare - INFO - User 4 connected to chat 13
-2026-04-18 15:16:44 - moodshare - INFO - User 4 disconnected from chat 13
-2026-04-18 15:16:44 - moodshare - INFO - User 4 connected to chat 12
-2026-04-18 15:16:45 - moodshare - INFO - User 4 disconnected from chat 12
-2026-04-18 15:16:45 - moodshare - INFO - User 4 connected to chat 6
-2026-04-18 15:16:45 - moodshare - INFO - User 4 disconnected from chat 6
-2026-04-18 15:16:45 - moodshare - INFO - User 4 connected to chat 2
-2026-04-18 15:16:46 - moodshare - INFO - User 4 disconnected from chat 2
-2026-04-18 15:16:46 - moodshare - INFO - User 4 connected to chat 3
-2026-04-18 15:16:47 - moodshare - INFO - User 4 disconnected from chat 3
-2026-04-18 15:16:47 - moodshare - INFO - User 4 connected to chat 4
-2026-04-18 15:16:53 - moodshare - INFO - User 4 disconnected from chat 4
-2026-04-18 15:17:03 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:17:03 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:03 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:07 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:07 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:17:08 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:17:08 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:10 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:17 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-18 15:17:18 - moodshare - INFO - User 4 connected to chat 15
-2026-04-18 15:17:18 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-18 15:17:18 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-19 08:54:52 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-19 08:54:52 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-19 08:55:46 - moodshare - INFO - WFP order created order_id=25 provider_order_id=wfp_ff58745aa2dd49a3977d80402ca4e0d0 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
-2026-04-19 09:30:38 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-19 09:30:38 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-19 09:30:38 - moodshare - ERROR - JWT expired: Signature has expired.
-2026-04-19 09:30:42 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-19 09:30:42 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:14:50 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:19:25 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:24:04 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:24:05 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:24:09 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:24:12 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:28:47 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:28:49 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:28:54 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:28:54 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 13:28:56 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 13:28:56 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:33:09 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:33:12 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:38:50 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:38:50 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:38:52 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 13:51:48 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:51:49 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:51:53 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:51:54 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:51:55 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:51:59 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:01 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:05 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:10 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:17 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:18 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:34 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:53:34 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 13:59:41 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:00:15 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:00:17 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:00:23 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:00:24 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:00:26 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:01:21 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:01:22 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:04:05 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:04:07 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:04:09 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:04:33 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:04:57 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:06:15 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:06:16 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:08:22 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:08:22 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:08:23 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:09:03 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:10:30 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:10:35 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:13:13 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:13:54 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:13:55 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:13:56 - moodshare - INFO - User 7 connected to chat 2
-2026-04-21 14:13:57 - moodshare - INFO - User 7 disconnected from chat 2
-2026-04-21 14:13:57 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:14:06 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:14:53 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:14:55 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:14:59 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:15:00 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:15:05 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:15:05 - moodshare - INFO - User 4 connected to chat 6
-2026-04-21 14:15:09 - moodshare - INFO - User 4 disconnected from chat 6
-2026-04-21 14:15:09 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:15:13 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:15:13 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:15:14 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:15:14 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:15:26 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:19:48 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:19:49 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:20:26 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:20:27 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:20:29 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:20:30 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:20:58 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:21:00 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:24:02 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:24:03 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:24:11 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:24:12 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:29:24 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:30:45 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:30:46 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:30:48 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:30:48 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:30:49 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:30:49 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:31:10 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:31:16 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:31:18 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:31:43 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:31:47 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:31:51 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:31:53 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:31:53 - moodshare - INFO - User 7 connected to chat 2
-2026-04-21 14:31:56 - moodshare - INFO - User 7 disconnected from chat 2
-2026-04-21 14:31:56 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:32:00 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:32:14 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:32:18 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:32:19 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:32:31 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:32:31 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:34:21 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:34:21 - moodshare - INFO - User 7 connected to chat 2
-2026-04-21 14:34:22 - moodshare - INFO - User 7 disconnected from chat 2
-2026-04-21 14:34:22 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:34:28 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:34:52 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:34:53 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:34:53 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:34:53 - moodshare - INFO - User 4 connected to chat 3
-2026-04-21 14:34:53 - moodshare - INFO - User 4 disconnected from chat 3
-2026-04-21 14:34:53 - moodshare - INFO - User 4 connected to chat 16
-2026-04-21 14:37:43 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:38:01 - moodshare - INFO - User 4 disconnected from chat 16
-2026-04-21 14:38:01 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:38:02 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:38:02 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:38:02 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:38:12 - moodshare - INFO - User 4 connected to notifications ws
-2026-04-21 14:38:12 - moodshare - INFO - User 4 connected to chat 16
-2026-04-21 14:38:12 - moodshare - INFO - User 4 disconnected from chat 16
-2026-04-21 14:38:12 - moodshare - INFO - User 4 connected to chat 15
-2026-04-21 14:38:23 - moodshare - INFO - User 4 disconnected from chat 15
-2026-04-21 14:38:23 - moodshare - INFO - User 4 connected to chat 16
-2026-04-21 14:38:35 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:38:35 - moodshare - INFO - User 7 connected to notifications ws
-2026-04-21 14:38:35 - moodshare - INFO - User 7 connected to chat 16
+2026-04-21 18:20:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:38 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:38 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:20:38 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:20:39 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:20:39 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:44 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:52 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:56 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:20:56 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:20:56 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:20:57 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:20:58 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:21:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:21:06 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:21:06 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:21:07 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:21:07 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:21:10 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:21:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:21:51 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:22:25 - moodshare - INFO - Using vacancy AI fill model: meta-llama/llama-3.3-70b-instruct
+2026-04-21 18:26:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:26:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:26:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:26:53 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:26:53 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:26:54 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:26:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:26:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:27:00 - moodshare - INFO - Using vacancy AI fill model: google/gemma-4-31b-it
+2026-04-21 18:27:02 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:28:00 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:28:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:28:03 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:28:03 - moodshare - INFO - User 4 disconnected from chat 16
+2026-04-21 18:28:03 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:28:08 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:28:08 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:28:10 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:30:28 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:31:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:32 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:35 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:35 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 18:31:35 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 18:31:37 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 18:31:37 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:40 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:31:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:33:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:37:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:37:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:37:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:39:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:39:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:41:02 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:42:16 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:42:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:42:26 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:26 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:26 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:26 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:27 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:28 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:42:29 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct
+2026-04-21 18:44:01 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:44:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:44:13 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:13 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:13 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:13 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:14 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:15 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:44:16 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:45:08 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:48:55 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:55 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:55 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:55 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:56 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:57 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:48:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:44 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:49:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:49:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:58 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:58 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:49:59 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:00 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:01 - moodshare - INFO - Starting candidate rerank with model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:50:01 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-21 18:51:00 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:51:08 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:09 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:10 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:51:11 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:52:28 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 18:54:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:54:15 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:15 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:16 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:17 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:54:59 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:00 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:01 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Starting candidate rerank with model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:02 - moodshare - INFO - Using candidate match model: qwen/qwen2.5-14b-instruct
+2026-04-21 18:55:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:55:32 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 18:55:42 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:55:42 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:55:42 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:55:42 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:55:55 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:55:55 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:01 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:01 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:10 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:10 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:15 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:15 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:18 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:18 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:27 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:27 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:49 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:49 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:56:50 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:56:50 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:07 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:07 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:13 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:13 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:20 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:20 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:32 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:32 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:38 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:38 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:57:43 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 18:57:43 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 18:59:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:02:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:05:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:07:08 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:07:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:07:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:07:28 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:09:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:10:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:10:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:11:00 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:11:00 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:11:00 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:11:00 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:11:27 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:11:27 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:11:38 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:11:38 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:11:59 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:11:59 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:12:14 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:12:14 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:12:44 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:12:44 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:12 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:12 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:18 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:18 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:22 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:22 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:24 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:24 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:25 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:25 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:26 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:26 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:30 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:30 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:31 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:31 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:13:33 - moodshare - INFO - Starting candidate rerank with model: openrouter/free
+2026-04-21 19:13:33 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:17:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:17:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:17:30 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 19:17:30 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:21:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:06 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:11 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:11 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:12 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:12 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 19:21:29 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 19:21:29 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:21:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:25:35 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:25:35 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 19:25:35 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 19:25:35 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 19:25:35 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:25:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:25:39 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:29:08 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:29:34 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:30:26 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:36:04 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:36:55 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:37:15 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:40:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:40:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:43:20 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:43:26 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:43:26 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:43:28 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:43:28 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:44:37 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-21 19:48:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:48:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:48:58 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-21 19:48:58 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-21 19:49:32 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:49:32 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 19:49:32 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 19:49:33 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 19:49:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:55:28 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 19:57:56 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:00:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:01:51 - moodshare - INFO - WFP order created order_id=35 provider_order_id=wfp_7a93a7331b244dc0892743cbfd5f3558 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-04-21 20:02:22 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-21 20:02:22 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_7a93a7331b244dc0892743cbfd5f3558', 'merchantSignature': '8912648f31147beca3e4dcdf965f9ab1', 'amount': 149, 'currency': 'UAH', 'authCode': '000603', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1776801711, 'processingDate': 1776801742, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 2.98, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
+2026-04-21 20:02:22 - moodshare - INFO - Order reference: wfp_7a93a7331b244dc0892743cbfd5f3558
+2026-04-21 20:02:22 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-04-21 20:02:22 - moodshare - INFO - Verifying callback signature...
+2026-04-21 20:02:22 - moodshare - INFO - Signature verified successfully
+2026-04-21 20:02:22 - moodshare - INFO - Order found: id=35, status=pending, user_id=4
+2026-04-21 20:02:22 - moodshare - INFO - Amount check: callback=149.00, expected=149.00
+2026-04-21 20:02:22 - moodshare - INFO - Currency: UAH
+2026-04-21 20:02:22 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-21 20:02:22 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-21 20:02:23 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_7a93a7331b244dc0892743cbfd5f3558', 'amount': 149, 'currency': 'UAH', 'authCode': '000603', 'createdDate': 1776801711, 'processingDate': 1776801742, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 2.98, 'merchantSignature': '9b8635723175947a4ccec0a114b38fc9'}
+2026-04-21 20:02:23 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-21 20:02:23 - moodshare - INFO - Applying credits to user_id=4, credits=50
+2026-04-21 20:02:23 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-21 20:02:23 - moodshare - INFO - WFP payment approved order_id=35 order_reference=wfp_7a93a7331b244dc0892743cbfd5f3558 check_status=Approved credits_applied=50
+2026-04-21 20:02:24 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:02:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:02:41 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 20:02:41 - moodshare - INFO - User 4 disconnected from chat 16
+2026-04-21 20:02:41 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 20:02:48 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 20:02:48 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 20:02:54 - moodshare - INFO - User 4 disconnected from chat 16
+2026-04-21 20:02:54 - moodshare - INFO - User 4 connected to chat 12
+2026-04-21 20:03:01 - moodshare - INFO - User 4 disconnected from chat 12
+2026-04-21 20:03:01 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:03:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:03:02 - moodshare - INFO - User 4 connected to chat 16
+2026-04-21 20:03:02 - moodshare - INFO - User 4 connected to chat 15
+2026-04-21 20:03:03 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-21 20:03:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:03:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 20:03:06 - moodshare - INFO - User 4 connected to notifications ws

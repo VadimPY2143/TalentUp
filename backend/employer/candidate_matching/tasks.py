@@ -4,11 +4,12 @@ import os
 from typing import Any, Coroutine, TypeVar
 
 import redis.asyncio as redis
+from fastapi import HTTPException
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from payments.billing import CreditBillingService
-from employer.candidate_matching.ai_rerank import rerank_candidate
+from payments.billing import CreditBillingService, get_candidate_matching_credits
+from employer.candidate_matching.ai_rerank import rerank_candidates
 from employer.candidate_matching.cache import (
     build_job_payload,
     dumps_payload,
@@ -17,16 +18,17 @@ from employer.candidate_matching.cache import (
     match_latest_job_key,
     utcnow_iso,
 )
+from employer.candidate_matching.models import CandidateRerankOutput
 from employer.candidate_matching.repository import CandidateMatchingRepository
 from worker.messages.celery_app import celery_app
 
 LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 _T = TypeVar("_T")
 billing_service = CreditBillingService()
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = 3600
-AI_CONCURRENCY = 2
 
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -185,6 +187,7 @@ async def _refund_candidate_matching_credits(
     job_id: str,
     amount: int,
     reason: str,
+    idempotency_suffix: str = "default",
 ) -> None:
     if amount <= 0:
         return
@@ -196,7 +199,7 @@ async def _refund_candidate_matching_credits(
                 session=session,
                 user_id=employer_user_id,
                 amount=amount,
-                idempotency_key=f"refund:{job_id}",
+                idempotency_key=f"refund:{job_id}:{idempotency_suffix}",
                 feature_code="candidate_matching",
                 reference_type="matching_job",
                 reference_id=job_id,
@@ -209,6 +212,41 @@ async def _refund_candidate_matching_credits(
         await session.close()
         if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
             await session.bind.dispose()
+
+
+async def _charge_candidate_matching_credits(
+    *,
+    employer_user_id: int,
+    vacancy_id: int,
+    job_id: str,
+    analyzed_candidates: int,
+) -> int:
+    amount = get_candidate_matching_credits(analyzed_candidates)
+    if amount <= 0:
+        return 0
+
+    session = await _get_celery_session()
+    try:
+        async with session.begin():
+            await billing_service.charge_for_feature(
+                session=session,
+                user_id=employer_user_id,
+                feature_code="candidate_matching",
+                amount=amount,
+                idempotency_key=f"candidate_matching:{job_id}",
+                reference_type="matching_job",
+                reference_id=job_id,
+                meta={
+                    "vacancy_id": vacancy_id,
+                    "analyzed_candidates": analyzed_candidates,
+                },
+            )
+    finally:
+        await session.close()
+        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
+            await session.bind.dispose()
+
+    return amount
 
 
 async def _set_status(
@@ -233,36 +271,31 @@ async def _set_status(
     await _store_payload(payload)
 
 
-async def _score_single_candidate(
-    *,
-    vacancy: dict[str, Any],
-    candidate: dict[str, Any],
-    sql_score: int,
-) -> dict[str, Any]:
-    try:
-        ai_result = await rerank_candidate(vacancy, candidate)
-        score_total = max(0, min(100, int(round((ai_result.score_total * 0.7) + (sql_score * 0.3)))))
-        return {
-            "score_total": score_total,
-            "confidence": float(ai_result.confidence),
-            "verdict": ai_result.verdict,
-            "matched_skills": ai_result.matched_skills,
-            "missing_skills": ai_result.missing_skills,
-            "strengths": ai_result.strengths,
-            "risks": ai_result.risks,
-            "summary": ai_result.summary,
-        }
-    except Exception:
-        return {
-            "score_total": sql_score,
-            "confidence": 0.3,
-            "verdict": "weak_match" if sql_score >= 50 else "mismatch",
-            "matched_skills": [],
-            "missing_skills": [],
-            "strengths": [],
-            "risks": ["AI scoring temporarily unavailable"],
-            "summary": "Тимчасово недоступна повна AI-оцінка, тому використано спрощений розрахунок релевантності.",
-        }
+def _fallback_ai_payload(sql_score: int) -> dict[str, Any]:
+    return {
+        "score_total": sql_score,
+        "confidence": 0.3,
+        "verdict": "weak_match" if sql_score >= 50 else "mismatch",
+        "matched_skills": [],
+        "missing_skills": [],
+        "strengths": [],
+        "risks": ["AI scoring temporarily unavailable"],
+        "summary": "Тимчасово недоступна повна AI-оцінка, тому використано спрощений розрахунок релевантності.",
+    }
+
+
+def _build_ai_payload(ai_result: CandidateRerankOutput, sql_score: int) -> dict[str, Any]:
+    score_total = max(0, min(100, int(round((ai_result.score_total * 0.7) + (sql_score * 0.3)))))
+    return {
+        "score_total": score_total,
+        "confidence": float(ai_result.confidence),
+        "verdict": ai_result.verdict,
+        "matched_skills": ai_result.matched_skills,
+        "missing_skills": ai_result.missing_skills,
+        "strengths": ai_result.strengths,
+        "risks": ai_result.risks,
+        "summary": ai_result.summary,
+    }
 
 
 @celery_app.task(
@@ -276,7 +309,6 @@ def run_candidate_matching(
     vacancy_id: int,
     employer_user_id: int,
     requested_limit: int,
-    charged_credits: int,
     **_unused: Any,
 ) -> dict[str, Any]:
     del self
@@ -287,7 +319,6 @@ def run_candidate_matching(
                 vacancy_id=vacancy_id,
                 employer_user_id=employer_user_id,
                 requested_limit=requested_limit,
-                charged_credits=charged_credits,
             )
         )
     except Exception as exc:
@@ -310,18 +341,6 @@ def run_candidate_matching(
             )
         except Exception:
             LOGGER.exception("Failed to persist failed status for candidate matching job_id=%s", job_id)
-        try:
-            _run_async(
-                _refund_candidate_matching_credits(
-                    employer_user_id=employer_user_id,
-                    vacancy_id=vacancy_id,
-                    job_id=job_id,
-                    amount=charged_credits,
-                    reason="task_failed",
-                )
-            )
-        except Exception:
-            LOGGER.exception("Failed to refund credits for candidate matching job_id=%s", job_id)
         raise
 
 
@@ -331,7 +350,6 @@ async def _run_candidate_matching(
     vacancy_id: int,
     employer_user_id: int,
     requested_limit: int,
-    charged_credits: int,
 ) -> dict[str, Any]:
     payload = build_job_payload(
         job_id=job_id,
@@ -342,94 +360,159 @@ async def _run_candidate_matching(
     )
     await _store_payload(payload)
 
-    repository = CandidateMatchingRepository()
-    session = await _get_celery_session()
+    charged_credits = 0
     try:
-        async with session.begin():
-            vacancy = await repository.get_owned_vacancy(
-                session=session,
-                vacancy_id=vacancy_id,
-                employer_user_id=employer_user_id,
+        repository = CandidateMatchingRepository()
+        session = await _get_celery_session()
+        try:
+            async with session.begin():
+                vacancy = await repository.get_owned_vacancy(
+                    session=session,
+                    vacancy_id=vacancy_id,
+                    employer_user_id=employer_user_id,
+                )
+                if vacancy is None:
+                    await _set_status(payload=payload, status="failed", error="Vacancy not found")
+                    return payload
+
+                candidates = await repository.list_vacancy_candidates(
+                    session=session,
+                    vacancy=vacancy,
+                )
+        finally:
+            await session.close()
+            if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
+                await session.bind.dispose()
+
+        if not candidates:
+            await _set_status(
+                payload=payload,
+                status="done",
+                prefiltered_count=0,
+                scored_count=0,
+                result=[],
             )
-            if vacancy is None:
-                await _set_status(payload=payload, status="failed", error="Vacancy not found")
+            return payload
+
+        await _set_status(
+            payload=payload,
+            status="running",
+            prefiltered_count=len(candidates),
+            scored_count=0,
+        )
+
+        sql_scores_by_application_id = {
+            int(row["application_id"]): _heuristic_score(vacancy, row)
+            for row in candidates
+        }
+
+        ai_results_by_application_id: dict[int, CandidateRerankOutput] = {}
+        try:
+            charged_credits = await _charge_candidate_matching_credits(
+                employer_user_id=employer_user_id,
+                vacancy_id=vacancy_id,
+                job_id=job_id,
+                analyzed_candidates=len(candidates),
+            )
+        except HTTPException as exc:
+            if exc.status_code == 402:
+                LOGGER.warning(
+                    "Insufficient credits for candidate matching vacancy_id=%s, job_id=%s. "
+                    "Falling back to SQL scores.",
+                    vacancy_id,
+                    job_id,
+                )
+            else:
+                raise
+        else:
+            try:
+                ai_results_by_application_id = await rerank_candidates(vacancy, candidates)
+            except Exception:
+                LOGGER.warning(
+                    "Batch AI rerank failed for vacancy_id=%s, job_id=%s. Falling back to SQL scores.",
+                    vacancy_id,
+                    job_id,
+                    exc_info=True,
+                )
+                ai_results_by_application_id = {}
+
+            actual_credits = get_candidate_matching_credits(len(ai_results_by_application_id))
+            refund_amount = max(charged_credits - actual_credits, 0)
+            if refund_amount > 0:
+                await _refund_candidate_matching_credits(
+                    employer_user_id=employer_user_id,
+                    vacancy_id=vacancy_id,
+                    job_id=job_id,
+                    amount=refund_amount,
+                    reason="partial_ai_results",
+                    idempotency_suffix="partial",
+                )
+                charged_credits -= refund_amount
+
+        if 0 < len(ai_results_by_application_id) < len(candidates):
+            LOGGER.warning(
+                "Batch AI rerank returned partial results for vacancy_id=%s, job_id=%s: %s/%s",
+                vacancy_id,
+                job_id,
+                len(ai_results_by_application_id),
+                len(candidates),
+            )
+
+        scored_rows: list[dict[str, Any]] = []
+        for row in candidates:
+            application_id = int(row["application_id"])
+            sql_score = sql_scores_by_application_id[application_id]
+            ai_result = ai_results_by_application_id.get(application_id)
+            ai_payload = _build_ai_payload(ai_result, sql_score) if ai_result else _fallback_ai_payload(sql_score)
+
+            merged = {
+                "application_id": int(row["application_id"]),
+                "resume_id": int(row["resume_id"]),
+                "candidate_user_id": int(row["candidate_user_id"]),
+                "candidate_name": str(row.get("candidate_name") or "Unknown"),
+                "title": str(row.get("resume_title") or "Resume"),
+                "desired_role": row.get("desired_role"),
+                "years_experience": row.get("years_experience"),
+                "location": row.get("location"),
+                "employment_type": list(row.get("employment_type") or []),
+                "salary_min": row.get("salary_min"),
+                "salary_max": row.get("salary_max"),
+                "salary_currency": row.get("salary_currency"),
+                "cover_letter": row.get("cover_letter"),
+                "score_sql": sql_score,
+                **ai_payload,
+            }
+            scored_rows.append(merged)
+
+        scored_rows = sorted(
+            scored_rows,
+            key=lambda row: (row["score_total"], row["confidence"], row["score_sql"]),
+            reverse=True,
+        )
+
+        top_rows: list[dict[str, Any]] = []
+        for index, row in enumerate(scored_rows[:requested_limit], start=1):
+            top_rows.append({"rank": index, **row})
+
+        await _set_status(
+            payload=payload,
+            status="done",
+            prefiltered_count=len(candidates),
+            scored_count=len(scored_rows),
+            result=top_rows,
+        )
+        return payload
+    except Exception:
+        if charged_credits > 0:
+            try:
                 await _refund_candidate_matching_credits(
                     employer_user_id=employer_user_id,
                     vacancy_id=vacancy_id,
                     job_id=job_id,
                     amount=charged_credits,
-                    reason="vacancy_not_found",
+                    reason="task_failed",
+                    idempotency_suffix="failed",
                 )
-                return payload
-
-            candidates = await repository.list_vacancy_candidates(
-                session=session,
-                vacancy=vacancy,
-            )
-    finally:
-        await session.close()
-        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
-            await session.bind.dispose()
-
-    if not candidates:
-        await _set_status(
-            payload=payload,
-            status="done",
-            prefiltered_count=0,
-            scored_count=0,
-            result=[],
-        )
-        return payload
-
-    await _set_status(
-        payload=payload,
-        status="running",
-        prefiltered_count=len(candidates),
-        scored_count=0,
-    )
-
-    semaphore = asyncio.Semaphore(max(AI_CONCURRENCY, 1))
-
-    async def _score_row(row: dict[str, Any]) -> dict[str, Any]:
-        sql_score = _heuristic_score(vacancy, row)
-        async with semaphore:
-            await asyncio.sleep(0.3)  # затримка між запитами для стабільності
-            ai_payload = await _score_single_candidate(vacancy=vacancy, candidate=row, sql_score=sql_score)
-        merged = {
-            "application_id": int(row["application_id"]),
-            "resume_id": int(row["resume_id"]),
-            "candidate_user_id": int(row["candidate_user_id"]),
-            "candidate_name": str(row.get("candidate_name") or "Unknown"),
-            "title": str(row.get("resume_title") or "Resume"),
-            "desired_role": row.get("desired_role"),
-            "years_experience": row.get("years_experience"),
-            "location": row.get("location"),
-            "employment_type": list(row.get("employment_type") or []),
-            "salary_min": row.get("salary_min"),
-            "salary_max": row.get("salary_max"),
-            "salary_currency": row.get("salary_currency"),
-            "cover_letter": row.get("cover_letter"),
-            "score_sql": sql_score,
-            **ai_payload,
-        }
-        return merged
-
-    scored_rows = await asyncio.gather(*[_score_row(candidate) for candidate in candidates])
-    scored_rows = sorted(
-        scored_rows,
-        key=lambda row: (row["score_total"], row["confidence"], row["score_sql"]),
-        reverse=True,
-    )
-
-    top_rows: list[dict[str, Any]] = []
-    for index, row in enumerate(scored_rows[:requested_limit], start=1):
-        top_rows.append({"rank": index, **row})
-
-    await _set_status(
-        payload=payload,
-        status="done",
-        prefiltered_count=len(candidates),
-        scored_count=len(scored_rows),
-        result=top_rows,
-    )
-    return payload
+            except Exception:
+                LOGGER.exception("Failed to refund credits for candidate matching job_id=%s", job_id)
+        raise
