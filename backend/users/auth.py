@@ -5,7 +5,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from jose.exceptions import ExpiredSignatureError
 import bcrypt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +24,10 @@ if not JWT_SECRET_KEY:
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
+REFRESH_COOKIE_NAME = os.getenv("REFRESH_COOKIE_NAME", "refresh_token")
+REFRESH_COOKIE_SECURE = os.getenv("REFRESH_COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes", "on"}
+REFRESH_COOKIE_SAMESITE = os.getenv("REFRESH_COOKIE_SAMESITE", "lax")
+REFRESH_COOKIE_PATH = os.getenv("REFRESH_COOKIE_PATH", "/")
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -82,6 +86,28 @@ def hash_refresh_token(token: str) -> str:
 
 def get_refresh_token_expiry() -> datetime:
     return datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+
+
+def set_refresh_cookie(response: Response, refresh_token: str) -> None:
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        secure=REFRESH_COOKIE_SECURE,
+        samesite=REFRESH_COOKIE_SAMESITE,
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        path=REFRESH_COOKIE_PATH,
+    )
+
+
+def clear_refresh_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=REFRESH_COOKIE_NAME,
+        path=REFRESH_COOKIE_PATH,
+        httponly=True,
+        secure=REFRESH_COOKIE_SECURE,
+        samesite=REFRESH_COOKIE_SAMESITE,
+    )
 
 
 def verify_token(token: str) -> dict:

@@ -1,19 +1,67 @@
-export const API_URL = import.meta.env.VITE_API_URL ?? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : `${window.location.protocol}//${window.location.hostname}`)
+const API_URL_OVERRIDE_STORAGE_KEY = "api_url_override"
 
-const ACCESS_TOKEN_KEY = "accessToken"
-const REFRESH_TOKEN_KEY = "refreshToken"
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "")
 
-const getToken = () => localStorage.getItem(ACCESS_TOKEN_KEY)
-const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY)
+const resolveDefaultApiUrl = (): string => {
+  const configured = (import.meta.env.VITE_API_URL ?? "").trim()
+  if (configured) {
+    return trimTrailingSlash(configured)
+  }
 
-const saveTokens = (accessToken: string, refreshToken: string) => {
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
-  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return "http://127.0.0.1:8000"
+  }
+
+  return `${window.location.protocol}//${window.location.hostname}`
 }
 
-const clearTokens = () => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY)
-  localStorage.removeItem(REFRESH_TOKEN_KEY)
+const readStoredApiUrlOverride = (): string | null => {
+  try {
+    const raw = sessionStorage.getItem(API_URL_OVERRIDE_STORAGE_KEY)
+    if (!raw) {
+      return null
+    }
+    return trimTrailingSlash(raw)
+  } catch {
+    return null
+  }
+}
+
+export let API_URL = readStoredApiUrlOverride() ?? resolveDefaultApiUrl()
+
+export const setApiUrlOverride = (nextUrl: string | null) => {
+  if (!nextUrl) {
+    API_URL = resolveDefaultApiUrl()
+    try {
+      sessionStorage.removeItem(API_URL_OVERRIDE_STORAGE_KEY)
+    } catch {
+      // ignore storage failures
+    }
+    return
+  }
+
+  const normalized = trimTrailingSlash(nextUrl.trim())
+  if (!/^https?:\/\//i.test(normalized)) {
+    return
+  }
+
+  API_URL = normalized
+  try {
+    sessionStorage.setItem(API_URL_OVERRIDE_STORAGE_KEY, normalized)
+  } catch {
+    // ignore storage failures
+  }
+}
+
+let accessTokenMemory: string | null = null
+let refreshInFlight: Promise<string | null> | null = null
+
+export const setAccessToken = (token: string | null) => {
+  accessTokenMemory = token
+}
+
+export const clearAccessToken = () => {
+  accessTokenMemory = null
 }
 
 const parseErrorDetail = (detail: unknown): string => {
@@ -32,52 +80,70 @@ const parseErrorDetail = (detail: unknown): string => {
 }
 
 const buildHeaders = (token: string | null, options?: RequestInit): HeadersInit => {
+  const hasBody = options?.body !== undefined && options?.body !== null
   const isFormData = options?.body instanceof FormData
+  const isNgrokApi = /https?:\/\/[^/]*ngrok(-free)?\.(app|dev)/i.test(API_URL)
   return {
-    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...(isFormData || !hasBody ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(isNgrokApi ? { "ngrok-skip-browser-warning": "true" } : {}),
     ...(options?.headers ?? {}),
   }
 }
 
 const refreshAccessToken = async () => {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) {
-    return null
+  if (refreshInFlight) {
+    return refreshInFlight
   }
 
-  const response = await fetch(`${API_URL}/user/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  })
+  refreshInFlight = (async () => {
+    const response = await fetch(`${API_URL}/user/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    })
 
-  if (!response.ok) {
-    clearTokens()
-    return null
+    if (!response.ok) {
+      return null
+    }
+
+    const data = (await response.json()) as {
+      access_token: string
+    }
+
+    setAccessToken(data.access_token)
+    return data.access_token
+  })()
+
+  try {
+    return await refreshInFlight
+  } finally {
+    refreshInFlight = null
   }
+}
 
-  const data = (await response.json()) as {
-    access_token: string
-    refresh_token: string
+export const refreshAccessTokenViaCookie = async (): Promise<string> => {
+  const token = await refreshAccessToken()
+  if (!token) {
+    throw new Error("Unauthorized")
   }
-
-  saveTokens(data.access_token, data.refresh_token)
-  return data.access_token
+  return token
 }
 
 export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<T> => {
-  const token = getToken()
+  const token = accessTokenMemory
   const response = await fetch(`${API_URL}${path}`, {
     headers: buildHeaders(token, options),
+    credentials: "include",
     ...options,
   })
 
-  if (response.status === 401) {
+  if (response.status === 401 && path !== "/user/refresh") {
     const newToken = await refreshAccessToken()
     if (newToken) {
       const retry = await fetch(`${API_URL}${path}`, {
         headers: buildHeaders(newToken, options),
+        credentials: "include",
         ...options,
       })
 
@@ -108,17 +174,19 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
 }
 
 export const apiFetchBlob = async (path: string, options?: RequestInit): Promise<Blob> => {
-  const token = getToken()
+  const token = accessTokenMemory
   const response = await fetch(`${API_URL}${path}`, {
     headers: buildHeaders(token, options),
+    credentials: "include",
     ...options,
   })
 
-  if (response.status === 401) {
+  if (response.status === 401 && path !== "/user/refresh") {
     const newToken = await refreshAccessToken()
     if (newToken) {
       const retry = await fetch(`${API_URL}${path}`, {
         headers: buildHeaders(newToken, options),
+        credentials: "include",
         ...options,
       })
       if (!retry.ok) {

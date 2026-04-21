@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -7,10 +6,12 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 import uvicorn
+from backend.app_config import load_http_settings
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 app = FastAPI()
+http_settings = load_http_settings()
 
 from cities.views import router as cities_router
 from employer.company.views import router as company_router
@@ -33,16 +34,19 @@ from notifications.views import router as notifications_router
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.getenv("OAUTH_SESSION_SECRET", os.getenv("JWT_SECRET_KEY", "change-me")),
+    secret_key=http_settings.oauth_session_secret,
+    same_site=http_settings.oauth_session_same_site,
+    https_only=http_settings.oauth_session_https_only,
+    session_cookie=http_settings.oauth_session_cookie_name,
 )
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=http_settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=http_settings.cors_methods,
+    allow_headers=http_settings.cors_headers,
 )
 
 

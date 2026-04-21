@@ -1,4 +1,4 @@
-import { apiFetch } from "./client"
+import { apiFetch, refreshAccessTokenViaCookie } from "./client"
 import type { RegisterPayload, UserResponse, LoginPayload, TokenResponse } from "../types/auth"
 
 export const registerUser = (payload: RegisterPayload) => {
@@ -15,9 +15,15 @@ export const loginUser = (payload: LoginPayload) => {
   })
 }
 
-export const refreshTokens = (refreshToken: string) => {
-  return apiFetch<TokenResponse>("/user/refresh", {
+export const refreshSession = () => {
+  return refreshAccessTokenViaCookie().then((accessToken) => ({
+    access_token: accessToken,
+    token_type: "bearer" as const,
+  }))
+}
+
+export const logoutUser = () => {
+  return apiFetch<void>("/user/logout", {
     method: "POST",
-    body: JSON.stringify({ refresh_token: refreshToken }),
   })
 }

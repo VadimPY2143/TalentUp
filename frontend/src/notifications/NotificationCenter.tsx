@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../api/notifications"
+import { useCallback, useEffect, useMemo, useState, useRef } from "react"
+import { listNotifications, markAllNotificationsRead, markNotificationRead, buildNotificationsWebSocketUrl } from "../api/notifications"
+import { useAuth } from "../auth/useAuth"
 import type { Notification } from "../types/notification"
 
 const formatTime = (iso: string) => {
@@ -27,11 +28,13 @@ const translateNotification = (notification: Notification) => {
 }
 
 export const NotificationCenter = () => {
+  const { token } = useAuth()
   const [items, setItems] = useState<Notification[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
 
   const unreadCount = useMemo(() => items.filter((n) => !n.is_read).length, [items])
 
@@ -52,12 +55,47 @@ export const NotificationCenter = () => {
         setLoading(false)
       }
     },
-    [cursor, loading],
+    [cursor],
   )
 
   useEffect(() => {
     load("initial")
   }, [load])
+
+  useEffect(() => {
+    if (!token) return
+
+    const wsUrl = buildNotificationsWebSocketUrl(token)
+    const ws = new WebSocket(wsUrl)
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      console.log("WebSocket connected for notifications")
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        console.log("Received notification via WebSocket:", data)
+        load("initial")
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error)
+    }
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected")
+    }
+
+    return () => {
+      ws.close()
+      wsRef.current = null
+    }
+  }, [token, load])
 
   const onMarkRead = async (id: number) => {
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
@@ -99,13 +137,6 @@ export const NotificationCenter = () => {
             className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
           >
             Позначити всі прочитаними
-          </button>
-          <button
-            type="button"
-            onClick={() => load("initial")}
-            className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
-          >
-            Оновити
           </button>
         </div>
       </div>
