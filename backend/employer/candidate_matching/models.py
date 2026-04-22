@@ -60,12 +60,7 @@ class CandidateMatchJobResponse(BaseModel):
 
 class CandidateRerankOutput(BaseModel):
     score_total: int = Field(ge=0, le=100)
-    confidence: float = Field(ge=0.0, le=1.0)
     verdict: Literal["strong_match", "match", "weak_match", "mismatch"]
-    matched_skills: list[str] = Field(default_factory=list)
-    missing_skills: list[str] = Field(default_factory=list)
-    strengths: list[str] = Field(default_factory=list)
-    risks: list[str] = Field(default_factory=list)
     summary: str = Field(min_length=10, max_length=400)
 
 

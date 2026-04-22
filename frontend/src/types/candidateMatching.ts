@@ -30,10 +30,6 @@ export interface CandidateMatchResultItem {
   score_sql: number
   confidence: number
   verdict: "strong_match" | "match" | "weak_match" | "mismatch" | string
-  matched_skills: string[]
-  missing_skills: string[]
-  strengths: string[]
-  risks: string[]
   summary: string
 }
 

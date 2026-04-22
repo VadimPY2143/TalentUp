@@ -1,4 +1,4 @@
-﻿import {
+import {
   useEffect,
   useMemo,
   useState,
@@ -508,7 +508,6 @@ const CandidateSearch = () => {
     candidateId: number
     title: string
     summary: string
-    strengths: string[]
     cached: boolean
   } | null>(null)
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
@@ -818,7 +817,6 @@ const CandidateSearch = () => {
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
-        strengths: data?.strengths ?? [],
         cached: Boolean(data?.cached),
       })
     } catch (err) {
@@ -1057,23 +1055,6 @@ const CandidateSearch = () => {
             ) : (
               <>
                 <p className="mt-4 text-sm text-slate-700">{summaryModal.summary}</p>
-                {summaryModal.strengths.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Сильні сторони
-                    </p>
-                    <ul className="mt-2 space-y-2 text-sm text-slate-700">
-                      {summaryModal.strengths.map((item, index) => (
-                        <li
-                          key={`${summaryModal.candidateId}-${index}`}
-                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </>
             )}
           </div>

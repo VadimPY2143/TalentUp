@@ -150,10 +150,7 @@ class WayForPayProvider:
         if value in {"expired"}:
             return "expired"
         if value in {
-            "inprocessing",
             "pending",
-            "waitingauthcomplete",
-            "waitingamountconfirm",
             "processing",
         }:
             return "pending"

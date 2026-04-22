@@ -452,3 +452,325 @@
 2026-04-21 20:03:03 - moodshare - INFO - User 4 connected to notifications ws
 2026-04-21 20:03:03 - moodshare - INFO - User 4 connected to notifications ws
 2026-04-21 20:03:06 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 21:12:14 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-21 23:12:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 03:10:54 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 05:37:48 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 07:03:25 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 07:07:39 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:07:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:07:41 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 07:07:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:08:07 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:08:22 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-22 07:08:22 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 07:13:10 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-22 07:13:10 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 07:13:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:14:14 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:14:14 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:17:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:17:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:17:59 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free
+2026-04-22 07:17:59 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 07:25:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:25:32 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:25:45 - moodshare - INFO - Starting candidate batch rerank with model: google/gemma-4-31b-it
+2026-04-22 07:25:45 - moodshare - INFO - Using candidate match model: google/gemma-4-31b-it
+2026-04-22 07:29:09 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:29:18 - moodshare - INFO - Starting candidate batch rerank with model: google/gemma-4-31b-it, candidates count: 16
+2026-04-22 07:29:18 - moodshare - INFO - Using candidate match model: google/gemma-4-31b-it
+2026-04-22 07:29:18 - moodshare - INFO - Timeout set to 30s
+2026-04-22 07:29:48 - moodshare - ERROR - Candidate batch rerank timed out after 30s
+2026-04-22 07:31:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:31:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:31:56 - moodshare - INFO - Starting candidate batch rerank with model: meta-llama/llama-3.2-3b-instruct:free, candidates count: 16
+2026-04-22 07:31:56 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-22 07:31:56 - moodshare - INFO - Timeout set to 60s
+2026-04-22 07:33:09 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:33:22 - moodshare - INFO - Starting candidate batch rerank with model: meta-llama/llama-3.2-3b-instruct:free, candidates count: 16
+2026-04-22 07:33:22 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.2-3b-instruct:free
+2026-04-22 07:33:22 - moodshare - INFO - Timeout set to 60s
+2026-04-22 07:34:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:34:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:34:52 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:34:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:34:55 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:34:56 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:35:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:35:04 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:35:14 - moodshare - INFO - Starting candidate batch rerank with model: meta-llama/llama-3.3-70b-instruct:free, candidates count: 16
+2026-04-22 07:35:14 - moodshare - INFO - Using candidate match model: meta-llama/llama-3.3-70b-instruct:free
+2026-04-22 07:35:14 - moodshare - INFO - Timeout set to 90s
+2026-04-22 07:36:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:37:00 - moodshare - INFO - Starting candidate batch rerank with model: CANDIDATE_MATCH_MODEL=openrouter/free, candidates count: 16
+2026-04-22 07:37:00 - moodshare - INFO - Using candidate match model: CANDIDATE_MATCH_MODEL=openrouter/free
+2026-04-22 07:37:00 - moodshare - INFO - Timeout set to 90s
+2026-04-22 07:37:57 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:37:58 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:38:09 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free, candidates count: 16
+2026-04-22 07:38:09 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 07:38:09 - moodshare - INFO - Timeout set to 90s
+2026-04-22 07:38:22 - moodshare - INFO - AI request completed successfully
+2026-04-22 07:38:22 - moodshare - INFO - Processed 14 candidates out of 16
+2026-04-22 07:40:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:27 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:27 - moodshare - INFO - User 4 connected to chat 15
+2026-04-22 07:40:29 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-22 07:40:29 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:29 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:40:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:41:04 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:41:06 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:41:06 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:41:18 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:43:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:28 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:48:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:33 - moodshare - INFO - User 4 connected to chat 16
+2026-04-22 07:48:33 - moodshare - INFO - User 4 disconnected from chat 16
+2026-04-22 07:48:34 - moodshare - INFO - User 4 connected to chat 15
+2026-04-22 07:48:34 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-22 07:48:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:40 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:48:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:49:22 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:49:23 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:49:28 - moodshare - INFO - Using vacancy AI fill model: google/gemma-4-31b-it
+2026-04-22 07:50:11 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:50:18 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:52:25 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:53:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 07:59:20 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:21 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:27 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:28 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:29 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:29 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 07:59:30 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 07:59:30 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:31 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 07:59:31 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 07:59:34 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 07:59:34 - moodshare - INFO - User 6 connected to chat 13
+2026-04-22 07:59:35 - moodshare - INFO - User 6 disconnected from chat 13
+2026-04-22 07:59:35 - moodshare - INFO - User 6 connected to chat 11
+2026-04-22 07:59:35 - moodshare - INFO - User 6 disconnected from chat 11
+2026-04-22 07:59:35 - moodshare - INFO - User 6 connected to chat 12
+2026-04-22 07:59:37 - moodshare - INFO - User 6 disconnected from chat 12
+2026-04-22 07:59:37 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 07:59:37 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 07:59:37 - moodshare - INFO - User 6 connected to chat 12
+2026-04-22 07:59:38 - moodshare - INFO - User 6 disconnected from chat 12
+2026-04-22 07:59:38 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 07:59:39 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 07:59:39 - moodshare - INFO - User 6 connected to chat 13
+2026-04-22 07:59:42 - moodshare - INFO - User 6 disconnected from chat 13
+2026-04-22 07:59:42 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 07:59:47 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 07:59:47 - moodshare - INFO - User 6 connected to chat 7
+2026-04-22 08:00:04 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:00:04 - moodshare - INFO - User 4 connected to chat 16
+2026-04-22 08:00:04 - moodshare - INFO - User 4 disconnected from chat 16
+2026-04-22 08:00:04 - moodshare - INFO - User 4 connected to chat 15
+2026-04-22 08:00:16 - moodshare - INFO - User 6 disconnected from chat 7
+2026-04-22 08:00:16 - moodshare - INFO - User 6 connected to chat 15
+2026-04-22 08:05:16 - moodshare - INFO - User 6 disconnected from chat 15
+2026-04-22 08:05:16 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 08:05:55 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 08:08:13 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 08:08:13 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 08:09:24 - moodshare - INFO - User 6 connected to notifications ws
+2026-04-22 08:12:19 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-22 08:12:19 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:12:19 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:12:19 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:12:19 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:12:19 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:14:50 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:16:25 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:16:25 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:16:35 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:16:35 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:17:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:17:13 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:18:10 - moodshare - ERROR - JWT expired: Signature has expired.
+2026-04-22 08:19:44 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:19:44 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:19:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:19:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:20:29 - moodshare - INFO - WFP order created order_id=36 provider_order_id=wfp_e9cf923124b445e7893030cd9620602f user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-04-22 08:20:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:20:53 - moodshare - INFO - WFP order created order_id=37 provider_order_id=wfp_137b0a740c05447ba75338f20c8c79f6 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-04-22 08:21:00 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:21:01 - moodshare - INFO - WFP order created order_id=38 provider_order_id=wfp_55b0c5820253447a846e26467f23bfc4 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-04-22 08:21:40 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-22 08:21:40 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_55b0c5820253447a846e26467f23bfc4', 'merchantSignature': '08ef2e78e6ceb48ccae43006bcad86cd', 'amount': 149, 'currency': 'UAH', 'authCode': '549094', 'email': 'vadimpapusha2310@gmail.com', 'phone': '380992220142', 'createdDate': 1776846062, 'processingDate': 1776846100, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 2.98, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'cardProduct': 'debit', 'clientName': 'NoCLIENT NAME'}
+2026-04-22 08:21:40 - moodshare - INFO - Order reference: wfp_55b0c5820253447a846e26467f23bfc4
+2026-04-22 08:21:40 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-04-22 08:21:40 - moodshare - INFO - Verifying callback signature...
+2026-04-22 08:21:40 - moodshare - INFO - Signature verified successfully
+2026-04-22 08:21:40 - moodshare - INFO - Order found: id=38, status=pending, user_id=4
+2026-04-22 08:21:40 - moodshare - INFO - Amount check: callback=149.00, expected=149.00
+2026-04-22 08:21:40 - moodshare - INFO - Currency: UAH
+2026-04-22 08:21:40 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-04-22 08:21:40 - moodshare - INFO - Payment approved by callback, checking status...
+2026-04-22 08:21:40 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_55b0c5820253447a846e26467f23bfc4', 'amount': 149, 'currency': 'UAH', 'authCode': '549094', 'createdDate': 1776846062, 'processingDate': 1776846100, 'cardPan': '41****2662', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC CB PRIVATBANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 2.98, 'merchantSignature': '08ef2e78e6ceb48ccae43006bcad86cd'}
+2026-04-22 08:21:40 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-04-22 08:21:40 - moodshare - INFO - Applying credits to user_id=4, credits=50
+2026-04-22 08:21:40 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-04-22 08:21:40 - moodshare - INFO - WFP payment approved order_id=38 order_reference=wfp_55b0c5820253447a846e26467f23bfc4 check_status=Approved credits_applied=50
+2026-04-22 08:21:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:22:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 08:22:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:18:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:18:38 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:37:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:37:49 - moodshare - INFO - User 4 connected to chat 15
+2026-04-22 18:37:51 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-22 18:37:51 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:38:04 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free, candidates count: 16
+2026-04-22 18:38:04 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 18:38:04 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:38:23 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:38:38 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:39:34 - moodshare - ERROR - Candidate batch rerank timed out after 90s
+2026-04-22 18:39:59 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:39:59 - moodshare - INFO - User 4 connected to chat 15
+2026-04-22 18:40:00 - moodshare - INFO - User 4 disconnected from chat 15
+2026-04-22 18:40:00 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:40:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:40:06 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:40:27 - moodshare - INFO - Starting candidate batch rerank with model: openrouter/free, candidates count: 16
+2026-04-22 18:40:27 - moodshare - INFO - Using candidate match model: openrouter/free
+2026-04-22 18:40:27 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:41:38 - moodshare - INFO - AI request completed successfully
+2026-04-22 18:41:38 - moodshare - INFO - Processed 15 candidates out of 16
+2026-04-22 18:42:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:46:00 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:46:11 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 18:46:11 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 18:46:11 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:46:28 - moodshare - INFO - AI request completed successfully
+2026-04-22 18:46:28 - moodshare - INFO - Processed 1 candidates out of 8
+2026-04-22 18:51:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:51:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:51:54 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 18:51:54 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 18:51:54 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:52:12 - moodshare - INFO - AI request completed successfully
+2026-04-22 18:52:12 - moodshare - INFO - Processed 7 candidates out of 8
+2026-04-22 18:53:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:53:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:54:01 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 18:54:01 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 18:54:01 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:54:05 - moodshare - INFO - AI request completed successfully
+2026-04-22 18:54:05 - moodshare - INFO - Processed 1 candidates out of 8
+2026-04-22 18:58:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:58:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:58:16 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 18:58:16 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 18:58:16 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:59:06 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 18:59:23 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 18:59:23 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 18:59:23 - moodshare - INFO - Timeout set to 90s
+2026-04-22 18:59:35 - moodshare - INFO - AI request completed successfully
+2026-04-22 18:59:35 - moodshare - INFO - Processed 1 candidates out of 8
+2026-04-22 19:01:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:02:03 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:02:03 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:02:03 - moodshare - INFO - Prompt length: 5112 characters
+2026-04-22 19:02:03 - moodshare - INFO - Prompt preview:
+Vacancy:
+Title: Python Machine Learning Engineer
+Description: Команда нашої компанії шукає талановитого Python Machine Learning Engineer, який приєднається до нас у Львові. Ця роль передбачає розробку, впровадження та оптимізацію моделей машинного навчання для вирішення реальних бізнес-задач. Ви будете працювати в тісному співробітництві з командою аналітиків і розробників, використовуючи передові технології. Ваші основні завдання включатимуть вибір та підготовку даних, налаштування алгоритмів навчання, виконання тестування моделей та проведення їхньої валідації. Вам необхідно буде постійно вдосконалювати й оновлювати моделі, аналізувати результати їхньої роботи та брати участь у плануванні стратегії розвитку продуктів. Очікуємо на ваші інноваційні ідеї та ініціативність у пошуку рішень для підвищення ефективності наших продуктів.
+Responsibilities: • Розробка та впровадження моделей машинного навчання
+• Аналіз та підготовка даних для тренування моделей
+• Налаштування гіперпараметрів та...
+2026-04-22 19:02:03 - moodshare - INFO - Timeout set to 90s
+2026-04-22 19:08:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:08:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:08:23 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:08:23 - moodshare - INFO - Split into 3 batches of max 3 candidates
+2026-04-22 19:08:23 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:08:23 - moodshare - INFO - Processing batch 1/3 with 3 candidates
+2026-04-22 19:08:23 - moodshare - INFO - Prompt length: 3206 characters
+2026-04-22 19:08:30 - moodshare - INFO - Batch 1 processed 1 candidates
+2026-04-22 19:08:30 - moodshare - INFO - Processing batch 2/3 with 3 candidates
+2026-04-22 19:08:30 - moodshare - INFO - Prompt length: 3255 characters
+2026-04-22 19:08:38 - moodshare - INFO - Batch 2 processed 3 candidates
+2026-04-22 19:08:38 - moodshare - INFO - Processing batch 3/3 with 2 candidates
+2026-04-22 19:08:38 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-22 19:08:43 - moodshare - INFO - Batch 3 processed 1 candidates
+2026-04-22 19:08:43 - moodshare - INFO - Total processed 5 candidates out of 8
+2026-04-22 19:10:56 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:11:13 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:11:13 - moodshare - INFO - Split into 4 batches of max 2 candidates
+2026-04-22 19:11:13 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:11:13 - moodshare - INFO - Processing batch 1/4 with 2 candidates
+2026-04-22 19:11:13 - moodshare - INFO - Prompt length: 2742 characters
+2026-04-22 19:11:20 - moodshare - INFO - Batch 1 processed 1 candidates
+2026-04-22 19:11:20 - moodshare - INFO - Processing batch 2/4 with 2 candidates
+2026-04-22 19:11:20 - moodshare - INFO - Prompt length: 2837 characters
+2026-04-22 19:11:30 - moodshare - ERROR - Batch 2 failed: Exceeded maximum retries (1) for output validation
+2026-04-22 19:11:30 - moodshare - INFO - Processing batch 3/4 with 2 candidates
+2026-04-22 19:11:30 - moodshare - INFO - Prompt length: 2795 characters
+2026-04-22 19:12:32 - moodshare - INFO - Batch 3 processed 1 candidates
+2026-04-22 19:12:32 - moodshare - INFO - Processing batch 4/4 with 2 candidates
+2026-04-22 19:12:32 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-22 19:12:38 - moodshare - INFO - Batch 4 processed 1 candidates
+2026-04-22 19:12:38 - moodshare - INFO - Total processed 3 candidates out of 8
+2026-04-22 19:17:07 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:19:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:19:04 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:19:14 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:19:14 - moodshare - INFO - Split into 3 batches of max 3 candidates
+2026-04-22 19:19:14 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:19:14 - moodshare - INFO - Processing batch 1/3 with 3 candidates
+2026-04-22 19:19:14 - moodshare - INFO - Prompt length: 3206 characters
+2026-04-22 19:19:19 - moodshare - INFO - Batch 1 processed 3 candidates
+2026-04-22 19:19:19 - moodshare - INFO - Processing batch 2/3 with 3 candidates
+2026-04-22 19:19:19 - moodshare - INFO - Prompt length: 3255 characters
+2026-04-22 19:19:24 - moodshare - INFO - Batch 2 processed 3 candidates
+2026-04-22 19:19:24 - moodshare - INFO - Processing batch 3/3 with 2 candidates
+2026-04-22 19:19:24 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-22 19:19:28 - moodshare - INFO - Batch 3 processed 2 candidates
+2026-04-22 19:19:28 - moodshare - INFO - Total processed 8 candidates out of 8
+2026-04-22 19:21:56 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:21:56 - moodshare - INFO - Split into 3 batches of max 3 candidates
+2026-04-22 19:21:56 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:21:56 - moodshare - INFO - Processing batch 1/3 with 3 candidates
+2026-04-22 19:21:56 - moodshare - INFO - Prompt length: 3206 characters
+2026-04-22 19:22:01 - moodshare - INFO - Batch 1 processed 3 candidates
+2026-04-22 19:22:01 - moodshare - INFO - Processing batch 2/3 with 3 candidates
+2026-04-22 19:22:01 - moodshare - INFO - Prompt length: 3255 characters
+2026-04-22 19:22:08 - moodshare - INFO - Batch 2 processed 3 candidates
+2026-04-22 19:22:08 - moodshare - INFO - Processing batch 3/3 with 2 candidates
+2026-04-22 19:22:08 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-22 19:22:11 - moodshare - INFO - Batch 3 processed 2 candidates
+2026-04-22 19:22:11 - moodshare - INFO - Total processed 8 candidates out of 8
+2026-04-22 19:25:49 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:26:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-22 19:28:23 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-22 19:28:23 - moodshare - INFO - Split into 3 batches of max 3 candidates
+2026-04-22 19:28:23 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-22 19:28:23 - moodshare - INFO - Processing batch 1/3 with 3 candidates
+2026-04-22 19:28:23 - moodshare - INFO - Prompt length: 3206 characters
+2026-04-22 19:28:27 - moodshare - INFO - Batch 1 processed 3 candidates
+2026-04-22 19:28:27 - moodshare - INFO - Processing batch 2/3 with 3 candidates
+2026-04-22 19:28:27 - moodshare - INFO - Prompt length: 3255 characters
+2026-04-22 19:28:32 - moodshare - INFO - Batch 2 processed 3 candidates
+2026-04-22 19:28:32 - moodshare - INFO - Processing batch 3/3 with 2 candidates
+2026-04-22 19:28:32 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-22 19:28:36 - moodshare - INFO - Batch 3 processed 2 candidates
+2026-04-22 19:28:36 - moodshare - INFO - Total processed 8 candidates out of 8
+2026-04-22 19:30:54 - moodshare - INFO - User 4 connected to notifications ws

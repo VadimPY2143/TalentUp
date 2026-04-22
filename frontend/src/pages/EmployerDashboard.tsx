@@ -1969,45 +1969,6 @@ const EmployerDashboard = () => {
 
                                 <p className="mt-3 text-sm text-slate-700">{item.summary}</p>
 
-                                {(item.matched_skills.length > 0 || item.missing_skills.length > 0) && (
-                                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
-                                      <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Matched</div>
-                                      <div className="mt-1 flex flex-wrap gap-1.5">
-                                        {item.matched_skills.length === 0 ? (
-                                          <span className="text-xs text-emerald-700/80">—</span>
-                                        ) : (
-                                          item.matched_skills.map((skill) => (
-                                            <span
-                                              key={`${item.application_id}-m-${skill}`}
-                                              className="rounded-full border border-emerald-300/60 bg-white px-2 py-0.5 text-[11px] font-medium text-emerald-700"
-                                            >
-                                              {skill}
-                                            </span>
-                                          ))
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-2.5">
-                                      <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-700">Missing</div>
-                                      <div className="mt-1 flex flex-wrap gap-1.5">
-                                        {item.missing_skills.length === 0 ? (
-                                          <span className="text-xs text-amber-700/80">—</span>
-                                        ) : (
-                                          item.missing_skills.map((skill) => (
-                                            <span
-                                              key={`${item.application_id}-x-${skill}`}
-                                              className="rounded-full border border-amber-300/60 bg-white px-2 py-0.5 text-[11px] font-medium text-amber-700"
-                                            >
-                                              {skill}
-                                            </span>
-                                          ))
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-
                                 <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
                                   <button
                                     className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"

@@ -96,7 +96,7 @@ users_table = Table(
     Column('username', String(50), unique=True, nullable=False),
     Column('email', String(255), unique=True, nullable=False),
     Column('password', String(255), nullable=False),
-    Column('credits', Integer, nullable=False, default=0, server_default='0'),
+    Column('credits', Integer, nullable=False, default=50, server_default='0'),
     Column(
         'role',
         Enum('employer', 'worker', name='user_role'),

@@ -431,18 +431,18 @@ export default function PaymentTest() {
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="text-xs uppercase tracking-wide text-slate-500">AI Resume Summary</div>
                 <div className="mt-1 text-2xl font-semibold text-slate-900">~{formatNumber(selectedResumeSummaries)}</div>
-                <div className="mt-1 text-xs text-slate-500">по {RESUME_SUMMARY_CREDITS} кредитів за дію</div>
+                <div className="mt-1 text-xs text-slate-500">Аналіз резюме за 5 секунд замість 5 хв читання</div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="text-xs uppercase tracking-wide text-slate-500">AI Vacancy Fill</div>
                 <div className="mt-1 text-2xl font-semibold text-slate-900">~{formatNumber(selectedVacancyAIFills)}</div>
-                <div className="mt-1 text-xs text-slate-500">по {VACANCY_AI_FILL_CREDITS} кредитів за дію</div>
+                <div className="mt-1 text-xs text-slate-500">Автоматично заповнить вакансію за вашим коротким описом замість довгої ручної роботи</div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                 <div className="text-xs uppercase tracking-wide text-slate-500">AI Candidate Match</div>
                 <div className="mt-1 text-2xl font-semibold text-slate-900">~{formatNumber(selectedCandidateResumeScans)}</div>
                 <div className="mt-1 text-xs text-slate-500">
-                  резюме кандидатів можна просканувати (по {CANDIDATE_MATCHING_PER_CANDIDATE_CREDITS} кредити за 1 резюме)
+                  Автоматично підбере найкращих кандидатів під вашу вакансію без ручного перегляду
                 </div>
               </div>
             </div>

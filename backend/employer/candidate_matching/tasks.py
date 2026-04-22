@@ -288,12 +288,8 @@ def _build_ai_payload(ai_result: CandidateRerankOutput, sql_score: int) -> dict[
     score_total = max(0, min(100, int(round((ai_result.score_total * 0.7) + (sql_score * 0.3)))))
     return {
         "score_total": score_total,
-        "confidence": float(ai_result.confidence),
+        "confidence": 0.7,
         "verdict": ai_result.verdict,
-        "matched_skills": ai_result.matched_skills,
-        "missing_skills": ai_result.missing_skills,
-        "strengths": ai_result.strengths,
-        "risks": ai_result.risks,
         "summary": ai_result.summary,
     }
 
@@ -406,13 +402,26 @@ async def _run_candidate_matching(
             for row in candidates
         }
 
+        SQL_SCORE_THRESHOLD = 30
+        filtered_candidates = [
+            row for row in candidates
+            if sql_scores_by_application_id[int(row["application_id"])] >= SQL_SCORE_THRESHOLD
+        ]
+
+        LOGGER.info(
+            "SQL filtering: %d candidates passed threshold %d/%d",
+            len(filtered_candidates),
+            SQL_SCORE_THRESHOLD,
+            len(candidates),
+        )
+
         ai_results_by_application_id: dict[int, CandidateRerankOutput] = {}
         try:
             charged_credits = await _charge_candidate_matching_credits(
                 employer_user_id=employer_user_id,
                 vacancy_id=vacancy_id,
                 job_id=job_id,
-                analyzed_candidates=len(candidates),
+                analyzed_candidates=len(filtered_candidates),
             )
         except HTTPException as exc:
             if exc.status_code == 402:
@@ -426,7 +435,7 @@ async def _run_candidate_matching(
                 raise
         else:
             try:
-                ai_results_by_application_id = await rerank_candidates(vacancy, candidates)
+                ai_results_by_application_id = await rerank_candidates(vacancy, filtered_candidates)
             except Exception:
                 LOGGER.warning(
                     "Batch AI rerank failed for vacancy_id=%s, job_id=%s. Falling back to SQL scores.",
@@ -449,12 +458,13 @@ async def _run_candidate_matching(
                 )
                 charged_credits -= refund_amount
 
-        if 0 < len(ai_results_by_application_id) < len(candidates):
+        if 0 < len(ai_results_by_application_id) < len(filtered_candidates):
             LOGGER.warning(
-                "Batch AI rerank returned partial results for vacancy_id=%s, job_id=%s: %s/%s",
+                "Batch AI rerank returned partial results for vacancy_id=%s, job_id=%s: %s/%s (filtered from %s total)",
                 vacancy_id,
                 job_id,
                 len(ai_results_by_application_id),
+                len(filtered_candidates),
                 len(candidates),
             )
 
