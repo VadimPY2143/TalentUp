@@ -1,5 +1,6 @@
 import os
 import uuid
+from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 
 import redis.asyncio as redis
@@ -30,7 +31,20 @@ router = APIRouter(tags=["candidate_matching"])
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 MATCH_CACHE_TTL_SECONDS = 3600
 MATCH_STALE_SECONDS = int(os.getenv("MATCH_STALE_SECONDS", "180"))
-redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+redis_pool = redis.ConnectionPool.from_url(REDIS_URL, decode_responses=True)
+
+
+async def get_redis_client() -> AsyncIterator[redis.Redis]:
+    client = redis.Redis(connection_pool=redis_pool)
+    try:
+        yield client
+    finally:
+        await client.aclose()
+
+
+@router.on_event("shutdown")
+async def _close_redis_pool() -> None:
+    await redis_pool.disconnect()
 
 
 async def _ensure_owned_vacancy(
@@ -49,7 +63,7 @@ async def _ensure_owned_vacancy(
     return vacancy
 
 
-async def _get_job_payload(job_id: str) -> dict:
+async def _get_job_payload(job_id: str, redis_client: redis.Redis) -> dict:
     try:
         raw = await redis_client.get(match_job_key(job_id))
     except RedisError as exc:
@@ -94,6 +108,7 @@ async def start_candidate_matching(
     payload: CandidateMatchRunRequest,
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
+    redis_client: redis.Redis = Depends(get_redis_client),
 ) -> CandidateMatchRunResponse:
     await _ensure_owned_vacancy(
         session=session,
@@ -132,7 +147,6 @@ async def start_candidate_matching(
                 "vacancy_id": vacancy_id,
                 "employer_user_id": current_user["id"],
                 "requested_limit": payload.requested_limit,
-                # Keep compatibility with workers that still expect this kwarg.
                 "charged_credits": 0,
             },
         )
@@ -166,13 +180,14 @@ async def get_candidate_matching_job(
     job_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
+    redis_client: redis.Redis = Depends(get_redis_client),
 ) -> CandidateMatchJobResponse:
     await _ensure_owned_vacancy(
         session=session,
         vacancy_id=vacancy_id,
         employer_user_id=current_user["id"],
     )
-    payload = await _get_job_payload(job_id)
+    payload = await _get_job_payload(job_id, redis_client)
 
     if payload.get("vacancy_id") != vacancy_id or payload.get("created_by_user_id") != current_user["id"]:
         raise HTTPException(status_code=404, detail="Matching job not found")
@@ -188,6 +203,7 @@ async def get_latest_candidate_matching_job(
     vacancy_id: int,
     session: AsyncSession = Depends(get_session),
     current_user: dict = Depends(require_roles(["employer"])),
+    redis_client: redis.Redis = Depends(get_redis_client),
 ) -> CandidateMatchJobResponse:
     await _ensure_owned_vacancy(
         session=session,
@@ -203,7 +219,7 @@ async def get_latest_candidate_matching_job(
     if not latest_job_id:
         raise HTTPException(status_code=404, detail="No matching job found for this vacancy")
 
-    payload = await _get_job_payload(str(latest_job_id))
+    payload = await _get_job_payload(str(latest_job_id), redis_client)
     if payload.get("vacancy_id") != vacancy_id or payload.get("created_by_user_id") != current_user["id"]:
         raise HTTPException(status_code=404, detail="Matching job not found")
 

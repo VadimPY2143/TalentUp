@@ -100,11 +100,11 @@ def _build_agent() -> Agent:
 
 
 def _get_rerank_timeout_seconds() -> float:
-    raw_value = 90
+    raw_value = os.getenv("CANDIDATE_MATCH_TIMEOUT_SECONDS", "90")
     try:
-        timeout_seconds = 90
+        timeout_seconds = float(raw_value)
     except (TypeError, ValueError):
-        timeout_seconds = 90
+        timeout_seconds = 90.0
     return max(5.0, timeout_seconds)
 
 
@@ -116,72 +116,57 @@ async def rerank_candidates(
         return {}
 
     model_name = os.getenv("CANDIDATE_MATCH_MODEL", "openrouter/free")
-    logger.info(f"Starting candidate batch rerank with model: {model_name}, candidates count: {len(candidates)}")
-    print(f"[CANDIDATE MATCHING] Starting batch rerank with model: {model_name}, candidates: {len(candidates)}")
-
-    BATCH_SIZE = 3
-    batches = [candidates[i:i + BATCH_SIZE] for i in range(0, len(candidates), BATCH_SIZE)]
-    logger.info(f"Split into {len(batches)} batches of max {BATCH_SIZE} candidates")
-    print(f"[CANDIDATE MATCHING] Split into {len(batches)} batches")
-
+    logger.info(
+        "Starting candidate batch rerank with model: %s, candidates count: %s",
+        model_name,
+        len(candidates),
+    )
     agent = _build_agent()
+    prompt = (
+        f"Vacancy:\n{_format_vacancy(vacancy)}\n\n"
+        f"Candidates:\n{_format_candidates(candidates)}"
+    )
     timeout_seconds = _get_rerank_timeout_seconds()
-    mapped: dict[int, CandidateRerankOutput] = {}
-
-    for batch_index, batch in enumerate(batches, start=1):
-        logger.info(f"Processing batch {batch_index}/{len(batches)} with {len(batch)} candidates")
-        print(f"[CANDIDATE MATCHING] Batch {batch_index}/{len(batches)}: {len(batch)} candidates")
-
-        prompt = (
-            f"Vacancy:\n{_format_vacancy(vacancy)}\n\n"
-            f"Candidates:\n{_format_candidates(batch)}"
+    try:
+        result = await asyncio.wait_for(
+            agent.run(
+                prompt,
+                output_type=CandidateBatchRerankOutput,
+                model_settings={"max_tokens": 4096},
+            ),
+            timeout=timeout_seconds,
         )
-        logger.info(f"Prompt length: {len(prompt)} characters")
-        print(f"[CANDIDATE MATCHING] Prompt length: {len(prompt)} chars")
+    except asyncio.TimeoutError as exc:
+        raise RuntimeError(
+            f"Candidate batch rerank timed out after {int(timeout_seconds)}s"
+        ) from exc
 
-        try:
-            result = await asyncio.wait_for(
-                agent.run(
-                    prompt,
-                    output_type=CandidateBatchRerankOutput,
-                    model_settings={"max_tokens": 4096},
-                ),
-                timeout=timeout_seconds,
-            )
-        except asyncio.TimeoutError as exc:
-            logger.error(f"Batch {batch_index} timed out after {int(timeout_seconds)}s")
-            print(f"[CANDIDATE MATCHING] Batch {batch_index} timed out")
+    output = result.output
+    if isinstance(output, CandidateBatchRerankOutput):
+        batch_output = output
+    else:
+        batch_output = CandidateBatchRerankOutput.model_validate(output)
+
+    known_ids = {
+        int(candidate["application_id"])
+        for candidate in candidates
+        if candidate.get("application_id") is not None
+    }
+
+    mapped: dict[int, CandidateRerankOutput] = {}
+    for item in batch_output.results:
+        application_id = int(item.application_id)
+        if application_id not in known_ids:
             continue
-        except Exception as exc:
-            logger.error(f"Batch {batch_index} failed: {exc}")
-            print(f"[CANDIDATE MATCHING] Batch {batch_index} failed: {exc}")
+        if application_id in mapped:
             continue
+        mapped[application_id] = CandidateRerankOutput.model_validate(
+            item.model_dump(exclude={"application_id"})
+        )
 
-        output = result.output
-        if isinstance(output, CandidateBatchRerankOutput):
-            batch_output = output
-        else:
-            batch_output = CandidateBatchRerankOutput.model_validate(output)
-
-        known_ids = {
-            int(candidate["application_id"])
-            for candidate in batch
-            if candidate.get("application_id") is not None
-        }
-
-        for item in batch_output.results:
-            application_id = int(item.application_id)
-            if application_id not in known_ids:
-                continue
-            if application_id in mapped:
-                continue
-            mapped[application_id] = CandidateRerankOutput.model_validate(
-                item.model_dump(exclude={"application_id"})
-            )
-
-        logger.info(f"Batch {batch_index} processed {len([item for item in batch_output.results if int(item.application_id) in known_ids])} candidates")
-        print(f"[CANDIDATE MATCHING] Batch {batch_index} done")
-
-    logger.info(f"Total processed {len(mapped)} candidates out of {len(candidates)}")
-    print(f"[CANDIDATE MATCHING] Total: {len(mapped)}/{len(candidates)} candidates")
+    logger.info(
+        "Candidate batch rerank finished: %s/%s results",
+        len(mapped),
+        len(candidates),
+    )
     return mapped

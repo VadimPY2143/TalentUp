@@ -1,7 +1,8 @@
 import asyncio
 import logging
 import os
-from typing import Any, Coroutine, TypeVar
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator, Coroutine, TypeVar
 
 import redis.asyncio as redis
 from fastapi import HTTPException
@@ -20,6 +21,7 @@ from employer.candidate_matching.cache import (
 )
 from employer.candidate_matching.models import CandidateRerankOutput
 from employer.candidate_matching.repository import CandidateMatchingRepository
+from employer.candidate_matching.utils import normalize_work_formats
 from worker.messages.celery_app import celery_app
 
 LOGGER = logging.getLogger(__name__)
@@ -40,6 +42,18 @@ CELERY_DATABASE_URL = (
     f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
     f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 )
+CELERY_ENGINE = create_async_engine(
+    CELERY_DATABASE_URL,
+    echo=False,
+    pool_size=1,
+    max_overflow=0,
+    pool_pre_ping=False,
+    pool_recycle=300,
+)
+CELERY_SESSION_FACTORY = async_sessionmaker(
+    bind=CELERY_ENGINE,
+    expire_on_commit=False,
+)
 
 
 def _run_async(coro: Coroutine[object, object, _T]) -> _T:
@@ -57,35 +71,16 @@ async def _get_redis_client():
 
 
 async def _get_celery_session() -> AsyncSession:
-    engine = create_async_engine(
-        CELERY_DATABASE_URL,
-        echo=False,
-        pool_size=1,
-        max_overflow=0,
-        pool_pre_ping=False,
-        pool_recycle=300,
-    )
-    session_factory = async_sessionmaker(
-        bind=engine,
-        expire_on_commit=False,
-    )
-    return session_factory()
+    return CELERY_SESSION_FACTORY()
 
 
-def _normalize_work_formats(values: list[str] | None) -> set[str]:
-    if not values:
-        return set()
-
-    normalized: set[str] = set()
-    for value in values:
-        token = value.strip().lower().replace("-", "").replace("_", "").replace(" ", "")
-        if token == "remote":
-            normalized.add("Remote")
-        elif token == "hybrid":
-            normalized.add("Hybrid")
-        elif token in {"office", "onsite", "offline"}:
-            normalized.add("Office")
-    return normalized
+@asynccontextmanager
+async def _celery_session_scope() -> AsyncIterator[AsyncSession]:
+    session = await _get_celery_session()
+    try:
+        yield session
+    finally:
+        await session.close()
 
 
 def _heuristic_score(vacancy: dict[str, Any], candidate: dict[str, Any]) -> int:
@@ -109,10 +104,10 @@ def _heuristic_score(vacancy: dict[str, Any], candidate: dict[str, Any]) -> int:
             overlaps = cand_low <= upper and cand_high >= lower
             score += 10 if overlaps else -5
 
-    vacancy_formats = _normalize_work_formats(
+    vacancy_formats = normalize_work_formats(
         list(vacancy.get("work_format") or []) + list(vacancy.get("employment_type") or [])
     )
-    candidate_formats = _normalize_work_formats(candidate.get("employment_type"))
+    candidate_formats = normalize_work_formats(candidate.get("employment_type"))
     if vacancy_formats and candidate_formats:
         if vacancy_formats.intersection(candidate_formats):
             score += 8
@@ -192,8 +187,7 @@ async def _refund_candidate_matching_credits(
     if amount <= 0:
         return
 
-    session = await _get_celery_session()
-    try:
+    async with _celery_session_scope() as session:
         async with session.begin():
             await billing_service.refund_feature_charge(
                 session=session,
@@ -208,10 +202,6 @@ async def _refund_candidate_matching_credits(
                     "vacancy_id": vacancy_id,
                 },
             )
-    finally:
-        await session.close()
-        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
-            await session.bind.dispose()
 
 
 async def _charge_candidate_matching_credits(
@@ -225,8 +215,7 @@ async def _charge_candidate_matching_credits(
     if amount <= 0:
         return 0
 
-    session = await _get_celery_session()
-    try:
+    async with _celery_session_scope() as session:
         async with session.begin():
             await billing_service.charge_for_feature(
                 session=session,
@@ -241,10 +230,6 @@ async def _charge_candidate_matching_credits(
                     "analyzed_candidates": analyzed_candidates,
                 },
             )
-    finally:
-        await session.close()
-        if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
-            await session.bind.dispose()
 
     return amount
 
@@ -359,8 +344,7 @@ async def _run_candidate_matching(
     charged_credits = 0
     try:
         repository = CandidateMatchingRepository()
-        session = await _get_celery_session()
-        try:
+        async with _celery_session_scope() as session:
             async with session.begin():
                 vacancy = await repository.get_owned_vacancy(
                     session=session,
@@ -375,10 +359,6 @@ async def _run_candidate_matching(
                     session=session,
                     vacancy=vacancy,
                 )
-        finally:
-            await session.close()
-            if hasattr(session, 'bind') and hasattr(session.bind, 'dispose'):
-                await session.bind.dispose()
 
         if not candidates:
             await _set_status(

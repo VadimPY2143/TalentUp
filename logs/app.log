@@ -774,3 +774,66 @@ Responsibilities: • Розробка та впровадження модел�
 2026-04-22 19:28:36 - moodshare - INFO - Batch 3 processed 2 candidates
 2026-04-22 19:28:36 - moodshare - INFO - Total processed 8 candidates out of 8
 2026-04-22 19:30:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 00:07:46 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-04-23 00:07:46 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_137b0a740c05447ba75338f20c8c79f6', 'merchantSignature': '9a10eaa46727362a6f59304f0a716ea0', 'amount': 699, 'currency': 'UAH', 'authCode': '', 'email': None, 'phone': None, 'createdDate': 1776846053, 'processingDate': 1776846978, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Expired', 'reason': 'Cardholder session expired', 'reasonCode': 1124, 'fee': 0, 'paymentSystem': 'card', 'acquirerBankName': 'WayForPay', 'clientName': None}
+2026-04-23 00:07:46 - moodshare - INFO - Order reference: wfp_137b0a740c05447ba75338f20c8c79f6
+2026-04-23 00:07:46 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-04-23 00:07:46 - moodshare - INFO - Verifying callback signature...
+2026-04-23 00:07:46 - moodshare - INFO - Signature verified successfully
+2026-04-23 00:07:46 - moodshare - INFO - Order found: id=37, status=pending, user_id=4
+2026-04-23 00:07:46 - moodshare - INFO - Amount check: callback=699.00, expected=699.00
+2026-04-23 00:07:46 - moodshare - INFO - Currency: UAH
+2026-04-23 00:07:46 - moodshare - INFO - Transaction status: Expired (normalized: expired)
+2026-04-23 00:07:46 - moodshare - INFO - WFP callback non-approved order_id=37 order_reference=wfp_137b0a740c05447ba75338f20c8c79f6 status=Expired reason_code=1124
+2026-04-23 12:34:54 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 12:34:56 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 12:35:05 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:35:06 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:13 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:15 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:16 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:16 - moodshare - INFO - User 7 connected to chat 16
+2026-04-23 12:37:20 - moodshare - INFO - User 7 disconnected from chat 16
+2026-04-23 12:37:21 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:26 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:26 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:37:26 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:11 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:12 - moodshare - INFO - User 7 connected to chat 16
+2026-04-23 12:41:13 - moodshare - INFO - User 7 disconnected from chat 16
+2026-04-23 12:41:13 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:15 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:17 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:28 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:43 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:43 - moodshare - INFO - User 7 connected to chat 16
+2026-04-23 12:41:44 - moodshare - INFO - User 7 disconnected from chat 16
+2026-04-23 12:41:44 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:41:47 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:42:04 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:42:06 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:46:57 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:49:54 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:49:54 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 12:49:55 - moodshare - INFO - User 7 connected to notifications ws
+2026-04-23 19:14:40 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 19:14:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 19:17:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 19:17:20 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 19:18:30 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-23 19:18:30 - moodshare - INFO - Split into 3 batches of max 3 candidates
+2026-04-23 19:18:30 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-23 19:18:30 - moodshare - INFO - Processing batch 1/3 with 3 candidates
+2026-04-23 19:18:30 - moodshare - INFO - Prompt length: 3206 characters
+2026-04-23 19:18:34 - moodshare - INFO - Batch 1 processed 3 candidates
+2026-04-23 19:18:34 - moodshare - INFO - Processing batch 2/3 with 3 candidates
+2026-04-23 19:18:34 - moodshare - INFO - Prompt length: 3255 characters
+2026-04-23 19:18:42 - moodshare - INFO - Batch 2 processed 3 candidates
+2026-04-23 19:18:42 - moodshare - INFO - Processing batch 3/3 with 2 candidates
+2026-04-23 19:18:42 - moodshare - INFO - Prompt length: 2477 characters
+2026-04-23 19:18:45 - moodshare - INFO - Batch 3 processed 2 candidates
+2026-04-23 19:18:45 - moodshare - INFO - Total processed 8 candidates out of 8
+2026-04-23 19:34:29 - moodshare - INFO - User 4 connected to notifications ws
+2026-04-23 19:34:44 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-04-23 19:34:44 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-04-23 19:34:53 - moodshare - INFO - Candidate batch rerank finished: 8/8 results

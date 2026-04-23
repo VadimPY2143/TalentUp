@@ -9,22 +9,7 @@ from database import (
     users_table,
     vacancies_table,
 )
-
-
-def _normalize_work_formats(values: list[str] | None) -> set[str]:
-    if not values:
-        return set()
-
-    normalized: set[str] = set()
-    for value in values:
-        token = str(value).strip().lower().replace("-", "").replace("_", "").replace(" ", "")
-        if token == "remote":
-            normalized.add("Remote")
-        elif token == "hybrid":
-            normalized.add("Hybrid")
-        elif token in {"office", "onsite", "offline"}:
-            normalized.add("Office")
-    return normalized
+from employer.candidate_matching.utils import normalize_work_formats
 
 
 def _should_prefilter_by_city(vacancy: dict[str, Any]) -> bool:
@@ -32,7 +17,7 @@ def _should_prefilter_by_city(vacancy: dict[str, Any]) -> bool:
     if vacancy_city_id is None:
         return False
 
-    work_formats = _normalize_work_formats(vacancy.get("work_format"))
+    work_formats = normalize_work_formats(vacancy.get("work_format"))
     if "Remote" in work_formats:
         return False
 
