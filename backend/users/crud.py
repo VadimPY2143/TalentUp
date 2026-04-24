@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import insert, select, update
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import (
+    LanguageOption,
     RefreshRequest,
     TokenPair,
     User,
@@ -12,7 +13,7 @@ from .models import (
     UserProfileResponse,
     UserProfileUpdate,
 )
-from database import get_session, refresh_tokens_table, user_profiles_table, users_table
+from database import get_session, languages_table, refresh_tokens_table, user_profiles_table, users_table
 from .auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -26,6 +27,27 @@ from .auth import (
 )
 
 router = APIRouter(tags=["users"])
+
+
+@router.get("/languages", response_model=list[LanguageOption])
+async def list_languages(
+    query: str | None = None,
+    limit: int = 12,
+    session: AsyncSession = Depends(get_session),
+) -> list[LanguageOption]:
+    normalized_limit = max(1, min(limit, 50))
+    stmt = select(languages_table).order_by(
+        languages_table.c.popularity_rank.asc(),
+        languages_table.c.name.asc(),
+    )
+
+    if query and query.strip():
+        pattern = f"%{query.strip().lower()}%"
+        stmt = stmt.where(func.lower(languages_table.c.name).like(pattern))
+
+    result = await session.execute(stmt.limit(normalized_limit))
+    rows = result.mappings().all()
+    return [LanguageOption(id=row["id"], name=row["name"]) for row in rows]
 
 @router.post("/user/register", response_model=UserResponse)
 async def user_register(

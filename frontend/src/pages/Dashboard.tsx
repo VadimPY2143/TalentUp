@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import Navbar from "../components/layout/Navbar"
 import { useAuth } from "../auth/useAuth"
 import EmployerDashboard from "./EmployerDashboard"
+import WorkerProfilePanel from "../components/WorkerProfilePanel"
 import {
   createResume,
   deleteResume,
@@ -249,7 +250,11 @@ const Dashboard = () => {
           </div>
         </section>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-[1.12fr,0.88fr]">
+        <div className="mt-6">
+          <WorkerProfilePanel />
+        </div>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-[1.12fr,0.88fr]">
           <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-display text-2xl font-semibold text-slate-900">
