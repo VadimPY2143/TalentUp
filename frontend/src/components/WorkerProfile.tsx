@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import CityAutocomplete from "./CityAutocomplete"
+import VacancyModal from "./VacancyModal"
 import {
   Star,
   Settings,
@@ -19,6 +20,8 @@ import {
   Bell,
   BarChart3,
   Home,
+  Trash2,
+  ExternalLink,
 } from "lucide-react"
 import { useAuth } from "../auth/useAuth"
 import {
@@ -37,10 +40,16 @@ import {
   updateResume,
   uploadResumePdf,
 } from "../api/resumes"
-import { listMyApplications } from "../api/applications"
+import { listMyApplications, createApplication } from "../api/applications"
+import { listSavedVacancies, deleteSavedVacancy } from "../api/savedVacancies"
+import { getCompanyById } from "../api/companies"
+import { getVacancyById } from "../api/vacancies"
 import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
+import type { CompanyResponse } from "../types/company"
+import type { SavedVacancy } from "../api/savedVacancies"
+import type { VacancyResponse } from "../types/vacancy"
 import Navbar from "./layout/Navbar"
 import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
@@ -81,6 +90,103 @@ const createResumeInitialForm: CreateResumeFormState = {
 }
 
 const employmentTypeOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
+
+interface ApplyModalProps {
+  vacancy: any | null
+  resumes: Resume[]
+  selectedResumeId: number | null
+  coverLetter: string
+  isSubmitting: boolean
+  onResumeChange: (resumeId: number) => void
+  onCoverLetterChange: (value: string) => void
+  onClose: () => void
+  onSubmit: () => void
+}
+
+const ApplyModal = ({
+  vacancy,
+  resumes,
+  selectedResumeId,
+  coverLetter,
+  isSubmitting,
+  onResumeChange,
+  onCoverLetterChange,
+  onClose,
+  onSubmit,
+}: ApplyModalProps) => {
+  if (!vacancy) {
+    return null
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Application</p>
+            <h2 className="mt-1 font-display text-xl font-semibold text-slate-900">Відгук на вакансію</h2>
+            <p className="mt-1 text-sm text-slate-600">{vacancy.title}</p>
+          </div>
+          <button
+            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+          >
+            Закрити
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Оберіть резюме</label>
+            <select
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+              value={selectedResumeId ?? ""}
+              onChange={(event) => onResumeChange(Number(event.target.value))}
+            >
+              {resumes.map((resume) => (
+                <option key={resume.id} value={resume.id}>
+                  {resume.title} {resume.is_active ? "• активне" : "• неактивне"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Супровідний лист (опціонально)
+            </label>
+            <textarea
+              className="mt-2 min-h-[110px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-400/70"
+              placeholder="Коротко розкажіть, чому ви підходите на цю вакансію"
+              value={coverLetter}
+              onChange={(event) => onCoverLetterChange(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <button
+            className="flex-1 rounded-xl bg-[#1f2f5e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
+            type="button"
+            disabled={isSubmitting || !selectedResumeId}
+            onClick={onSubmit}
+          >
+            {isSubmitting ? "Надсилаємо..." : "Надіслати відгук"}
+          </button>
+          <button
+            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const applicationStatusLabel: Record<ApplicationStatus, string> = {
   applied: "Подано",
@@ -161,11 +267,22 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [applicationsLoading, setApplicationsLoading] = useState(false)
   const [applicationsError, setApplicationsError] = useState<string | null>(null)
+  const [savedVacancies, setSavedVacancies] = useState<SavedVacancy[]>([])
+  const [savedVacanciesLoading, setSavedVacanciesLoading] = useState(false)
+  const [savedVacanciesError, setSavedVacanciesError] = useState<string | null>(null)
+  const [companyById, setCompanyById] = useState<Record<number, CompanyResponse>>({})
+  const [vacancyById, setVacancyById] = useState<Record<number, any>>({})
+  const [selectedVacancy, setSelectedVacancy] = useState<any | null>(null)
+  const [applyVacancy, setApplyVacancy] = useState<any | null>(null)
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
+  const [coverLetter, setCoverLetter] = useState("")
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false)
 
   useEffect(() => {
     void loadProfile()
     void loadResumes()
     void loadApplications()
+    void loadSavedVacancies()
   }, [])
 
   const loadProfile = async () => {
@@ -257,6 +374,136 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
       setApplicationsError(err instanceof Error ? err.message : "Не вдалося завантажити відгуки")
     } finally {
       setApplicationsLoading(false)
+    }
+  }
+
+  const loadSavedVacancies = async () => {
+    try {
+      setSavedVacanciesLoading(true)
+      setSavedVacanciesError(null)
+      const data = await listSavedVacancies()
+      setSavedVacancies(data)
+      
+      const missingVacancyIds = Array.from(
+        new Set(data.map((s) => s.vacancy_id).filter((id) => !vacancyById[id])),
+      )
+      
+      if (missingVacancyIds.length > 0) {
+        const vacancies = await Promise.all(
+          missingVacancyIds.map(async (vacancyId) => {
+            try {
+              return await getVacancyById(vacancyId)
+            } catch {
+              return null
+            }
+          }),
+        )
+        const validVacancies = vacancies.filter((v): v is any => v !== null)
+        setVacancyById((prev) => {
+          const next = { ...prev }
+          for (const vacancy of validVacancies) {
+            next[vacancy.id] = vacancy
+          }
+          return next
+        })
+        
+        const missingCompanyIds = Array.from(
+          new Set(validVacancies.map((v) => v.company_id).filter((id) => !companyById[id])),
+        )
+        
+        if (missingCompanyIds.length > 0) {
+          const companies = await Promise.all(
+            missingCompanyIds.map(async (companyId) => {
+              try {
+                return await getCompanyById(companyId)
+              } catch {
+                return null
+              }
+            }),
+          )
+          const validCompanies = companies.filter((c): c is CompanyResponse => c !== null)
+          setCompanyById((prev) => {
+            const next = { ...prev }
+            for (const company of validCompanies) {
+              next[company.id] = company
+            }
+            return next
+          })
+        }
+      }
+    } catch (err) {
+      setSavedVacanciesError(err instanceof Error ? err.message : "Не вдалося завантажити збережені вакансії")
+    } finally {
+      setSavedVacanciesLoading(false)
+    }
+  }
+
+  const handleRemoveSavedVacancy = async (savedVacancyId: number) => {
+    const confirmed = window.confirm("Видалити цю вакансію зі збережених?")
+    if (!confirmed) {
+      return
+    }
+    try {
+      await deleteSavedVacancy(savedVacancyId)
+      await loadSavedVacancies()
+    } catch (err) {
+      setSavedVacanciesError(err instanceof Error ? err.message : "Не вдалося видалити вакансію")
+    }
+  }
+
+  const handleViewVacancy = (vacancyId: number) => {
+    const vacancy = vacancyById[vacancyId]
+    if (vacancy) {
+      setSelectedVacancy(vacancy)
+    }
+  }
+
+  const openApplyModal = (vacancy: any) => {
+    if (resumes.length === 0) {
+      alert("Спочатку створіть хоча б одне резюме.")
+      return
+    }
+
+    const availableResumes = resumes.filter((resume) => resume.is_active)
+    if (availableResumes.length === 0) {
+      alert("Потрібно мати активне резюме, щоб відгукнутися.")
+      return
+    }
+
+    const preferredResume = availableResumes[0]
+    setSelectedResumeId(preferredResume?.id ?? null)
+    setCoverLetter("")
+    setApplyVacancy(vacancy)
+    setSelectedVacancy(null)
+  }
+
+  const closeApplyModal = () => {
+    if (isSubmittingApplication) {
+      return
+    }
+    setApplyVacancy(null)
+    setCoverLetter("")
+    setSelectedResumeId(null)
+  }
+
+  const submitApplication = async () => {
+    if (!applyVacancy || !selectedResumeId) {
+      return
+    }
+
+    try {
+      setIsSubmittingApplication(true)
+      await createApplication({
+        vacancy_id: applyVacancy.id,
+        resume_id: selectedResumeId,
+        cover_letter: coverLetter || undefined,
+      })
+      await loadApplications()
+      closeApplyModal()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Не вдалося подати відгук")
+    } finally {
+      setIsSubmittingApplication(false)
     }
   }
 
@@ -1311,7 +1558,66 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                 </div>
               </section>
               <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть ваші збережені вакансії...</p>
+                {savedVacanciesError && (
+                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {savedVacanciesError}
+                  </div>
+                )}
+                {savedVacanciesLoading ? (
+                  <div className="py-12 text-center text-slate-500">Завантаження...</div>
+                ) : savedVacancies.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500">
+                    <Star className="mx-auto mb-3 h-12 w-12 text-slate-300" />
+                    <p>У вас ще немає збережених вакансій</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {savedVacancies.map((saved) => (
+                      <div
+                        key={saved.id}
+                        className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-orange-300 hover:bg-orange-50/30"
+                      >
+                        <div className="flex-1">
+                          <div
+                            className="flex items-center gap-2 cursor-pointer hover:text-orange-600 transition"
+                            onClick={() => handleViewVacancy(saved.vacancy_id)}
+                          >
+                            <h3 className="font-semibold text-slate-900">
+                              {vacancyById[saved.vacancy_id]?.title || `Вакансія #${saved.vacancy_id}`}
+                            </h3>
+                            {companyById[saved.vacancy_id] && (
+                              <span className="text-sm text-slate-600">
+                                • {companyById[saved.vacancy_id].name}
+                              </span>
+                            )}
+                          </div>
+                          {saved.note && (
+                            <p className="mt-2 text-sm text-slate-600">{saved.note}</p>
+                          )}
+                          <p className="mt-2 text-xs text-slate-500">
+                            Збережено: {new Date(saved.created_at).toLocaleDateString("uk-UA")}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => window.open(`/vacancies/${saved.vacancy_id}`, "_blank")}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-700"
+                            title="Перегляти вакансію"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveSavedVacancy(saved.id)}
+                            className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                            title="Видалити"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             </div>
           ) : activeSection === "notifications" ? (
@@ -1414,6 +1720,25 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
           )}
         </main>
       </div>
+
+      <VacancyModal
+        vacancy={selectedVacancy}
+        onClose={() => setSelectedVacancy(null)}
+        onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
+        isApplyDisabled={applications.some((app) => app.vacancy_id === selectedVacancy?.id)}
+        applicationStatus={applications.find((app) => app.vacancy_id === selectedVacancy?.id)?.status}
+      />
+      <ApplyModal
+        vacancy={applyVacancy}
+        resumes={resumes}
+        selectedResumeId={selectedResumeId}
+        coverLetter={coverLetter}
+        isSubmitting={isSubmittingApplication}
+        onResumeChange={setSelectedResumeId}
+        onCoverLetterChange={setCoverLetter}
+        onClose={closeApplyModal}
+        onSubmit={submitApplication}
+      />
     </div>
   )
 }
