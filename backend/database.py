@@ -216,6 +216,16 @@ user_profiles_table = Table(
     UniqueConstraint('user_id', name='uq_users_profile_user_id'),
 )
 
+languages_table = Table(
+    "languages",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("name", String(100), unique=True, nullable=False),
+    Column("popularity_rank", Integer, nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Index("ix_languages_popularity_rank", "popularity_rank"),
+)
+
 resumes_table = Table(
     'resumes',
     metadata,
