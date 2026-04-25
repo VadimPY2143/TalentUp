@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useDeferredValue, useMemo, useRef, type KeyboardEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import CityAutocomplete from "./CityAutocomplete"
 import {
@@ -19,6 +19,7 @@ import {
   Bell,
   BarChart3,
   Home,
+  X,
 } from "lucide-react"
 import { useAuth } from "../auth/useAuth"
 import {
@@ -28,6 +29,8 @@ import {
   type UserProfile,
   type UserProfileUpdate,
 } from "../api/userProfile"
+import { searchLanguages } from "../api/profile"
+import type { LanguageOption, UserLanguage, UserLink } from "../types/profile"
 import {
   createResume,
   deleteResume,
@@ -161,11 +164,68 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [applicationsLoading, setApplicationsLoading] = useState(false)
   const [applicationsError, setApplicationsError] = useState<string | null>(null)
+  const [languageQuery, setLanguageQuery] = useState("")
+  const [languageSuggestions, setLanguageSuggestions] = useState<LanguageOption[]>([])
+  const [showLanguageSuggestions, setShowLanguageSuggestions] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption | null>(null)
+  const [selectedProficiency, setSelectedProficiency] = useState<string>("")
+  const deferredLanguageQuery = useDeferredValue(languageQuery)
+  const languageSuggestionBoxRef = useRef<HTMLDivElement | null>(null)
+  const [linkTitle, setLinkTitle] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+
+  const proficiencyLevels = [
+    { value: "A1", label: "A1 - Початковий" },
+    { value: "A2", label: "A2 - Елементарний" },
+    { value: "B1", label: "B1 - Середній" },
+    { value: "B2", label: "B2 - Вищий середній" },
+    { value: "C1", label: "C1 - Просунутий" },
+    { value: "C2", label: "C2 - Рідна" },
+  ]
 
   useEffect(() => {
     void loadProfile()
     void loadResumes()
     void loadApplications()
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadLanguageSuggestions = async () => {
+      try {
+        const options = await searchLanguages(deferredLanguageQuery, 10)
+        if (!cancelled) {
+          setLanguageSuggestions(options)
+        }
+      } catch {
+        if (!cancelled) {
+          setLanguageSuggestions([])
+        }
+      }
+    }
+
+    if (!showLanguageSuggestions) {
+      return () => {
+        cancelled = true
+      }
+    }
+
+    void loadLanguageSuggestions()
+    return () => {
+      cancelled = true
+    }
+  }, [deferredLanguageQuery, showLanguageSuggestions])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (languageSuggestionBoxRef.current && !languageSuggestionBoxRef.current.contains(event.target as Node)) {
+        setShowLanguageSuggestions(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   const loadProfile = async () => {
@@ -181,6 +241,14 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         phone: data.phone,
         languages: data.languages,
         links: data.links,
+        user_languages: data.user_languages?.map((ul) => ({
+          name: ul.language_name,
+          proficiency_level: ul.proficiency_level,
+        })),
+        user_links: data.user_links?.map((ul) => ({
+          title: ul.title,
+          url: ul.url,
+        })),
       })
       setProfileError(null)
     } catch (err) {
@@ -432,6 +500,90 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
 
   const handleMenuItemClick = (section: Section) => {
     setActiveSection(section)
+  }
+
+  const visibleLanguageSuggestions = useMemo(() => {
+    const selected = new Set(
+      (formData.user_languages || []).map((item) => item.name.toLowerCase())
+    )
+    return languageSuggestions.filter((item) => !selected.has(item.name.toLowerCase()))
+  }, [formData.user_languages, languageSuggestions])
+
+  const addLanguage = () => {
+    if (!selectedLanguage || !selectedProficiency) {
+      return
+    }
+
+    setFormData((prev) => {
+      const currentLanguages = prev.user_languages || []
+      const exists = currentLanguages.some(
+        (item) => item.name.toLowerCase() === selectedLanguage.name.toLowerCase()
+      )
+      if (exists) {
+        return prev
+      }
+      return {
+        ...prev,
+        user_languages: [
+          ...currentLanguages,
+          { name: selectedLanguage.name, proficiency_level: selectedProficiency },
+        ],
+      }
+    })
+    setSelectedLanguage(null)
+    setSelectedProficiency("")
+    setLanguageQuery("")
+    setShowLanguageSuggestions(false)
+  }
+
+  const removeLanguage = (name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      user_languages: (prev.user_languages || []).filter((item) => item.name !== name),
+    }))
+  }
+
+  const addLink = () => {
+    const title = linkTitle.trim()
+    const url = linkUrl.trim()
+    if (!title || !url) {
+      return
+    }
+
+    setFormData((prev) => {
+      const currentLinks = prev.user_links || []
+      const exists = currentLinks.some((item) => item.url === url)
+      if (exists) {
+        return prev
+      }
+      return {
+        ...prev,
+        user_links: [...currentLinks, { title, url }],
+      }
+    })
+    setLinkTitle("")
+    setLinkUrl("")
+  }
+
+  const removeLink = (url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      user_links: (prev.user_links || []).filter((item) => item.url !== url),
+    }))
+  }
+
+  const handleLanguageKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      const firstSuggestion = visibleLanguageSuggestions.find(
+        (item) => item.name.toLowerCase() === languageQuery.trim().toLowerCase(),
+      )
+      if (firstSuggestion) {
+        setSelectedLanguage(firstSuggestion)
+        setLanguageQuery("")
+        setShowLanguageSuggestions(false)
+      }
+    }
   }
 
   const menuItems = [
@@ -701,31 +853,100 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                           <div className="flex-1">
                             <p className="text-xs text-slate-500">Мови</p>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={formData.languages?.join(", ") || ""}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    languages: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                                  })
-                                }
-                                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="Українська, Англійська..."
-                              />
+                              <div className="space-y-3">
+                                <div className="relative" ref={languageSuggestionBoxRef}>
+                                  <input
+                                    type="text"
+                                    value={languageQuery}
+                                    onChange={(e) => {
+                                      setLanguageQuery(e.target.value)
+                                      setShowLanguageSuggestions(true)
+                                    }}
+                                    onFocus={() => setShowLanguageSuggestions(true)}
+                                    onKeyDown={handleLanguageKeyDown}
+                                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="Почніть вводити назву мови..."
+                                  />
+                                  {showLanguageSuggestions && visibleLanguageSuggestions.length > 0 && (
+                                    <div className="absolute z-10 mt-2 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+                                      {visibleLanguageSuggestions.map((option) => (
+                                        <button
+                                          key={option.id}
+                                          className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedLanguage(option)
+                                            setLanguageQuery("")
+                                            setShowLanguageSuggestions(false)
+                                          }}
+                                        >
+                                          {option.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {selectedLanguage && (
+                                  <div className="flex gap-2">
+                                    <select
+                                      value={selectedProficiency}
+                                      onChange={(e) => setSelectedProficiency(e.target.value)}
+                                      className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    >
+                                      <option value="">Оберіть рівень</option>
+                                      {proficiencyLevels.map((level) => (
+                                        <option key={level.value} value={level.value}>
+                                          {level.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      onClick={addLanguage}
+                                      className="rounded-lg bg-orange-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600"
+                                      type="button"
+                                    >
+                                      Додати
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             ) : (
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {profile?.languages?.length ? (
-                                  profile.languages.map((lang, idx) => (
+                                {profile?.user_languages?.length ? (
+                                  profile.user_languages.map((lang) => (
                                     <span
-                                      key={idx}
+                                      key={lang.id}
                                       className="rounded-lg bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm"
                                     >
-                                      {lang}
+                                      {lang.language_name} ({lang.proficiency_level})
                                     </span>
                                   ))
                                 ) : (
                                   <span className="text-slate-500">Не вказано</span>
+                                )}
+                              </div>
+                            )}
+                            {isEditing && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {formData.user_languages?.length ? (
+                                  formData.user_languages.map((lang) => (
+                                    <span
+                                      key={lang.name}
+                                      className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-medium text-orange-700"
+                                    >
+                                      {lang.name} ({lang.proficiency_level})
+                                      <button
+                                        className="text-orange-500 transition hover:text-orange-700"
+                                        type="button"
+                                        onClick={() => removeLanguage(lang.name)}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-sm text-slate-500">Мови ще не додані</span>
                                 )}
                               </div>
                             )}
@@ -741,30 +962,64 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                           <div className="flex-1">
                             <p className="text-xs text-slate-500">Посилання</p>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={formData.links?.join(", ") || ""}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    links: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                                  })
-                                }
-                                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="LinkedIn, GitHub, Portfolio..."
-                              />
+                              <div className="space-y-3">
+                                <div className="flex gap-1">
+                                  <input
+                                    type="text"
+                                    value={linkTitle}
+                                    onChange={(e) => setLinkTitle(e.target.value)}
+                                    className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="Назва"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    className="w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="URL"
+                                  />
+                                  <button
+                                    onClick={addLink}
+                                    className="rounded-lg bg-orange-500 px-2 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600 whitespace-nowrap"
+                                    type="button"
+                                  >
+                                    Додати
+                                  </button>
+                                </div>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {formData.user_links?.length ? (
+                                    formData.user_links.map((link) => (
+                                      <span
+                                        key={link.url}
+                                        className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-medium text-orange-700"
+                                      >
+                                        {link.title}
+                                        <button
+                                          className="text-orange-500 transition hover:text-orange-700"
+                                          type="button"
+                                          onClick={() => removeLink(link.url)}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </button>
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span className="text-sm text-slate-500">Посилання ще не додані</span>
+                                  )}
+                                </div>
+                              </div>
                             ) : (
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {profile?.links?.length ? (
-                                  profile.links.map((link, idx) => (
+                                {profile?.user_links?.length ? (
+                                  profile.user_links.map((link) => (
                                     <a
-                                      key={idx}
-                                      href={link.startsWith("http") ? link : `https://${link}`}
+                                      key={link.id}
+                                      href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="rounded-lg bg-orange-100 px-3 py-1 text-sm font-medium text-orange-600 hover:bg-orange-200 transition"
                                     >
-                                      {link.length > 20 ? link.substring(0, 20) + "..." : link}
+                                      {link.title}
                                     </a>
                                   ))
                                 ) : (

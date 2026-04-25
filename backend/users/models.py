@@ -86,6 +86,8 @@ class UserProfileBase(BaseModel):
     phone: str | None = Field(default=None, max_length=50)
     languages: list[str] | None = None
     links: list[str] | None = None
+    user_languages: list[dict[str, str]] | None = None
+    user_links: list[dict[str, str]] | None = None
 
     @field_validator("languages", mode="before")
     @classmethod
@@ -111,8 +113,23 @@ class LanguageOption(BaseModel):
     name: str
 
 
+class UserLanguage(BaseModel):
+    id: int
+    language_id: int
+    language_name: str
+    proficiency_level: str
+
+
+class UserLink(BaseModel):
+    id: int
+    title: str
+    url: str
+
+
 class UserProfileResponse(UserProfileBase):
     id: int
     user_id: int
     created_at: datetime
     updated_at: datetime
+    user_languages: list[UserLanguage] = []
+    user_links: list[UserLink] = []
