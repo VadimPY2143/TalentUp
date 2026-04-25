@@ -2,6 +2,7 @@ export type CandidateSort = "relevance" | "date" | "experience"
 
 export interface CandidateSearchParams {
   query?: string
+  city_id?: number
   location?: string
   years_experience?: number
   salary_min?: number
@@ -21,13 +22,18 @@ export interface CandidateSearchItem {
   summary?: string | null
   desired_role?: string | null
   years_experience?: number | null
+  city_id?: number | null
   location?: string | null
   is_active?: boolean | null
   salary_min?: number | null
   salary_max?: number | null
   salary_currency?: string | null
   employment_type?: string[] | null
+  created_at?: string | null
   pdf_file_path?: string | null
+  pdf_original_name?: string | null
+  pdf_size?: number | null
+  pdf_uploaded_at?: string | null
   updated_at?: string | null
 }
 

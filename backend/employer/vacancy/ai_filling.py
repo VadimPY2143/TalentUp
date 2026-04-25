@@ -6,11 +6,12 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from .models import Vacancy
+from logger import logger
 
 load_dotenv()
 
 SYSTEM_PROMPT = """
-You are a senior Ukrainian HR/recruiter assistant.
+You are a senior Ukrainian HR assistant.
 Generate one complete vacancy JSON from user description.
 
 Hard rules:
@@ -18,7 +19,7 @@ Hard rules:
 2) Language: same as user request Ukrainian/English (except enum-like fields).
 3) Return only one valid JSON object. No markdown, no comments, no extra text.
 4) All fields must be filled with meaningful values. Never use null, empty strings, or empty arrays.
-5) If some details are missing, infer realistic values from the role and context.
+5) If some details are missing, infer realistic values from the role and context. Every field must be filled.
 6) Salary must be monthly (for 1 month), integer values only.
 7) Salary range must be logical: salary_min <= salary_max.
 8) expires_at must be valid ISO datetime in the future.
@@ -34,6 +35,7 @@ Field quality requirements:
 - salary_currency: use "UAH" for Ukrainian market unless user explicitly asks another currency.
 - experience_years_min / experience_years_max: realistic and consistent with title.
 - work_format: choose from "Remote", "Hybrid", "Office".
+
 """.strip()
 
 
@@ -46,12 +48,15 @@ async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
+    model_name = os.getenv("VACANCY_AI_FILL_MODEL", "google/gemma-3-12b-it")
+    logger.info(f"Using vacancy AI fill model: {model_name}")
+    model = OpenAIModel(model_name, provider=provider)
     agent = Agent(model, system_prompt=SYSTEM_PROMPT)
 
     result = await agent.run(
         f"Description: {vacancy_description}",
         output_type=Vacancy,
+        model_settings={"max_tokens": 3072},
     )
     output = result.output
     if isinstance(output, Vacancy):

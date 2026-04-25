@@ -46,6 +46,7 @@ const toUiMessages = (chatId: number, messages: ChatMessageResponse[]): ChatUiMe
       text: item.message,
       createdAt: item.created_at,
       optimistic: false,
+      status: "read" as const,
     }))
 }
 
@@ -131,9 +132,10 @@ const Messages = () => {
       const participantId = participantUserIdByRole(chat, role)
       const vacancyTitle = chatVacancyById[chat.vacancy_id]?.title
       if (role === "worker") {
-        return vacancyTitle || `Employer #${participantId}`
+        return vacancyTitle || chat.employer_name || `Employer #${participantId}`
       }
-      return vacancyTitle ? `${vacancyTitle} · Candidate #${participantId}` : `Candidate #${participantId}`
+      const candidateLabel = chat.worker_name || "Невідомий кандидат"
+      return vacancyTitle ? `${vacancyTitle} · ${candidateLabel}` : candidateLabel
     },
     [chatVacancyById, role],
   )
@@ -659,6 +661,7 @@ const Messages = () => {
                 onChange={(event) => setSelectedVacancyId(event.target.value ? Number(event.target.value) : null)}
                 disabled={isVacanciesLoading}
               >
+                <option value="">Всі вакансії</option>
                 {!vacancies.length && <option value="">Немає доступних вакансій</option>}
                 {vacancies.map((vacancy) => (
                   <option key={vacancy.id} value={vacancy.id}>
@@ -693,7 +696,7 @@ const Messages = () => {
           </div>
         )}
 
-        <section className="mt-6 grid gap-4 lg:grid-cols-[360px,1fr]">
+        <section className="mt-6 grid gap-4 lg:grid-cols-[380px,1fr]">
           <ConversationList
             chats={visibleChats}
             selectedChatId={selectedChatId}
@@ -701,6 +704,7 @@ const Messages = () => {
             isLoading={isChatsLoading}
             onSelect={setSelectedChatId}
             getParticipantLabel={getParticipantLabel}
+            currentUserRole={role}
           />
           {selectedChat ? (
             <MessageThread
@@ -711,6 +715,8 @@ const Messages = () => {
               draft={draft}
               isLoading={isMessagesLoading}
               isSocketReady={isSocketReady}
+              participantAvatarUrl={role === "worker" ? selectedChat.employer_avatar_url : selectedChat.worker_avatar_url}
+              isTyping={false}
               onOpenVacancy={role === "worker" ? () => void handleOpenVacancy() : undefined}
               onOpenResume={role === "employer" ? () => void handleOpenResume() : undefined}
               onDraftChange={setDraft}
@@ -718,7 +724,15 @@ const Messages = () => {
             />
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-soft">
-              Оберіть діалог зліва або відкрийте його з картки кандидата.
+              <div className="flex flex-col items-center">
+                <div className="rounded-full bg-slate-100 p-3 mb-3">
+                  <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <p className="font-medium">Оберіть діалог зліва</p>
+                <p className="text-xs mt-1">або відкрийте його з картки кандидата</p>
+              </div>
             </div>
           )}
         </section>

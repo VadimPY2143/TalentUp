@@ -1,12 +1,14 @@
-﻿import {
+import {
   useEffect,
   useMemo,
   useState,
   type FormEvent,
 } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import ResumeModal from "../components/ResumeModal"
 import {
   fetchCandidateResumeSummary,
   fetchRecommendedCandidates,
@@ -15,12 +17,17 @@ import {
   saveCandidateResume,
   searchCandidates,
 } from "../api/candidates"
+import { trackAnalyticsEvent } from "../api/analytics"
 import { listCompanies } from "../api/companies"
 import { listCompanyVacancies } from "../api/vacancies"
+import { redirectToPaymentOnInsufficientCredits } from "../payments/insufficientCredits"
+import type { ChatResumeResponse } from "../types/chat"
+import type { CityOption } from "../types/city"
 import type { CandidateSearchItem, CandidateSort } from "../types/candidate"
 import type { VacancyResponse } from "../types/vacancy"
 
 interface FilterState {
+  cityId: number | null
   location: string
   yearsExperience: string
   salaryMin: string
@@ -40,6 +47,7 @@ interface FiltersPanelProps {
   filters: FilterState
   onToggleEmployment: (value: string) => void
   onUpdateField: (field: keyof FilterState, value: string | boolean) => void
+  onCitySelect: (option: CityOption | null) => void
   onClear: () => void
 }
 
@@ -57,7 +65,7 @@ interface CandidateCardProps {
   isSaving: boolean
   isSummaryLoading: boolean
   onToggleSave: () => void
-  onViewResume: () => void
+  onViewResume: (candidate: CandidateSearchItem) => void
   onViewSummary: () => void
   onStartChat: () => void
 }
@@ -84,6 +92,7 @@ const sortOptions: Array<{ value: CandidateSort; label: string }> = [
 ]
 
 const initialFilters: FilterState = {
+  cityId: null,
   location: "",
   yearsExperience: "",
   salaryMin: "",
@@ -176,6 +185,7 @@ const FiltersPanel = ({
   filters,
   onToggleEmployment,
   onUpdateField,
+  onCitySelect,
   onClear,
 }: FiltersPanelProps) => (
   <aside className="h-full rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
@@ -198,11 +208,12 @@ const FiltersPanel = ({
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Локація
         </label>
-        <input
+        <CityAutocomplete
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
-          placeholder="Київ, Львів, Ukraine (Remote)"
+          placeholder="Оберіть місто"
           value={filters.location}
-          onChange={(event) => onUpdateField("location", event.target.value)}
+          onChange={(value) => onUpdateField("location", value)}
+          onOptionSelect={onCitySelect}
         />
       </div>
 
@@ -346,17 +357,16 @@ const CandidateCard = ({
   const title = candidate.title || candidate.desired_role || "Резюме"
   const role = candidate.desired_role || "Позиція не вказана"
   const employment = normalizeEmploymentTypes(candidate.employment_type)
-  const hasPdf = Boolean(candidate.pdf_file_path)
   const summaryLength = candidate.summary?.trim().length ?? 0
-  const showAiSummary = summaryLength >= 120
+  const showAiSummary = summaryLength >= 500
 
   return (
-    <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
-      <div>
+    <article className="flex h-[430px] flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
+      <div className="min-h-0">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-            <p className="mt-1 text-sm text-slate-600">{role}</p>
+            <h3 className="line-clamp-2 text-base font-semibold text-slate-900">{title}</h3>
+            <p className="mt-1 line-clamp-1 text-sm text-slate-600">{role}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {showAiSummary && (
@@ -386,7 +396,7 @@ const CandidateCard = ({
         </div>
 
         {candidate.summary && (
-          <p className="mt-3 text-sm text-slate-600">{candidate.summary}</p>
+          <p className="mt-3 line-clamp-6 text-sm text-slate-600">{candidate.summary}</p>
         )}
 
         <div className="mt-4 space-y-2 text-sm text-slate-600">
@@ -415,10 +425,9 @@ const CandidateCard = ({
         <button
           className="flex-1 rounded-lg bg-[#1f2f5e] px-4 py-2.5 text-xs font-semibold text-white shadow-soft transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
           type="button"
-          onClick={onViewResume}
-          disabled={!hasPdf}
+          onClick={() => onViewResume(candidate)}
         >
-          {hasPdf ? "Переглянути резюме" : "PDF відсутній"}
+          Відкрити резюме
         </button>
         <button
           className="flex-1 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-xs font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
@@ -472,8 +481,10 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 
 const CandidateSearch = () => {
   const navigate = useNavigate()
-  const [searchInput, setSearchInput] = useState("")
-  const [query, setQuery] = useState("")
+  const [urlSearchParams] = useSearchParams()
+  const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
+  const [searchInput, setSearchInput] = useState(queryFromParams)
+  const [query, setQuery] = useState(queryFromParams)
   const [searchTrigger, setSearchTrigger] = useState(0)
   const [filters, setFilters] = useState<FilterState>(initialFilters)
   const [sort, setSort] = useState<CandidateSort>("relevance")
@@ -497,12 +508,12 @@ const CandidateSearch = () => {
     candidateId: number
     title: string
     summary: string
-    strengths: string[]
     cached: boolean
   } | null>(null)
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState<string | null>(null)
+  const [openedResume, setOpenedResume] = useState<ChatResumeResponse | null>(null)
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasQuery = query.trim().length >= 2
@@ -510,6 +521,7 @@ const CandidateSearch = () => {
   const searchParams = useMemo(
     () => ({
       query: query || undefined,
+      city_id: filters.cityId ?? undefined,
       location: filters.location.trim() || undefined,
       years_experience: parseNumber(filters.yearsExperience),
       salary_min: parseNumber(filters.salaryMin),
@@ -544,6 +556,13 @@ const CandidateSearch = () => {
       setPage(totalPages)
     }
   }, [page, totalPages])
+
+  useEffect(() => {
+    setSearchInput(queryFromParams)
+    setQuery(queryFromParams)
+    setPage(1)
+    setSearchTrigger((prev) => prev + 1)
+  }, [queryFromParams])
 
   useEffect(() => {
     let mounted = true
@@ -644,6 +663,7 @@ const CandidateSearch = () => {
               (page - 1) * PAGE_SIZE,
               {
                 location: searchParams.location,
+                city_id: searchParams.city_id,
                 years_experience: searchParams.years_experience,
                 salary_min: searchParams.salary_min,
                 salary_max: searchParams.salary_max,
@@ -682,6 +702,15 @@ const CandidateSearch = () => {
 
   const updateFilters = (field: keyof FilterState, value: string | boolean) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
+    setPage(1)
+  }
+
+  const handleCitySelect = (option: CityOption | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      cityId: option?.id ?? null,
+      location: option?.name_uk ?? prev.location,
+    }))
     setPage(1)
   }
 
@@ -734,10 +763,44 @@ const CandidateSearch = () => {
     }
   }
 
-  const handleViewResume = async (candidateId: number) => {
+  const handleViewResume = async (candidate: CandidateSearchItem) => {
+    const resume: ChatResumeResponse = {
+      id: candidate.id,
+      user_id: candidate.user_id ?? 0,
+      title: candidate.title || candidate.desired_role || "Резюме",
+      summary: candidate.summary ?? null,
+      desired_role: candidate.desired_role ?? null,
+      employment_type: candidate.employment_type ?? null,
+      location: candidate.location ?? null,
+      salary_min: candidate.salary_min ?? null,
+      salary_max: candidate.salary_max ?? null,
+      salary_currency: candidate.salary_currency ?? null,
+      years_experience: candidate.years_experience ?? null,
+      is_active: Boolean(candidate.is_active),
+      pdf_file_path: candidate.pdf_file_path ?? null,
+      pdf_original_name: candidate.pdf_original_name ?? null,
+      pdf_size: candidate.pdf_size ?? null,
+      pdf_uploaded_at: candidate.pdf_uploaded_at ?? null,
+      created_at: candidate.created_at ?? candidate.updated_at ?? new Date().toISOString(),
+      updated_at: candidate.updated_at ?? candidate.created_at ?? new Date().toISOString(),
+    }
+    setOpenedResume(resume)
+    if (candidate.id > 0) {
+      try {
+        await trackAnalyticsEvent({ event_type: "resume_view", target_resume_id: candidate.id })
+      } catch {
+        // Analytics must not block resume modal UX.
+      }
+    }
+  }
+
+  const handleOpenResumePdf = async () => {
+    if (!openedResume?.pdf_file_path) {
+      return
+    }
     setActionError(null)
     try {
-      await openCandidateResume(candidateId)
+      await openCandidateResume(openedResume.id)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося відкрити резюме"
       setActionError(message)
@@ -754,10 +817,20 @@ const CandidateSearch = () => {
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
-        strengths: data?.strengths ?? [],
         cached: Boolean(data?.cached),
       })
     } catch (err) {
+      const returnTo = `${window.location.pathname}${window.location.search}`
+      if (
+        redirectToPaymentOnInsufficientCredits({
+          error: err,
+          navigate,
+          feature: "resume_summary",
+          returnTo,
+        })
+      ) {
+        return
+      }
       const message = err instanceof Error ? err.message : "Не вдалося отримати вижимку"
       setSummaryError(message)
     } finally {
@@ -834,6 +907,7 @@ const CandidateSearch = () => {
             filters={filters}
             onToggleEmployment={toggleEmploymentType}
             onUpdateField={updateFilters}
+            onCitySelect={handleCitySelect}
             onClear={clearFilters}
           />
 
@@ -877,7 +951,7 @@ const CandidateSearch = () => {
                     isSaving={savingIds.has(candidate.id)}
                     isSummaryLoading={summaryLoadingId === candidate.id}
                     onToggleSave={() => toggleSave(candidate.id)}
-                    onViewResume={() => handleViewResume(candidate.id)}
+                    onViewResume={handleViewResume}
                     onViewSummary={() => handleViewSummary(candidate)}
                     onStartChat={() => handleStartChat(candidate)}
                   />
@@ -981,28 +1055,16 @@ const CandidateSearch = () => {
             ) : (
               <>
                 <p className="mt-4 text-sm text-slate-700">{summaryModal.summary}</p>
-                {summaryModal.strengths.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Сильні сторони
-                    </p>
-                    <ul className="mt-2 space-y-2 text-sm text-slate-700">
-                      {summaryModal.strengths.map((item, index) => (
-                        <li
-                          key={`${summaryModal.candidateId}-${index}`}
-                          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </>
             )}
           </div>
         </div>
       )}
+      <ResumeModal
+        resume={openedResume}
+        onClose={() => setOpenedResume(null)}
+        onOpenPdf={() => void handleOpenResumePdf()}
+      />
     </div>
   )
 }

@@ -1,17 +1,14 @@
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, insert, select, update
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, status
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import (
     LanguageOption,
     RefreshRequest,
-    TokenPair,
+    Token,
     User,
     UserLogin,
     UserResponse,
-    UserProfileCreate,
-    UserProfileResponse,
-    UserProfileUpdate,
 )
 from database import get_session, languages_table, refresh_tokens_table, user_profiles_table, users_table
 from .auth import (
@@ -22,8 +19,10 @@ from .auth import (
     get_password_hash,
     get_refresh_token_expiry,
     hash_refresh_token,
-    verify_password,
-    _authenticate_user
+    _authenticate_user,
+    REFRESH_COOKIE_NAME,
+    clear_refresh_cookie,
+    set_refresh_cookie,
 )
 
 router = APIRouter(tags=["users"])
@@ -48,6 +47,32 @@ async def list_languages(
     result = await session.execute(stmt.limit(normalized_limit))
     rows = result.mappings().all()
     return [LanguageOption(id=row["id"], name=row["name"]) for row in rows]
+def _extract_refresh_candidates(request: Request, payload: RefreshRequest | None) -> list[str]:
+    candidates: list[str] = []
+    if payload and payload.refresh_token:
+        candidates.append(payload.refresh_token.strip())
+
+    cookie_token = request.cookies.get(REFRESH_COOKIE_NAME)
+    if cookie_token:
+        candidates.append(cookie_token.strip())
+
+    raw_cookie_header = request.headers.get("cookie", "")
+    if raw_cookie_header:
+        prefix = f"{REFRESH_COOKIE_NAME}="
+        for chunk in raw_cookie_header.split(";"):
+            part = chunk.strip()
+            if part.startswith(prefix):
+                token = part[len(prefix):].strip()
+                if token:
+                    candidates.append(token)
+
+    unique: list[str] = []
+    seen: set[str] = set()
+    for token in candidates:
+        if token and token not in seen:
+            unique.append(token)
+            seen.add(token)
+    return unique
 
 @router.post("/user/register", response_model=UserResponse)
 async def user_register(
@@ -74,11 +99,12 @@ async def user_register(
     return UserResponse(username=user.username, email=user.email, role=user.role.value)
 
 
-@router.post("/user/login", response_model=TokenPair)
+@router.post("/user/login", response_model=Token)
 async def user_login(
     user: UserLogin,
+    response: Response,
     session: AsyncSession = Depends(get_session),
-) -> TokenPair:
+) -> Token:
     db_user = await _authenticate_user(
         session=session,
         email=str(user.email),
@@ -104,25 +130,31 @@ async def user_login(
     )
     await session.commit()
 
-    return TokenPair(
+    set_refresh_cookie(response, refresh_token)
+    return Token(
         access_token=access_token,
-        refresh_token=refresh_token,
         token_type="bearer",
     )
 
 
-@router.post("/user/refresh", response_model=TokenPair)
+@router.post("/user/refresh", response_model=Token)
 async def refresh_token(
-    payload: RefreshRequest,
+    request: Request,
+    response: Response,
+    payload: RefreshRequest | None = Body(default=None),
     session: AsyncSession = Depends(get_session),
-) -> TokenPair:
-    token_hash = hash_refresh_token(payload.refresh_token)
+) -> Token:
+    refresh_candidates = _extract_refresh_candidates(request, payload)
+    if not refresh_candidates:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    hashes = [hash_refresh_token(token) for token in refresh_candidates]
 
     stmt = select(refresh_tokens_table).where(
-        refresh_tokens_table.c.token_hash == token_hash,
+        refresh_tokens_table.c.token_hash.in_(hashes),
         refresh_tokens_table.c.revoked_at.is_(None),
         refresh_tokens_table.c.expires_at > datetime.utcnow(),
-    )
+    ).order_by(refresh_tokens_table.c.created_at.desc())
     result = await session.execute(stmt)
     token_row = result.mappings().first()
 
@@ -159,87 +191,41 @@ async def refresh_token(
     )
     await session.commit()
 
-    return TokenPair(
+    set_refresh_cookie(response, new_refresh_token)
+    return Token(
         access_token=access_token,
-        refresh_token=new_refresh_token,
         token_type="bearer",
     )
 
 
-@router.get("/user/profile", response_model=UserProfileResponse)
-async def get_user_profile(
+@router.post("/user/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def user_logout(
+    request: Request,
+    response: Response,
     session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(get_current_user),
-) -> UserProfileResponse:
-    stmt = select(user_profiles_table).where(user_profiles_table.c.user_id == current_user["id"])
-    result = await session.execute(stmt)
-    row = result.mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    return UserProfileResponse(**row)
-
-
-@router.post(
-    "/user/profile",
-    response_model=UserProfileResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_user_profile(
-    payload: UserProfileCreate,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(get_current_user),
-) -> UserProfileResponse:
-    exists_stmt = select(user_profiles_table.c.id).where(
-        user_profiles_table.c.user_id == current_user["id"]
-    )
-    exists = (await session.execute(exists_stmt)).scalar_one_or_none()
-    if exists:
-        raise HTTPException(status_code=409, detail="Profile already exists")
-
-    values = payload.model_dump(exclude_none=True)
-    stmt = (
-        insert(user_profiles_table)
-        .values(user_id=current_user["id"], **values)
-        .returning(*user_profiles_table.c)
-    )
-    result = await session.execute(stmt)
-    await session.commit()
-    row = result.mappings().one()
-    return UserProfileResponse(**row)
-
-
-@router.put("/user/profile", response_model=UserProfileResponse)
-async def upsert_user_profile(
-    payload: UserProfileUpdate,
-    session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(get_current_user),
-) -> UserProfileResponse:
-    values = payload.model_dump(exclude_unset=True)
-    if not values:
-        raise HTTPException(status_code=400, detail="No fields to update")
-
-    exists_stmt = select(user_profiles_table.c.id).where(
-        user_profiles_table.c.user_id == current_user["id"]
-    )
-    exists = (await session.execute(exists_stmt)).scalar_one_or_none()
-
-    if exists:
-        stmt = (
-            update(user_profiles_table)
-            .where(user_profiles_table.c.user_id == current_user["id"])
-            .values(**values, updated_at=datetime.utcnow())
-            .returning(*user_profiles_table.c)
+) -> Response:
+    refresh_token_value = request.cookies.get(REFRESH_COOKIE_NAME)
+    if refresh_token_value:
+        token_hash = hash_refresh_token(refresh_token_value)
+        await session.execute(
+            update(refresh_tokens_table)
+            .where(
+                refresh_tokens_table.c.token_hash == token_hash,
+                refresh_tokens_table.c.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.utcnow())
         )
-    else:
-        stmt = (
-            insert(user_profiles_table)
-            .values(user_id=current_user["id"], **values)
-            .returning(*user_profiles_table.c)
-        )
+        await session.commit()
+    clear_refresh_cookie(response)
+    return response
 
-    result = await session.execute(stmt)
-    await session.commit()
-    row = result.mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    return UserProfileResponse(**row)
+
+@router.get("/users/me", response_model=UserResponse)
+async def get_me(
+    current_user: dict = Depends(get_current_user),
+) -> UserResponse:
+    return UserResponse(
+        username=current_user["username"],
+        email=current_user["email"],
+        role=current_user["role"],
+    )

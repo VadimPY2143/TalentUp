@@ -1,13 +1,29 @@
 import type { VacancyResponse } from "../types/vacancy"
+import type { ApplicationStatus } from "../types/application"
 
 interface VacancyModalProps {
   vacancy: VacancyResponse | null
   onClose: () => void
   onApply: () => void
   showApplyButton?: boolean
+  isApplyDisabled?: boolean
+  applicationStatus?: ApplicationStatus
 }
 
-const VacancyModal = ({ vacancy, onClose, onApply, showApplyButton = true }: VacancyModalProps) => {
+const applicationStatusLabel: Record<ApplicationStatus, string> = {
+  applied: "Подано",
+  viewed: "Переглянуто",
+  chat_started: "Почато переписку",
+}
+
+const VacancyModal = ({
+  vacancy,
+  onClose,
+  onApply,
+  showApplyButton = true,
+  isApplyDisabled = false,
+  applicationStatus,
+}: VacancyModalProps) => {
   if (!vacancy) return null
 
   const normalizeBadgeList = (
@@ -95,6 +111,10 @@ const VacancyModal = ({ vacancy, onClose, onApply, showApplyButton = true }: Vac
       year: "numeric"
     })
   }
+
+  const applyButtonLabel = isApplyDisabled
+    ? `Ви вже відгукнулися${applicationStatus ? ` · ${applicationStatusLabel[applicationStatus]}` : ""}`
+    : "Відгукнутися на вакансію"
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
@@ -195,11 +215,12 @@ const VacancyModal = ({ vacancy, onClose, onApply, showApplyButton = true }: Vac
           <div className="flex gap-3">
             {showApplyButton && (
               <button
-                className="flex-1 rounded-xl bg-[#1f2f5e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1b294f]"
+                className="flex-1 rounded-xl bg-[#1f2f5e] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
                 type="button"
                 onClick={onApply}
+                disabled={isApplyDisabled}
               >
-                Відгукнутися на вакансію
+                {applyButtonLabel}
               </button>
             )}
             <button

@@ -5,6 +5,7 @@ export interface VacancyPayload {
   requirements?: string
   is_active?: boolean
   employment_type?: string[]
+  city_id?: number | null
   location?: string
   salary_min?: number
   salary_max?: number
@@ -26,6 +27,7 @@ export interface VacancyUpdatePayload {
   requirements?: string
   is_active?: boolean
   employment_type?: string[]
+  city_id?: number | null
   location?: string
   salary_min?: number
   salary_max?: number
@@ -46,6 +48,7 @@ export interface VacancyResponse {
   requirements?: string | null
   is_active: boolean
   employment_type?: string[] | null
+  city_id?: number | null
   location?: string | null
   salary_min?: number | null
   salary_max?: number | null

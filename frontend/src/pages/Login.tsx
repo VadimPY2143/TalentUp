@@ -27,8 +27,8 @@ const Login = () => {
     try {
       setIsSubmitting(true)
       const data = await loginUser({ email, password })
-      login(data.access_token, data.refresh_token)
-      navigate("/dashboard")
+      login(data.access_token)
+      navigate("/")
     } catch (err) {
       const message = err instanceof Error ? err.message : "Помилка входу"
       setError(message)
@@ -124,18 +124,6 @@ const Login = () => {
                 <path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.45-3.45A11.6 11.6 0 0 0 12 0 12 12 0 0 0 1.23 6.6l3.99 3.12C6.18 6.87 8.85 4.75 12 4.75Z" fill="#EA4335" />
               </svg>
               Продовжити з Google
-            </button>
-            <button
-              onClick={() => {
-                window.location.href = `${API_URL}/auth/linkedin/login`
-              }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
-              type="button"
-            >
-              <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20.5 3h-17A1.5 1.5 0 0 0 2 4.5v15A1.5 1.5 0 0 0 3.5 21h17a1.5 1.5 0 0 0 1.5-1.5v-15A1.5 1.5 0 0 0 20.5 3ZM8.34 18.5H5.67V9.5h2.67v9ZM7 8.34a1.55 1.55 0 1 1 0-3.1 1.55 1.55 0 0 1 0 3.1Zm12.5 10.16h-2.67v-4.42c0-1.06-.02-2.43-1.48-2.43-1.49 0-1.72 1.16-1.72 2.36v4.5h-2.67V9.5h2.56v1.23h.04c.36-.68 1.25-1.4 2.57-1.4 2.75 0 3.26 1.81 3.26 4.16v5.01Z" fill="#0A66C2" />
-              </svg>
-              Продовжити з LinkedIn
             </button>
           </div>
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import type { ChatResumeResponse } from "../types/chat"
 
 interface ResumeModalProps {
@@ -46,13 +47,24 @@ const formatDate = (value: string | null) => {
 }
 
 const ResumeModal = ({ resume, onClose, onOpenPdf }: ResumeModalProps) => {
+  useEffect(() => {
+    if (!resume) {
+      return
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [resume])
+
   if (!resume) {
     return null
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
-      <div className="w-full max-h-[90vh] max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-strong">
+      <div className="w-full max-h-[92vh] max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-strong">
         <div className="sticky top-0 border-b border-slate-200 bg-white p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">

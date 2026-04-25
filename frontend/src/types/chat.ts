@@ -15,6 +15,10 @@ export interface ChatResponse {
 }
 
 export interface MyChatResponse extends ChatResponse {
+  employer_name?: string | null
+  worker_name?: string | null
+  employer_avatar_url?: string | null
+  worker_avatar_url?: string | null
   unread_count: number
 }
 
@@ -79,4 +83,5 @@ export interface ChatUiMessage {
   text: string
   createdAt: string
   optimistic: boolean
+  status?: "sent" | "delivered" | "read"
 }

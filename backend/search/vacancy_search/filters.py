@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Iterable
 
 from pydantic import BaseModel, Field, model_validator
-from sqlalchemy import Select, and_, func, or_
+from sqlalchemy import Select, and_, or_
 
 from database import vacancies_table
 
@@ -48,30 +48,25 @@ WORK_FORMAT_ALIASES: dict[WorkFormat, tuple[str, ...]] = {
 
 
 class VacancySearchFilters(BaseModel):
-    # 1) Location
+    city_id: int | None = Field(default=None, ge=1)
     location: str | None = Field(default=None, max_length=255)
+    location_aliases: list[str] | None = None
 
-    # 2) Company
     company_id: int | None = Field(default=None, ge=1)
 
-    # 3) Employment
     employment_kind: list[EmploymentKind] | None = None
     work_format: list[WorkFormat] | None = None
 
-    # 4) Salary
     salary_min: int | None = Field(default=None, ge=0)
     salary_max: int | None = Field(default=None, ge=0)
     salary_currency: str | None = Field(default=None, max_length=10)
 
-    # 5) Experience required by vacancy
     experience_years_min: int | None = Field(default=None, ge=0, le=80)
     experience_years_max: int | None = Field(default=None, ge=0, le=80)
 
-    # 6) Published date
     published_within: PublishedWithin | None = None
 
-    # 7) Expires
-    exclude_expired: bool = False
+    exclude_expired: bool = True
 
     @model_validator(mode="after")
     def _validate_ranges(self) -> "VacancySearchFilters":
@@ -91,7 +86,6 @@ class VacancySearchFilters(BaseModel):
 
 
 def _overlap(column, values: Iterable[str]):
-    # Postgres ARRAY overlap: column && ARRAY[...]
     return column.op("&&")(list(values))
 
 
@@ -114,7 +108,16 @@ def _published_since(v: PublishedWithin) -> datetime:
 def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Select:
     conditions = []
 
-    if f.location:
+    if f.city_id is not None:
+        location_conditions = [vacancies_table.c.city_id == f.city_id]
+        aliases = [alias.strip() for alias in f.location_aliases or [] if alias.strip()]
+        if aliases:
+            location_conditions.extend(
+                vacancies_table.c.location.ilike(f"%{alias}%")
+                for alias in aliases
+            )
+        conditions.append(or_(*location_conditions))
+    elif f.location:
         conditions.append(vacancies_table.c.location.ilike(f"%{f.location.strip()}%"))
 
     if f.company_id is not None:
@@ -138,9 +141,6 @@ def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Selec
     if f.salary_currency:
         conditions.append(vacancies_table.c.salary_currency == f.salary_currency)
 
-    # Candidate-oriented salary filters:
-    # - salary_min: "I want at least X" -> vacancy_max >= X
-    # - salary_max: "I want at most Y"  -> vacancy_min <= Y
     if f.salary_min is not None:
         conditions.append(vacancies_table.c.salary_max.isnot(None))
         conditions.append(vacancies_table.c.salary_max >= f.salary_min)
@@ -161,7 +161,10 @@ def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Selec
     if f.exclude_expired:
         now = datetime.now(timezone.utc)
         conditions.append(
-            func.coalesce(vacancies_table.c.expires_at, now + timedelta(days=3650)) >= now
+            or_(
+                vacancies_table.c.expires_at.is_(None),
+                vacancies_table.c.expires_at > now,
+            )
         )
 
     if conditions:

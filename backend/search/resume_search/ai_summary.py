@@ -10,6 +10,7 @@ import redis.asyncio as redis
 from pydantic import ValidationError
 from redis.exceptions import RedisError
 from search.resume_search.models import ResumeSummary
+from logger import logger
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
@@ -90,10 +91,14 @@ async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model = OpenAIModel("openai/gpt-4o-mini", provider=provider)
+    model_name = os.getenv("RESUME_SUMMARY_MODEL", "google/gemma-3-4b-it")
+    logger.info(f"Using resume summary model: {model_name}")
+    model = OpenAIModel(model_name, provider=provider)
+
     agent = Agent(
         model,
         system_prompt=SYSTEM_PROMPT,
+        model_settings={"max_tokens": 2048},
     )
 
     result = await agent.run(

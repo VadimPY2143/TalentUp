@@ -4,7 +4,6 @@ import type { Resume } from "../types/resume"
 
 export interface CandidateResumeSummary {
   summary: string
-  strengths: string[]
   cached: boolean
 }
 
@@ -33,6 +32,7 @@ const buildSearchParams = (payload: CandidateSearchParams) => {
   const params = new URLSearchParams()
 
   appendParam(params, "resume_name", payload.query)
+  appendParam(params, "city_id", payload.city_id)
   appendParam(params, "location", payload.location)
   appendParam(params, "years_experience", payload.years_experience)
   appendParam(params, "salary_from", payload.salary_min)

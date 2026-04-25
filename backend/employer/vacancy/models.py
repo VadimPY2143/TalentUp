@@ -11,6 +11,7 @@ class Vacancy(BaseModel):
     requirements: Optional[str] = None
     is_active: bool = True
     employment_type: Optional[list[str]] = None
+    city_id: Optional[int] = Field(default=None, ge=1)
     location: Optional[str] = Field(default=None, max_length=255)
     salary_min: Optional[int] = Field(default=None, ge=0)
     salary_max: Optional[int] = Field(default=None, ge=0)
@@ -32,6 +33,7 @@ class VacancyUpdate(BaseModel):
     requirements: Optional[str] = None
     is_active: Optional[bool] = None
     employment_type: Optional[list[str]] = None
+    city_id: Optional[int] = Field(default=None, ge=1)
     location: Optional[str] = Field(default=None, max_length=255)
     salary_min: Optional[int] = Field(default=None, ge=0)
     salary_max: Optional[int] = Field(default=None, ge=0)

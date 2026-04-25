@@ -1,26 +1,40 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { useAuth } from "../auth/useAuth"
+import { setApiUrlOverride } from "../api/client"
 
 const OAuthCallback = () => {
   const navigate = useNavigate()
-  const { login } = useAuth()
   const [searchParams] = useSearchParams()
+  const { isAuthReady, isAuthenticated, login } = useAuth()
   const [error, setError] = useState<string | null>(null)
 
-  const accessToken = useMemo(() => searchParams.get("access_token"), [searchParams])
-  const refreshToken = useMemo(() => searchParams.get("refresh_token"), [searchParams])
-
   useEffect(() => {
-    if (!accessToken || !refreshToken) {
-      setError("Невірна OAuth відповідь. Спробуйте ще раз.")
+    const accessToken = searchParams.get("access_token")
+    const apiOrigin = searchParams.get("api_origin")
+
+    if (apiOrigin) {
+      setApiUrlOverride(apiOrigin)
+    }
+
+    if (accessToken) {
+      login(accessToken)
+      navigate("/", { replace: true })
       return
     }
 
-    login(accessToken, refreshToken)
-    navigate("/dashboard", { replace: true })
-  }, [accessToken, refreshToken, login, navigate])
+    if (!isAuthReady) {
+      return
+    }
+
+    if (isAuthenticated) {
+      navigate("/", { replace: true })
+      return
+    }
+
+    setError("Невірна OAuth відповідь. Спробуйте ще раз.")
+  }, [isAuthReady, isAuthenticated, login, navigate, searchParams])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#e9edf4] px-4">
