@@ -9,6 +9,7 @@ import { Link, useSearchParams } from "react-router-dom"
 import { createApplication, listMyApplications } from "../api/applications"
 import { getCompanyById } from "../api/companies"
 import { listResumes } from "../api/resumes"
+import { createSavedVacancy, deleteSavedVacancy, listSavedVacancies } from "../api/savedVacancies"
 import CityAutocomplete from "../components/CityAutocomplete"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
@@ -62,6 +63,9 @@ interface VacancyCardProps {
   isApplyDisabled: boolean
   applicationStatus?: ApplicationStatus
   isApplying?: boolean
+  isSaved?: boolean
+  onSave?: () => void
+  onUnsave?: () => void
 }
 
 interface PaginationProps {
@@ -420,6 +424,9 @@ const VacancyCard = ({
   isApplyDisabled,
   applicationStatus,
   isApplying = false,
+  isSaved = false,
+  onSave,
+  onUnsave,
 }: VacancyCardProps) => {
   const employment = normalizeBadgeList(
     [...(vacancy.employment_type ?? []), ...(vacancy.work_format ?? [])],
@@ -514,6 +521,19 @@ const VacancyCard = ({
         >
           {isApplying ? "Надсилаємо..." : isApplyDisabled ? "Вже подано" : "Відгукнутися"}
         </button>
+        {onSave && onUnsave && (
+          <button
+            className={`rounded-lg border border-slate-200 px-4 py-2.5 text-xs font-semibold transition shadow-sm ${
+              isSaved
+                ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                : "bg-white text-slate-600 hover:border-slate-300 hover:text-slate-700"
+            }`}
+            type="button"
+            onClick={isSaved ? onUnsave : onSave}
+          >
+            {isSaved ? "Збережено" : "Зберегти"}
+          </button>
+        )}
       </div>
 
       {applicationStatus && (
@@ -668,6 +688,7 @@ const JobSearchNew = () => {
   const [applyVacancy, setApplyVacancy] = useState<VacancyResponse | null>(null)
   const [workerResumes, setWorkerResumes] = useState<Resume[]>([])
   const [myApplications, setMyApplications] = useState<JobApplication[]>([])
+  const [savedVacancies, setSavedVacancies] = useState<Set<number>>(new Set())
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [coverLetter, setCoverLetter] = useState("")
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false)
@@ -746,21 +767,24 @@ const JobSearchNew = () => {
     if (!isAuthenticated || role !== "worker") {
       setWorkerResumes([])
       setMyApplications([])
+      setSavedVacancies(new Set())
       return
     }
 
     let mounted = true
     void (async () => {
       try {
-        const [resumes, applications] = await Promise.all([
+        const [resumes, applications, saved] = await Promise.all([
           listResumes(),
           listMyApplications(),
+          listSavedVacancies(),
         ])
         if (!mounted) {
           return
         }
         setWorkerResumes(resumes)
         setMyApplications(applications)
+        setSavedVacancies(new Set(saved.map((s) => s.vacancy_id)))
       } catch (err) {
         if (!mounted) {
           return
@@ -952,6 +976,36 @@ const JobSearchNew = () => {
     setSelectedVacancy(vacancy)
   }
 
+  const handleSaveVacancy = async (vacancyId: number) => {
+    try {
+      await createSavedVacancy({ vacancy_id: vacancyId })
+      setSavedVacancies((prev) => new Set([...prev, vacancyId]))
+      setActionSuccess("Вакансію збережено")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося зберегти вакансію"
+      setActionError(message)
+    }
+  }
+
+  const handleUnsaveVacancy = async (vacancyId: number) => {
+    try {
+      const saved = await listSavedVacancies()
+      const savedItem = saved.find((s) => s.vacancy_id === vacancyId)
+      if (savedItem) {
+        await deleteSavedVacancy(savedItem.id)
+        setSavedVacancies((prev) => {
+          const next = new Set(prev)
+          next.delete(vacancyId)
+          return next
+        })
+        setActionSuccess("Вакансію видалено зі збережених")
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Не вдалося видалити вакансію"
+      setActionError(message)
+    }
+  }
+
   const openApplyModal = (vacancy: VacancyResponse) => {
     setActionError(null)
     setActionSuccess(null)
@@ -1104,6 +1158,9 @@ const JobSearchNew = () => {
                     isApplyDisabled={Boolean(existingApplication)}
                     applicationStatus={existingApplication?.status}
                     isApplying={isSubmittingApplication && applyVacancy?.id === vacancy.id}
+                    isSaved={savedVacancies.has(vacancy.id)}
+                    onSave={() => handleSaveVacancy(vacancy.id)}
+                    onUnsave={() => handleUnsaveVacancy(vacancy.id)}
                   />
                   )
                 })}
