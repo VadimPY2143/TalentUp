@@ -102,6 +102,7 @@ async def user_register(
 @router.post("/user/login", response_model=Token)
 async def user_login(
     user: UserLogin,
+    request: Request,
     response: Response,
     session: AsyncSession = Depends(get_session),
 ) -> Token:
@@ -130,7 +131,7 @@ async def user_login(
     )
     await session.commit()
 
-    set_refresh_cookie(response, refresh_token)
+    set_refresh_cookie(response, refresh_token, request)
     return Token(
         access_token=access_token,
         token_type="bearer",
@@ -191,7 +192,7 @@ async def refresh_token(
     )
     await session.commit()
 
-    set_refresh_cookie(response, new_refresh_token)
+    set_refresh_cookie(response, new_refresh_token, request)
     return Token(
         access_token=access_token,
         token_type="bearer",
@@ -216,7 +217,7 @@ async def user_logout(
             .values(revoked_at=datetime.utcnow())
         )
         await session.commit()
-    clear_refresh_cookie(response)
+    clear_refresh_cookie(response, request)
     return response
 
 
