@@ -4,11 +4,18 @@ import type { NotificationSocketEvent } from "../types/notification"
 
 const POLL_INTERVAL_MS = 25_000
 
-export const useUnreadNotifications = (token: string | null, enabled: boolean) => {
+type UnreadNotificationsOptions = {
+  onNotificationCreated?: () => void
+}
+
+export const useUnreadNotifications = (token: string | null, enabled: boolean, options?: UnreadNotificationsOptions) => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [socketConnected, setSocketConnected] = useState(false)
   const socketRef = useRef<WebSocket | null>(null)
   const pollRef = useRef<number | null>(null)
+  const onNotificationCreatedRef = useRef<(() => void) | undefined>(undefined)
+
+  onNotificationCreatedRef.current = options?.onNotificationCreated
 
   useEffect(() => {
     if (!enabled) {
@@ -50,6 +57,7 @@ export const useUnreadNotifications = (token: string | null, enabled: boolean) =
         const payload = JSON.parse(event.data) as NotificationSocketEvent
         if (payload?.type === "notification_created") {
           setUnreadCount((prev) => prev + 1)
+          onNotificationCreatedRef.current?.()
         }
       } catch {
         // ignore
@@ -99,4 +107,3 @@ export const useUnreadNotifications = (token: string | null, enabled: boolean) =
 
   return { unreadCount, setUnreadCount, decrementUnread, resetUnread, socketConnected }
 }
-
