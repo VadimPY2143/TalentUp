@@ -216,6 +216,40 @@ user_profiles_table = Table(
     UniqueConstraint('user_id', name='uq_users_profile_user_id'),
 )
 
+languages_table = Table(
+    "languages",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("name", String(100), unique=True, nullable=False),
+    Column("popularity_rank", Integer, nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Index("ix_languages_popularity_rank", "popularity_rank"),
+)
+
+user_languages_table = Table(
+    "user_languages",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("language_id", Integer, ForeignKey("languages.id", ondelete="CASCADE"), nullable=False),
+    Column("proficiency_level", String(10), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint("user_id", "language_id", name="uq_user_languages_user_language"),
+    Index("ix_user_languages_user_id", "user_id"),
+)
+
+user_links_table = Table(
+    "user_links",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+    Column("title", String(255), nullable=False),
+    Column("url", String(500), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint("user_id", "url", name="uq_user_links_user_url"),
+    Index("ix_user_links_user_id", "user_id"),
+)
+
 resumes_table = Table(
     'resumes',
     metadata,
