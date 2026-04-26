@@ -1,13 +1,17 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
-import { Bell } from "lucide-react"
+import { Bell, MessageSquareText } from "lucide-react"
 import { useUnreadNotifications } from "../../notifications/useUnreadNotifications"
+import { useChatWidget } from "../../chat/ChatWidgetContext"
 
 const Navbar = () => {
   const navigate = useNavigate()
   const { isAuthenticated, role, logout, token } = useAuth()
-  const { unreadCount } = useUnreadNotifications(token, isAuthenticated)
+  const { toggle: toggleChat, unreadCount: unreadChats, refreshUnread } = useChatWidget()
+  const { unreadCount } = useUnreadNotifications(token, isAuthenticated, {
+    onNotificationCreated: () => void refreshUnread(),
+  })
 
   const primaryButton =
     "inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
@@ -46,7 +50,7 @@ const Navbar = () => {
               <Link className="transition hover:text-orange-300" to="/jobs">
                 Знайти роботу
               </Link>
-              <Link className="transition hover:text-orange-300" to="/messages">
+              <Link className="hidden transition hover:text-orange-300" to="/messages">
                 Повідомлення
               </Link>
               <Link className="transition hover:text-orange-300" to="/analytics">
@@ -60,7 +64,7 @@ const Navbar = () => {
               <Link className="transition hover:text-orange-300" to="/candidates">
                 База резюме
               </Link>
-              <Link className="transition hover:text-orange-300" to="/messages">
+              <Link className="hidden transition hover:text-orange-300" to="/messages">
                 Повідомлення
               </Link>
             </>
@@ -70,6 +74,19 @@ const Navbar = () => {
         <div className="flex items-center gap-2 md:gap-3">
           {isAuthenticated ? (
             <>
+              <button
+                type="button"
+                onClick={toggleChat}
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"
+                aria-label="Messages"
+              >
+                <MessageSquareText className="h-5 w-5" />
+                {unreadChats > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                    {unreadChats > 99 ? "99+" : unreadChats}
+                  </span>
+                )}
+              </button>
               <Link
                 to="/notifications"
                 className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"

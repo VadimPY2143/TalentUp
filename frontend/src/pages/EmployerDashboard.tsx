@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
-import { useNavigate } from "react-router-dom"
 import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import { useChatWidget } from "../chat/ChatWidgetContext"
 import {
   getApplicationResume,
   listEmployerApplications,
@@ -379,7 +379,7 @@ const mapSavedResumeToApplicationResume = (resume: Resume): ApplicationResume =>
 })
 
 const EmployerDashboard = () => {
-  const navigate = useNavigate()
+  const { open: openChatWidget } = useChatWidget()
   const [company, setCompany] = useState<CompanyResponse | null>(null)
   const [extraCompaniesCount, setExtraCompaniesCount] = useState(0)
   const [showCompanyEditor, setShowCompanyEditor] = useState(false)
@@ -535,11 +535,7 @@ const EmployerDashboard = () => {
       return
     }
     setSavedResumesError(null)
-    const params = new URLSearchParams({
-      resumeId: String(resume.id),
-      vacancyId: String(vacancyId),
-    })
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: resume.id, vacancyId })
   }
 
   const handleOpenApplicationResume = async (application: JobApplication) => {
@@ -585,11 +581,7 @@ const EmployerDashboard = () => {
         setApplicationStatusUpdatingId(null)
       }
     }
-    const params = new URLSearchParams({
-      resumeId: String(application.resume_id),
-      vacancyId: String(application.vacancy_id),
-    })
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: application.resume_id, vacancyId: application.vacancy_id })
   }
 
   const handleOpenApplicationResumePdf = async (resumeId?: number | null) => {

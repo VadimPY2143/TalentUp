@@ -5,6 +5,7 @@ import MessageThread from "../components/chat/MessageThread"
 import ResumeModal from "../components/ResumeModal"
 import VacancyModal from "../components/VacancyModal"
 import Navbar from "../components/layout/Navbar"
+import { useChatWidget } from "../chat/ChatWidgetContext"
 import { buildChatWebSocketUrl, createChat, getChatWorkerResume, listChatMessages, listMyChats } from "../api/chat"
 import { listCompanies } from "../api/companies"
 import { openResumePdf } from "../api/resumes"
@@ -57,16 +58,30 @@ const toPreviewMessage = (payload: ChatSocketMessage): ChatMessageResponse => ({
   created_at: payload.created_at,
 })
 
-const Messages = () => {
+type MessagesProps = {
+  embedded?: boolean
+  resumeId?: number | null
+  vacancyId?: number | null
+  onAutoOpenHandled?: () => void
+}
+
+const toPositiveNumberOrNull = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null
+
+const sumUnreadCount = (items: { unread_count: number }[]) =>
+  items.reduce((acc, item) => acc + (Number.isFinite(item.unread_count) ? item.unread_count : 0), 0)
+
+const Messages = ({ embedded = false, resumeId: resumeIdProp, vacancyId: vacancyIdProp, onAutoOpenHandled }: MessagesProps) => {
   const { role, token } = useAuth()
   const isEmployer = role === "employer"
   const [searchParams] = useSearchParams()
-  const resumeId = Number(searchParams.get("resumeId"))
-  const vacancyId = Number(searchParams.get("vacancyId"))
-  const normalizedResumeId =
-    Number.isFinite(resumeId) && resumeId > 0 ? resumeId : null
-  const normalizedVacancyId =
-    Number.isFinite(vacancyId) && vacancyId > 0 ? vacancyId : null
+
+  const normalizedResumeId = toPositiveNumberOrNull(
+    resumeIdProp !== undefined ? resumeIdProp : Number(searchParams.get("resumeId")),
+  )
+  const normalizedVacancyId = toPositiveNumberOrNull(
+    vacancyIdProp !== undefined ? vacancyIdProp : Number(searchParams.get("vacancyId")),
+  )
 
   const [chats, setChats] = useState<MyChatResponse[]>([])
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
@@ -88,10 +103,19 @@ const Messages = () => {
   const chatsRef = useRef<MyChatResponse[]>([])
   const vacancyMapRef = useRef<Record<number, VacancyResponse>>({})
   const autoOpenHandledRef = useRef<number | null>(null)
+  const chatWidget = useChatWidget()
+
+  useEffect(() => {
+    autoOpenHandledRef.current = null
+  }, [normalizedResumeId, normalizedVacancyId])
 
   useEffect(() => {
     chatsRef.current = chats
   }, [chats])
+
+  useEffect(() => {
+    chatWidget.setUnreadCount(sumUnreadCount(chats))
+  }, [chatWidget, chats])
 
   useEffect(() => {
     vacancyMapRef.current = chatVacancyById
@@ -365,6 +389,7 @@ const Messages = () => {
       const chatId = await openOrCreateConversation(normalizedResumeId)
       if (chatId) {
         autoOpenHandledRef.current = normalizedResumeId
+        onAutoOpenHandled?.()
       }
     })()
   }, [
@@ -372,6 +397,7 @@ const Messages = () => {
     isEmployer,
     isVacanciesLoading,
     normalizedResumeId,
+    onAutoOpenHandled,
     openOrCreateConversation,
     selectedVacancyId,
   ])
@@ -634,10 +660,51 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e9edf4]">
-      <Navbar />
-      <main className="mx-auto max-w-[1240px] px-4 pb-10 pt-8">
-        <section className="rounded-[28px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium">
+    <div className={embedded ? "flex h-full min-h-0 flex-col bg-[#e9edf4]" : "min-h-screen bg-[#e9edf4]"}>
+      {!embedded && <Navbar />}
+      <main
+        className={
+          embedded
+            ? "flex min-h-0 flex-1 flex-col p-3"
+            : "mx-auto max-w-[1240px] px-4 pb-10 pt-8"
+        }
+      >
+        {embedded ? (
+          <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-soft">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">
+                {isEmployer ? "Employer inbox" : "Candidate inbox"}
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-slate-900">Messages</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {isEmployer && (
+                <select
+                  className="max-w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70 md:min-w-[220px]"
+                  value={selectedVacancyId ?? ""}
+                  onChange={(event) => setSelectedVacancyId(event.target.value ? Number(event.target.value) : null)}
+                  disabled={isVacanciesLoading}
+                >
+                  <option value="">Р’СЃС– РІР°РєР°РЅСЃС–С—</option>
+                  {!vacancies.length && <option value="">РќРµРјР°С” РґРѕСЃС‚СѓРїРЅРёС… РІР°РєР°РЅСЃС–Р№</option>}
+                  {vacancies.map((vacancy) => (
+                    <option key={vacancy.id} value={vacancy.id}>
+                      {vacancy.title}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <button
+                type="button"
+                onClick={() => void loadChatsAndPreviews()}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Refresh
+              </button>
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-[28px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium">
           <p className="text-xs uppercase tracking-[0.35em] text-white/60">
             {isEmployer ? "Employer inbox" : "Candidate inbox"}
           </p>
@@ -687,7 +754,8 @@ const Messages = () => {
               </button>
             </div>
           )}
-        </section>
+          </section>
+        )}
 
         {chatError && (
           <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -695,7 +763,13 @@ const Messages = () => {
           </div>
         )}
 
-        <section className="mt-6 grid gap-4 lg:grid-cols-[360px,1fr]">
+        <section
+          className={
+            embedded
+              ? "mt-3 grid min-h-0 flex-1 gap-3 md:grid-cols-[280px,1fr]"
+              : "mt-6 grid gap-4 lg:grid-cols-[360px,1fr]"
+          }
+        >
           <ConversationList
             chats={visibleChats}
             selectedChatId={selectedChatId}
