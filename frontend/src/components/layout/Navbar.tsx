@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
 import { useChatWidget } from "../../chat/ChatWidgetContext"
-import { useUnreadNotifications } from "../../notifications/useUnreadNotifications"
+import { useNotificationWidget } from "../../notifications/NotificationWidgetContext"
+import { useUnreadNotificationsContext } from "../../notifications/UnreadNotificationsContext"
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const { isAuthenticated, role, logout, token } = useAuth()
-  const { toggle: toggleChat, unreadCount: unreadChats, refreshUnread } = useChatWidget()
-  const { unreadCount } = useUnreadNotifications(token, isAuthenticated, {
-    onNotificationCreated: () => void refreshUnread(),
-  })
+  const { isAuthenticated, role, logout } = useAuth()
+  const { toggle: toggleChat, unreadCount: unreadChats } = useChatWidget()
+  const { toggle: toggleNotifications } = useNotificationWidget()
+  const { unreadCount } = useUnreadNotificationsContext()
 
   const primaryButton =
     "inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
@@ -41,10 +41,10 @@ const Navbar = () => {
           {!isAuthenticated && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Р—РЅР°Р№С‚Рё СЂРѕР±РѕС‚Сѓ
+                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
               </Link>
               <Link className="transition hover:text-orange-300" to="/register?role=employer">
-                Р РѕР·РјС–СЃС‚РёС‚Рё РІР°РєР°РЅСЃС–СЋ
+                Р В Р С•Р В·Р СРЎвЂ“РЎРѓРЎвЂљР С‘РЎвЂљР С‘ Р Р†Р В°Р С”Р В°Р Р…РЎРѓРЎвЂ“РЎР‹
               </Link>
             </>
           )}
@@ -52,10 +52,10 @@ const Navbar = () => {
           {isAuthenticated && role === "worker" && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Р—РЅР°Р№С‚Рё СЂРѕР±РѕС‚Сѓ
+                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
               </Link>
-              <Link className="hidden transition hover:text-orange-300" to="/messages">
-                РџРѕРІС–РґРѕРјР»РµРЅРЅСЏ
+              <Link className="transition hover:text-orange-300" to="/analytics">
+                РђРЅР°Р»С–С‚РёРєР° (A+C)
               </Link>
             </>
           )}
@@ -63,13 +63,10 @@ const Navbar = () => {
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
-                Р‘Р°Р·Р° СЂРµР·СЋРјРµ
+                Р вЂР В°Р В·Р В° РЎР‚Р ВµР В·РЎР‹Р СР Вµ
               </Link>
               <Link className="transition hover:text-orange-300" to="/payment?return_to=/dashboard">
-                РљСѓРїРёС‚Рё РєСЂРµРґРёС‚Рё
-              </Link>
-              <Link className="hidden transition hover:text-orange-300" to="/messages">
-                РџРѕРІС–РґРѕРјР»РµРЅРЅСЏ
+                Р С™РЎС“Р С—Р С‘РЎвЂљР С‘ Р С”РЎР‚Р ВµР Т‘Р С‘РЎвЂљР С‘
               </Link>
             </>
           )}
@@ -92,8 +89,9 @@ const Navbar = () => {
                 )}
               </button>
 
-              <Link
-                to="/notifications"
+              <button
+                type="button"
+                onClick={toggleNotifications}
                 className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"
                 aria-label="Notifications"
               >
@@ -103,16 +101,16 @@ const Navbar = () => {
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
-              </Link>
+              </button>
 
               <Link
                 to="/dashboard"
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
               >
-                РљР°Р±С–РЅРµС‚
+                Р С™Р В°Р В±РЎвЂ“Р Р…Р ВµРЎвЂљ
               </Link>
               <button className={primaryButton} type="button" onClick={handleLogout}>
-                Р’РёР№С‚Рё
+                Р вЂ™Р С‘Р в„–РЎвЂљР С‘
               </button>
             </>
           ) : (
@@ -121,7 +119,7 @@ const Navbar = () => {
                 Р—Р°СЂРµС”СЃС‚СЂСѓРІР°С‚РёСЃСЏ
               </Link>
               <Link to="/login" className={secondaryButton}>
-                РЈРІС–Р№С‚Рё
+                Р Р€Р Р†РЎвЂ“Р в„–РЎвЂљР С‘
               </Link>
             </>
           )}
@@ -132,4 +130,3 @@ const Navbar = () => {
 }
 
 export default Navbar
-

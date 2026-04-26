@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import type { UserRole } from "../../types/auth"
+import { useChatWidget } from "../../chat/ChatWidgetContext"
 
 interface HomeHeroProps {
   isAuthenticated: boolean
@@ -22,6 +23,7 @@ const funnelStages = [
 
 const HomeHero = ({ isAuthenticated, role }: HomeHeroProps) => {
   const navigate = useNavigate()
+  const { open: openChatWidget } = useChatWidget()
   const [query, setQuery] = useState("")
 
   const searchPath = role === "employer" ? "/candidates" : "/jobs"
@@ -32,7 +34,6 @@ const HomeHero = ({ isAuthenticated, role }: HomeHeroProps) => {
     : role === "employer"
       ? "/candidates"
       : "/dashboard"
-  const chatTo = isAuthenticated ? "/messages" : "/login"
   const applicationStatusesTo = isAuthenticated ? "/dashboard" : "/login"
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -82,12 +83,22 @@ const HomeHero = ({ isAuthenticated, role }: HomeHeroProps) => {
             >
               Короткий опис ШІ
             </Link>
-            <Link
-              className="rounded-full border border-white/25 bg-white/10 px-3 py-1 transition hover:bg-white/20"
-              to={chatTo}
-            >
-              Чат роботодавець-працівник
-            </Link>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className="rounded-full border border-white/25 bg-white/10 px-3 py-1 transition hover:bg-white/20"
+                onClick={() => openChatWidget()}
+              >
+                Чат роботодавець-працівник
+              </button>
+            ) : (
+              <Link
+                className="rounded-full border border-white/25 bg-white/10 px-3 py-1 transition hover:bg-white/20"
+                to="/login"
+              >
+                Чат роботодавець-працівник
+              </Link>
+            )}
             <Link
               className="rounded-full border border-white/25 bg-white/10 px-3 py-1 transition hover:bg-white/20"
               to={applicationStatusesTo}

@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { AuthProvider } from "./auth/AuthContext"
 import { ChatWidgetProvider } from "./chat/ChatWidgetContext"
+import { NotificationWidgetProvider } from "./notifications/NotificationWidgetContext"
+import { UnreadNotificationsProvider } from "./notifications/UnreadNotificationsContext"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
@@ -16,37 +18,43 @@ import ProtectedRoute from "./routes/ProtectedRoute"
 import RoleRoute from "./routes/RoleRoute"
 import Footer from "./components/layout/Footer"
 import ChatWidget from "./components/chat/ChatWidget"
+import NotificationWidget from "./components/notifications/NotificationWidget"
 
 const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ChatWidgetProvider>
-          <div className="flex min-h-screen flex-col">
-            <div className="flex-1">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/oauth/callback" element={<OAuthCallback />} />
-                <Route path="/jobs" element={<JobSearchNew />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/messages" element={<MessagesRoute />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/jobs-old" element={<JobSearch />} />
-                  <Route element={<RoleRoute allowed={["employer"]} />}>
-                    <Route path="/candidates" element={<CandidateSearch />} />
-                  </Route>
-                  <Route element={<RoleRoute allowed={["worker"]} />}>
-                    <Route path="/analytics" element={<Analytics />} />
-                  </Route>
-                </Route>
-              </Routes>
-              <ChatWidget />
-            </div>
-            <Footer />
-          </div>
+          <NotificationWidgetProvider>
+            <UnreadNotificationsProvider>
+              <div className="flex min-h-screen flex-col">
+                <div className="flex-1">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/oauth/callback" element={<OAuthCallback />} />
+                    <Route path="/jobs" element={<JobSearchNew />} />
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/messages" element={<MessagesRoute />} />
+                      <Route path="/notifications" element={<Notifications />} />
+                      <Route path="/jobs-old" element={<JobSearch />} />
+                      <Route element={<RoleRoute allowed={["employer"]} />}>
+                        <Route path="/candidates" element={<CandidateSearch />} />
+                      </Route>
+                      <Route element={<RoleRoute allowed={["worker"]} />}>
+                        <Route path="/analytics" element={<Analytics />} />
+                      </Route>
+                    </Route>
+                  </Routes>
+                  <ChatWidget />
+                  <NotificationWidget />
+                </div>
+                <Footer />
+              </div>
+            </UnreadNotificationsProvider>
+          </NotificationWidgetProvider>
         </ChatWidgetProvider>
       </AuthProvider>
     </BrowserRouter>

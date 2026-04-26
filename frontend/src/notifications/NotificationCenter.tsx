@@ -1,7 +1,19 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from "react"
-import { listNotifications, markAllNotificationsRead, markNotificationRead, buildNotificationsWebSocketUrl } from "../api/notifications"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  buildNotificationsWebSocketUrl,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../api/notifications"
 import { useAuth } from "../auth/useAuth"
 import type { Notification } from "../types/notification"
+
+type NotificationCenterProps = {
+  embedded?: boolean
+  refreshSignal?: number
+  onMarkedRead?: (count?: number) => void
+  onMarkedAllRead?: (count: number) => void
+}
 
 const formatTime = (iso: string) => {
   const date = new Date(iso)
@@ -13,21 +25,26 @@ const translateNotification = (notification: Notification) => {
   const translated = { ...notification }
 
   if (translated.title === "New message") {
-    translated.title = "Нове повідомлення"
+    translated.title = "РќРѕРІРµ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ"
   } else if (translated.title === "Application status updated") {
-    translated.title = "Статус заявки оновлено"
+    translated.title = "РЎС‚Р°С‚СѓСЃ Р·Р°СЏРІРєРё РѕРЅРѕРІР»РµРЅРѕ"
   } else if (translated.title === "Your resume was saved") {
-    translated.title = "Ваше резюме збережено"
+    translated.title = "Р’Р°С€Рµ СЂРµР·СЋРјРµ Р·Р±РµСЂРµР¶РµРЅРѕ"
   }
 
   if (translated.body) {
-    translated.body = translated.body.replace("I applied", "Я подав заявку")
+    translated.body = translated.body.replace("I applied", "РЇ РїРѕРґР°РІ Р·Р°СЏРІРєСѓ")
   }
 
   return translated
 }
 
-export const NotificationCenter = () => {
+export const NotificationCenter = ({
+  embedded = false,
+  refreshSignal,
+  onMarkedRead,
+  onMarkedAllRead,
+}: NotificationCenterProps) => {
   const { token } = useAuth()
   const [items, setItems] = useState<Notification[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
@@ -50,17 +67,24 @@ export const NotificationCenter = () => {
         setCursor(data?.next_cursor ?? null)
         setHasMore(Boolean(data?.next_cursor))
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Не вдалося завантажити сповіщення")
+        setError(e instanceof Error ? e.message : "РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё СЃРїРѕРІС–С‰РµРЅРЅСЏ")
       } finally {
         setLoading(false)
       }
     },
-    [cursor],
+    [cursor, loading],
   )
 
   useEffect(() => {
     load("initial")
   }, [load])
+
+  useEffect(() => {
+    if (refreshSignal === undefined) {
+      return
+    }
+    load("initial")
+  }, [load, refreshSignal])
 
   useEffect(() => {
     if (!token) return
@@ -69,40 +93,27 @@ export const NotificationCenter = () => {
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 
-    ws.onopen = () => {
-      console.log("WebSocket connected for notifications")
-    }
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        console.log("Received notification via WebSocket:", data)
-        load("initial")
-      } catch (error) {
-        console.error("Failed to parse WebSocket message:", error)
-      }
-    }
-
-    ws.onerror = (error) => {
-      console.error("WebSocket error:", error)
-    }
-
-    ws.onclose = () => {
-      console.log("WebSocket disconnected")
+    ws.onmessage = () => {
+      load("initial")
     }
 
     return () => {
       ws.close()
       wsRef.current = null
     }
-  }, [token, load])
+  }, [load, token])
 
   const onMarkRead = async (id: number) => {
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
+    const wasUnread = items.find((n) => n.id === id)?.is_read === false
+    setItems((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)),
+    )
     try {
       await markNotificationRead(id)
+      if (wasUnread) {
+        onMarkedRead?.(1)
+      }
     } catch {
-      // revert best-effort
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false, read_at: null } : n)))
     }
   }
@@ -112,45 +123,75 @@ export const NotificationCenter = () => {
     setItems((prev) => prev.map((n) => (n.is_read ? n : { ...n, is_read: true, read_at: new Date().toISOString() })))
     try {
       await markAllNotificationsRead()
+      if (prevUnread) {
+        onMarkedAllRead?.(prevUnread)
+      }
     } catch {
-      // revert best-effort
       setItems((prev) => prev.map((n) => (n.is_read && !n.read_at ? { ...n, is_read: false } : n)))
-      setError("Не вдалося позначити всі як прочитані")
-      // eslint-disable-next-line no-unused-vars
+      setError("РќРµ РІРґР°Р»РѕСЃСЏ РїРѕР·РЅР°С‡РёС‚Рё РІСЃС– СЏРє РїСЂРѕС‡РёС‚Р°РЅС–")
       void prevUnread
     }
   }
 
   return (
-    <section className="mx-auto w-full max-w-[1120px] px-4 py-10">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <section className={embedded ? "flex h-full min-h-0 flex-col" : "mx-auto w-full max-w-[1120px] px-4 py-10"}>
+      <div
+        className={
+          embedded
+            ? "flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-soft"
+            : "flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
+        }
+      >
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Сповіщення</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {unreadCount ? `${unreadCount} непрочитаних` : "Всі прочитані"}
+          <h1 className={embedded ? "text-sm font-semibold text-slate-900" : "text-2xl font-bold text-slate-900"}>
+            Notifications
+          </h1>
+          <p className={embedded ? "mt-0.5 text-xs text-slate-500" : "mt-1 text-sm text-slate-600"}>
+            {unreadCount ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onMarkAllRead}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            className={
+              embedded
+                ? "rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                : "rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            }
           >
-            Позначити всі прочитаними
+            Mark all read
+          </button>
+          <button
+            type="button"
+            onClick={() => load("initial")}
+            className={
+              embedded
+                ? "rounded-xl bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                : "rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+            }
+          >
+            Refresh
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div
+          className={
+            embedded
+              ? "mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              : "mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          }
+        >
           {error}
         </div>
       )}
 
-      <div className="mt-6 space-y-3">
+      <div className={embedded ? "mt-3 min-h-0 flex-1 space-y-3 overflow-auto pr-1" : "mt-6 space-y-3"}>
         {!items.length && !loading && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-700">
-            Поки що немає сповіщень.
+            РџРѕРєРё С‰Рѕ РЅРµРјР°С” СЃРїРѕРІС–С‰РµРЅСЊ.
           </div>
         )}
 
@@ -169,7 +210,9 @@ export const NotificationCenter = () => {
                     {!n.is_read && <span className="h-2 w-2 flex-none rounded-full bg-orange-500" />}
                     <h2 className="truncate text-base font-semibold text-slate-900">{translated.title}</h2>
                   </div>
-                  {translated.body && <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{translated.body}</p>}
+                  {translated.body && (
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{translated.body}</p>
+                  )}
                   <p className="mt-3 text-xs text-slate-500">{formatTime(n.created_at)}</p>
                 </div>
 
@@ -179,7 +222,7 @@ export const NotificationCenter = () => {
                     onClick={() => onMarkRead(n.id)}
                     className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                   >
-                    Позначити прочитаним
+                    РџРѕР·РЅР°С‡РёС‚Рё РїСЂРѕС‡РёС‚Р°РЅРёРј
                   </button>
                 )}
               </div>
@@ -195,7 +238,7 @@ export const NotificationCenter = () => {
               onClick={() => load("more")}
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
             >
-              {loading ? "Завантаження..." : "Завантажити ще"}
+              {loading ? "Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ..." : "Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё С‰Рµ"}
             </button>
           </div>
         )}
