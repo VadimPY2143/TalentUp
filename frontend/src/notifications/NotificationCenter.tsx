@@ -2,13 +2,25 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../api/notifications"
 import type { Notification } from "../types/notification"
 
+type NotificationCenterProps = {
+  embedded?: boolean
+  refreshSignal?: number
+  onMarkedRead?: (count?: number) => void
+  onMarkedAllRead?: (count: number) => void
+}
+
 const formatTime = (iso: string) => {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return iso
   return date.toLocaleString()
 }
 
-export const NotificationCenter = () => {
+export const NotificationCenter = ({
+  embedded = false,
+  refreshSignal,
+  onMarkedRead,
+  onMarkedAllRead,
+}: NotificationCenterProps) => {
   const [items, setItems] = useState<Notification[]>([])
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
@@ -41,10 +53,23 @@ export const NotificationCenter = () => {
     load("initial")
   }, [load])
 
+  useEffect(() => {
+    if (refreshSignal === undefined) {
+      return
+    }
+    load("initial")
+  }, [load, refreshSignal])
+
   const onMarkRead = async (id: number) => {
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
+    const wasUnread = items.find((n) => n.id === id)?.is_read === false
+    setItems((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)),
+    )
     try {
       await markNotificationRead(id)
+      if (wasUnread) {
+        onMarkedRead?.(1)
+      }
     } catch {
       // revert best-effort
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false, read_at: null } : n)))
@@ -56,6 +81,9 @@ export const NotificationCenter = () => {
     setItems((prev) => prev.map((n) => (n.is_read ? n : { ...n, is_read: true, read_at: new Date().toISOString() })))
     try {
       await markAllNotificationsRead()
+      if (prevUnread) {
+        onMarkedAllRead?.(prevUnread)
+      }
     } catch {
       // revert best-effort
       setItems((prev) => prev.map((n) => (n.is_read && !n.read_at ? { ...n, is_read: false } : n)))
@@ -66,11 +94,19 @@ export const NotificationCenter = () => {
   }
 
   return (
-    <section className="mx-auto w-full max-w-[1120px] px-4 py-10">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <section className={embedded ? "flex h-full min-h-0 flex-col" : "mx-auto w-full max-w-[1120px] px-4 py-10"}>
+      <div
+        className={
+          embedded
+            ? "flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-soft"
+            : "flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
+        }
+      >
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className={embedded ? "text-sm font-semibold text-slate-900" : "text-2xl font-bold text-slate-900"}>
+            Notifications
+          </h1>
+          <p className={embedded ? "mt-0.5 text-xs text-slate-500" : "mt-1 text-sm text-slate-600"}>
             {unreadCount ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
@@ -78,14 +114,22 @@ export const NotificationCenter = () => {
           <button
             type="button"
             onClick={onMarkAllRead}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            className={
+              embedded
+                ? "rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                : "rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            }
           >
             Mark all read
           </button>
           <button
             type="button"
             onClick={() => load("initial")}
-            className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+            className={
+              embedded
+                ? "rounded-xl bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                : "rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600"
+            }
           >
             Refresh
           </button>
@@ -93,12 +137,12 @@ export const NotificationCenter = () => {
       </div>
 
       {error && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div className={embedded ? "mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" : "mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"}>
           {error}
         </div>
       )}
 
-      <div className="mt-6 space-y-3">
+      <div className={embedded ? "mt-3 min-h-0 flex-1 space-y-3 overflow-auto pr-1" : "mt-6 space-y-3"}>
         {!items.length && !loading && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-700">
             No notifications yet.
@@ -151,4 +195,3 @@ export const NotificationCenter = () => {
     </section>
   )
 }
-

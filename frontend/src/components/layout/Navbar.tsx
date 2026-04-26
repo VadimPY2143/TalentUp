@@ -2,16 +2,16 @@ import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
 import { Bell, MessageSquareText } from "lucide-react"
-import { useUnreadNotifications } from "../../notifications/useUnreadNotifications"
 import { useChatWidget } from "../../chat/ChatWidgetContext"
+import { useNotificationWidget } from "../../notifications/NotificationWidgetContext"
+import { useUnreadNotificationsContext } from "../../notifications/UnreadNotificationsContext"
 
 const Navbar = () => {
   const navigate = useNavigate()
-  const { isAuthenticated, role, logout, token } = useAuth()
-  const { toggle: toggleChat, unreadCount: unreadChats, refreshUnread } = useChatWidget()
-  const { unreadCount } = useUnreadNotifications(token, isAuthenticated, {
-    onNotificationCreated: () => void refreshUnread(),
-  })
+  const { isAuthenticated, role, logout } = useAuth()
+  const { toggle: toggleChat, unreadCount: unreadChats } = useChatWidget()
+  const { toggle: toggleNotifications } = useNotificationWidget()
+  const { unreadCount } = useUnreadNotificationsContext()
 
   const primaryButton =
     "inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
@@ -50,9 +50,6 @@ const Navbar = () => {
               <Link className="transition hover:text-orange-300" to="/jobs">
                 Знайти роботу
               </Link>
-              <Link className="hidden transition hover:text-orange-300" to="/messages">
-                Повідомлення
-              </Link>
               <Link className="transition hover:text-orange-300" to="/analytics">
                 Аналітика
               </Link>
@@ -63,9 +60,6 @@ const Navbar = () => {
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
                 База резюме
-              </Link>
-              <Link className="hidden transition hover:text-orange-300" to="/messages">
-                Повідомлення
               </Link>
             </>
           )}
@@ -87,8 +81,9 @@ const Navbar = () => {
                   </span>
                 )}
               </button>
-              <Link
-                to="/notifications"
+              <button
+                type="button"
+                onClick={toggleNotifications}
                 className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"
                 aria-label="Notifications"
               >
@@ -98,7 +93,7 @@ const Navbar = () => {
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
-              </Link>
+              </button>
               <Link
                 to="/dashboard"
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
