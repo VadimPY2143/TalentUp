@@ -1,48 +1,100 @@
-import { useState, useRef, useEffect } from "react"
-import { Bell, CheckCircle2, MessageSquare, Briefcase, X } from "lucide-react"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { Bell, X, MessageSquare, Briefcase, CheckCircle2 } from "lucide-react"
+import { listNotifications, markNotificationRead, markAllNotificationsRead, buildNotificationsWebSocketUrl } from "../api/notifications"
+import { useAuth } from "../auth/useAuth"
+import type { Notification } from "../types/notification"
 
-interface Notification {
-  id: string
-  type: "message" | "application" | "vacancy" | "system"
-  title: string
-  message: string
-  timestamp: string
-  read: boolean
+const formatTime = (iso: string) => {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return iso
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return "Щойно"
+  if (diffMins < 60) return `${diffMins} хв тому`
+  if (diffHours < 24) return `${diffHours} год тому`
+  if (diffDays < 7) return `${diffDays} дн тому`
+  return date.toLocaleDateString("uk-UA")
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "message",
-    title: "Нове повідомлення",
-    message: "Роботодавець переглянув ваше резюме",
-    timestamp: "2 хв тому",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "application",
-    title: "Статус заявки змінився",
-    message: "Вашу заявку на вакансію Frontend Developer прийнято",
-    timestamp: "1 год тому",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "vacancy",
-    title: "Нова вакансія для вас",
-    message: "З'явилася нова вакансія Python Developer",
-    timestamp: "3 год тому",
-    read: true,
-  },
-]
+const translateNotification = (notification: Notification) => {
+  const translated = { ...notification }
+
+  if (translated.title === "New message") {
+    translated.title = "Нове повідомлення"
+  } else if (translated.title === "Application status updated") {
+    translated.title = "Статус заявки оновлено"
+  } else if (translated.title === "Your resume was saved") {
+    translated.title = "Ваше резюме збережено"
+  }
+
+  if (translated.body) {
+    translated.body = translated.body.replace("I applied", "Я подав заявку")
+  }
+
+  return translated
+}
 
 const NotificationBell = () => {
+  const { token } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+  const cursorRef = useRef<string | null>(null)
+  const loadingMoreRef = useRef(false)
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.is_read).length
+
+  useEffect(() => {
+    cursorRef.current = cursor
+  }, [cursor])
+
+  useEffect(() => {
+    loadingMoreRef.current = loadingMore
+  }, [loadingMore])
+
+  const loadNotifications = useCallback(
+    async (mode: "initial" | "more" = "initial") => {
+      if (mode === "more" && loadingMoreRef.current) return
+      
+      if (mode === "more") {
+        setLoadingMore(true)
+      } else {
+        setLoading(true)
+      }
+      
+      setError(null)
+      try {
+        console.log(`Loading notifications: mode=${mode}, cursor=${cursorRef.current}`)
+        const data = await listNotifications(10, mode === "more" ? cursorRef.current : null)
+        const next = data?.notifications ?? []
+        console.log(`Loaded ${next.length} notifications, next_cursor=${data?.next_cursor}`)
+        setNotifications((prev) => (mode === "more" ? [...prev, ...next] : next))
+        setCursor(data?.next_cursor ?? null)
+        setHasMore(Boolean(data?.next_cursor))
+      } catch (e) {
+        console.error("Failed to load notifications:", e)
+        setError(e instanceof Error ? e.message : "Не вдалося завантажити сповіщення")
+      } finally {
+        setLoading(false)
+        setLoadingMore(false)
+      }
+    },
+    [],
+  )
+
+  useEffect(() => {
+    loadNotifications()
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,21 +107,63 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    )
+  useEffect(() => {
+    if (!token) return
+
+    const wsUrl = buildNotificationsWebSocketUrl(token)
+    const ws = new WebSocket(wsUrl)
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      console.log("WebSocket connected for notifications")
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        console.log("Received notification via WebSocket:", data)
+        // Don't reload to preserve cursor for pagination
+        // User can close and reopen dropdown to see new notifications
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error)
+    }
+
+    ws.onclose = () => {
+      console.log("WebSocket disconnected")
+    }
+
+    return () => {
+      ws.close()
+      wsRef.current = null
+    }
+  }, [token, loadNotifications, isOpen])
+
+  const markAsRead = async (id: number) => {
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))
+    try {
+      await markNotificationRead(id)
+    } catch {
+      // Revert on error
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: false, read_at: null } : n)))
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  const markAllAsRead = async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })))
+    try {
+      await markAllNotificationsRead()
+    } catch {
+      // Revert on error
+      setNotifications((prev) => prev.map((n) => (n.is_read ? n : { ...n, is_read: false, read_at: null })))
+    }
   }
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }
-
-  const getIcon = (type: Notification["type"]) => {
+  const getIcon = (type: string) => {
     switch (type) {
       case "message":
         return <MessageSquare className="h-4 w-4 text-blue-400" />
@@ -97,7 +191,7 @@ const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-white/10 bg-gradient-to-b from-[#13244d] to-[#0b1736] shadow-2xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-96 rounded-xl border border-white/10 bg-gradient-to-b from-[#13244d] to-[#0b1736] shadow-2xl">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <h3 className="font-semibold text-white">Сповіщення</h3>
             {unreadCount > 0 && (
@@ -110,27 +204,29 @@ const NotificationBell = () => {
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
-            {notifications.length === 0 ? (
+          <div className="max-h-96 overflow-y-auto">
+            {error && (
+              <div className="mx-4 mt-4 rounded-xl border border-red-200/50 bg-red-50/10 px-4 py-3 text-sm text-red-300">
+                {error}
+              </div>
+            )}
+
+            {!notifications.length && !loading && (
               <div className="px-4 py-8 text-center text-sm text-white/60">
                 <Bell className="mx-auto mb-2 h-8 w-8 opacity-50" />
                 Немає сповіщень
               </div>
-            ) : (
-              notifications.map((notification) => (
+            )}
+
+            {notifications.map((notification) => {
+              const translated = translateNotification(notification)
+              return (
                 <div
                   key={notification.id}
                   className={`group relative border-b border-white/5 px-4 py-3 transition hover:bg-white/5 ${
-                    !notification.read ? "bg-white/5" : ""
+                    !notification.is_read ? "bg-white/5" : ""
                   }`}
                 >
-                  <button
-                    onClick={() => deleteNotification(notification.id)}
-                    className="absolute right-2 top-2 opacity-0 transition group-hover:opacity-100"
-                  >
-                    <X className="h-3 w-3 text-white/40 hover:text-white/80" />
-                  </button>
-
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
                       {getIcon(notification.type)}
@@ -140,28 +236,37 @@ const NotificationBell = () => {
                         onClick={() => markAsRead(notification.id)}
                         className="block w-full text-left"
                       >
-                        <p className={`text-sm font-medium ${!notification.read ? "text-white" : "text-white/80"}`}>
-                          {notification.title}
-                          {!notification.read && (
+                        <p className={`text-sm font-medium ${!notification.is_read ? "text-white" : "text-white/80"}`}>
+                          {translated.title}
+                          {!notification.is_read && (
                             <span className="ml-2 inline-block h-2 w-2 rounded-full bg-orange-500" />
                           )}
                         </p>
-                        <p className="mt-0.5 text-xs text-white/60 line-clamp-2">
-                          {notification.message}
-                        </p>
-                        <p className="mt-1 text-xs text-white/40">{notification.timestamp}</p>
+                        {translated.body && (
+                          <p className="mt-0.5 text-xs text-white/60 line-clamp-2">
+                            {translated.body}
+                          </p>
+                        )}
+                        <p className="mt-1 text-xs text-white/40">{formatTime(notification.created_at)}</p>
                       </button>
                     </div>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              )
+            })}
 
-          <div className="border-t border-white/10 px-4 py-2">
-            <button className="w-full text-center text-xs text-white/60 transition hover:text-white/90">
-              Переглянути всі сповіщення
-            </button>
+            {hasMore && (
+              <div className="px-4 py-3">
+                <button
+                  type="button"
+                  disabled={loadingMore}
+                  onClick={() => loadNotifications("more")}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 disabled:opacity-60"
+                >
+                  {loadingMore ? "Завантаження..." : "Завантажити ще"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

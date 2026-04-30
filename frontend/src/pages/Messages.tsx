@@ -635,9 +635,9 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#e9edf4]">
+    <div className="h-screen bg-[#e9edf4] flex flex-col">
       <Navbar />
-      <main className="mx-auto max-w-[1240px] px-4 pb-10 pt-8">
+      <main className="w-full px-4 pb-10 pt-8 flex-1 overflow-hidden">
         <section className="rounded-[28px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium">
           <p className="text-xs uppercase tracking-[0.35em] text-white/60">
             {isEmployer ? "Employer inbox" : "Candidate inbox"}
@@ -696,7 +696,7 @@ const Messages = () => {
           </div>
         )}
 
-        <section className="mt-6 grid gap-4 lg:grid-cols-[380px,1fr]">
+        <section className="mt-6 grid gap-4 lg:grid-cols-[320px,1fr] h-[calc(100vh-320px)] min-h-[500px] overflow-hidden">
           <ConversationList
             chats={visibleChats}
             selectedChatId={selectedChatId}
@@ -723,7 +723,7 @@ const Messages = () => {
               onSend={handleSend}
             />
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-soft">
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-soft h-full flex items-center justify-center overflow-hidden">
               <div className="flex flex-col items-center">
                 <div className="rounded-full bg-slate-100 p-3 mb-3">
                   <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

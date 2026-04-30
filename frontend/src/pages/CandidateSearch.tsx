@@ -508,6 +508,7 @@ const CandidateSearch = () => {
     candidateId: number
     title: string
     summary: string
+    strengths: string[]
     cached: boolean
   } | null>(null)
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
@@ -817,6 +818,7 @@ const CandidateSearch = () => {
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
+        strengths: data?.strengths ?? [],
         cached: Boolean(data?.cached),
       })
     } catch (err) {
@@ -1055,6 +1057,21 @@ const CandidateSearch = () => {
             ) : (
               <>
                 <p className="mt-4 text-sm text-slate-700">{summaryModal.summary}</p>
+                {summaryModal.strengths && summaryModal.strengths.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ключові навички</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {summaryModal.strengths.map((strength, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700"
+                        >
+                          {strength}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

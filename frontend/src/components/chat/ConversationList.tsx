@@ -72,7 +72,7 @@ export const ConversationList = ({
   }, [chats])
 
   return (
-    <aside className="flex h-full min-h-0 w-full max-w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-soft lg:max-w-[380px]">
+    <aside className="flex h-full min-h-0 w-full max-w-full flex-col rounded-2xl border border-slate-200 bg-white shadow-soft lg:max-w-[320px]">
       {/* Header */}
       <div className="border-b border-slate-200 px-4 py-4">
         <div className="flex items-center justify-between">

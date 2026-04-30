@@ -32,7 +32,6 @@ async def _create_and_publish(
         prefer_async=prefer_async,
     )
 
-    # If task was enqueued we can't publish the full saved row. Publish a lightweight event.
     if row.get("enqueued"):
         await publish_to_user(user_id, {"type": "notification_enqueued", "payload": row})
         return

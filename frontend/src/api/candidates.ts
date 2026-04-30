@@ -4,6 +4,7 @@ import type { Resume } from "../types/resume"
 
 export interface CandidateResumeSummary {
   summary: string
+  strengths: string[]
   cached: boolean
 }
 
