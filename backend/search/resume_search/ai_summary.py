@@ -15,8 +15,13 @@ from logger import logger
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 SYSTEM_PROMPT = """
-You are an HR assistant. Summarize the candidate resume and highlight key strengths.
+You are an HR assistant. Analyze the candidate resume and provide:
+1. A concise summary (2-3 sentences) of the candidate's profile
+2. A list of 3-5 key strengths/skills based on the resume
+
 Language: Ukrainian.
+
+IMPORTANT: Always return both fields. Strengths must be a list of strings, not empty.
 """.strip()
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -91,7 +96,7 @@ async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    model_name = os.getenv("RESUME_SUMMARY_MODEL", "google/gemma-3-4b-it")
+    model_name = os.getenv("RESUME_SUMMARY_MODEL", "openai/gpt-4o-mini")
     logger.info(f"Using resume summary model: {model_name}")
     model = OpenAIModel(model_name, provider=provider)
 
@@ -106,6 +111,9 @@ async def summarize_resume(resume: dict[str, Any]) -> dict[str, Any]:
         output_type=ResumeSummary,
     )
     output = result.output
+    print('----------------------------------------------')
+    print(output)
+    print('----------------------------------------------')
     if isinstance(output, ResumeSummary):
         return output.model_dump()
     return ResumeSummary.model_validate(output).model_dump()

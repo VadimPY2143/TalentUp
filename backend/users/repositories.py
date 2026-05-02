@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import refresh_tokens_table, user_profiles_table, users_table
+from database import user_profiles_table, user_languages_table, languages_table, user_links_table
 
 
 class UserProfileRepository:

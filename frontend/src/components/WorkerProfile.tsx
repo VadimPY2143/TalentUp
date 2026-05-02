@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useDeferredValue, useMemo, useRef, type KeyboardEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import CityAutocomplete from "./CityAutocomplete"
+import VacancyModal from "./VacancyModal"
 import {
   Star,
   Settings,
@@ -19,6 +20,9 @@ import {
   Bell,
   BarChart3,
   Home,
+  Trash2,
+  ExternalLink,
+  X,
 } from "lucide-react"
 import { useAuth } from "../auth/useAuth"
 import {
@@ -28,6 +32,8 @@ import {
   type UserProfile,
   type UserProfileUpdate,
 } from "../api/userProfile"
+import { searchLanguages } from "../api/profile"
+import type { LanguageOption, UserLanguage, UserLink } from "../types/profile"
 import {
   createResume,
   deleteResume,
@@ -37,10 +43,13 @@ import {
   updateResume,
   uploadResumePdf,
 } from "../api/resumes"
-import { listMyApplications } from "../api/applications"
+import { listMyApplications, createApplication } from "../api/applications"
+import { listSavedVacancies, deleteSavedVacancy } from "../api/savedVacancies"
 import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
+import type { SavedVacancy } from "../api/savedVacancies"
+import type { VacancyResponse } from "../types/vacancy"
 import Navbar from "./layout/Navbar"
 import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
@@ -82,6 +91,103 @@ const createResumeInitialForm: CreateResumeFormState = {
 }
 
 const employmentTypeOptions: EmploymentType[] = ["Remote", "Office", "Hybrid"]
+
+interface ApplyModalProps {
+  vacancy: any | null
+  resumes: Resume[]
+  selectedResumeId: number | null
+  coverLetter: string
+  isSubmitting: boolean
+  onResumeChange: (resumeId: number) => void
+  onCoverLetterChange: (value: string) => void
+  onClose: () => void
+  onSubmit: () => void
+}
+
+const ApplyModal = ({
+  vacancy,
+  resumes,
+  selectedResumeId,
+  coverLetter,
+  isSubmitting,
+  onResumeChange,
+  onCoverLetterChange,
+  onClose,
+  onSubmit,
+}: ApplyModalProps) => {
+  if (!vacancy) {
+    return null
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
+      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Application</p>
+            <h2 className="mt-1 font-display text-xl font-semibold text-slate-900">Відгук на вакансію</h2>
+            <p className="mt-1 text-sm text-slate-600">{vacancy.title}</p>
+          </div>
+          <button
+            className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+          >
+            Закрити
+          </button>
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Оберіть резюме</label>
+            <select
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-orange-400/70"
+              value={selectedResumeId ?? ""}
+              onChange={(event) => onResumeChange(Number(event.target.value))}
+            >
+              {resumes.map((resume) => (
+                <option key={resume.id} value={resume.id}>
+                  {resume.title} {resume.is_active ? "• активне" : "• неактивне"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Супровідний лист (опціонально)
+            </label>
+            <textarea
+              className="mt-2 min-h-[110px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-400/70"
+              placeholder="Коротко розкажіть, чому ви підходите на цю вакансію"
+              value={coverLetter}
+              onChange={(event) => onCoverLetterChange(event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <button
+            className="flex-1 rounded-xl bg-[#1f2f5e] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-70"
+            type="button"
+            disabled={isSubmitting || !selectedResumeId}
+            onClick={onSubmit}
+          >
+            {isSubmitting ? "Надсилаємо..." : "Надіслати відгук"}
+          </button>
+          <button
+            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const applicationStatusLabel: Record<ApplicationStatus, string> = {
   applied: "Подано",
@@ -162,11 +268,77 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [applicationsLoading, setApplicationsLoading] = useState(false)
   const [applicationsError, setApplicationsError] = useState<string | null>(null)
+  const [savedVacancies, setSavedVacancies] = useState<SavedVacancy[]>([])
+  const [savedVacanciesLoading, setSavedVacanciesLoading] = useState(false)
+  const [savedVacanciesError, setSavedVacanciesError] = useState<string | null>(null)
+  const [selectedVacancy, setSelectedVacancy] = useState<VacancyResponse | null>(null)
+  const [applyVacancy, setApplyVacancy] = useState<VacancyResponse | null>(null)
+  const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
+  const [coverLetter, setCoverLetter] = useState("")
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false)
+  const [languageQuery, setLanguageQuery] = useState("")
+  const [languageSuggestions, setLanguageSuggestions] = useState<LanguageOption[]>([])
+  const [showLanguageSuggestions, setShowLanguageSuggestions] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption | null>(null)
+  const [selectedProficiency, setSelectedProficiency] = useState<string>("")
+  const deferredLanguageQuery = useDeferredValue(languageQuery)
+  const languageSuggestionBoxRef = useRef<HTMLDivElement | null>(null)
+  const [linkTitle, setLinkTitle] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+
+  const proficiencyLevels = [
+    { value: "A1", label: "A1 - Початковий" },
+    { value: "A2", label: "A2 - Елементарний" },
+    { value: "B1", label: "B1 - Середній" },
+    { value: "B2", label: "B2 - Вищий середній" },
+    { value: "C1", label: "C1 - Просунутий" },
+    { value: "C2", label: "C2 - Рідна" },
+  ]
 
   useEffect(() => {
     void loadProfile()
     void loadResumes()
     void loadApplications()
+    void loadSavedVacancies()
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadLanguageSuggestions = async () => {
+      try {
+        const options = await searchLanguages(deferredLanguageQuery, 10)
+        if (!cancelled) {
+          setLanguageSuggestions(options)
+        }
+      } catch {
+        if (!cancelled) {
+          setLanguageSuggestions([])
+        }
+      }
+    }
+
+    if (!showLanguageSuggestions) {
+      return () => {
+        cancelled = true
+      }
+    }
+
+    void loadLanguageSuggestions()
+    return () => {
+      cancelled = true
+    }
+  }, [deferredLanguageQuery, showLanguageSuggestions])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (languageSuggestionBoxRef.current && !languageSuggestionBoxRef.current.contains(event.target as Node)) {
+        setShowLanguageSuggestions(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   const loadProfile = async () => {
@@ -182,6 +354,14 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         phone: data.phone,
         languages: data.languages,
         links: data.links,
+        user_languages: data.user_languages?.map((ul) => ({
+          name: ul.language_name,
+          proficiency_level: ul.proficiency_level,
+        })),
+        user_links: data.user_links?.map((ul) => ({
+          title: ul.title,
+          url: ul.url,
+        })),
       })
       setProfileError(null)
     } catch (err) {
@@ -258,6 +438,87 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
       setApplicationsError(err instanceof Error ? err.message : "Не вдалося завантажити відгуки")
     } finally {
       setApplicationsLoading(false)
+    }
+  }
+
+  const loadSavedVacancies = async () => {
+    try {
+      setSavedVacanciesLoading(true)
+      setSavedVacanciesError(null)
+      const data = await listSavedVacancies()
+      setSavedVacancies(data)
+    } catch (err) {
+      setSavedVacanciesError(err instanceof Error ? err.message : "Не вдалося завантажити збережені вакансії")
+    } finally {
+      setSavedVacanciesLoading(false)
+    }
+  }
+
+  const handleRemoveSavedVacancy = async (savedVacancyId: number) => {
+    const confirmed = window.confirm("Видалити цю вакансію зі збережених?")
+    if (!confirmed) {
+      return
+    }
+    try {
+      await deleteSavedVacancy(savedVacancyId)
+      await loadSavedVacancies()
+    } catch (err) {
+      setSavedVacanciesError(err instanceof Error ? err.message : "Не вдалося видалити вакансію")
+    }
+  }
+
+  const handleViewVacancy = (savedVacancy: SavedVacancy) => {
+    if (savedVacancy.vacancy) {
+      setSelectedVacancy(savedVacancy.vacancy)
+    }
+  }
+
+  const openApplyModal = (vacancy: VacancyResponse) => {
+    if (resumes.length === 0) {
+      alert("Спочатку створіть хоча б одне резюме.")
+      return
+    }
+
+    const availableResumes = resumes.filter((resume) => resume.is_active)
+    if (availableResumes.length === 0) {
+      alert("Потрібно мати активне резюме, щоб відгукнутися.")
+      return
+    }
+
+    const preferredResume = availableResumes[0]
+    setSelectedResumeId(preferredResume?.id ?? null)
+    setCoverLetter("")
+    setApplyVacancy(vacancy)
+    setSelectedVacancy(null)
+  }
+
+  const closeApplyModal = () => {
+    if (isSubmittingApplication) {
+      return
+    }
+    setApplyVacancy(null)
+    setCoverLetter("")
+    setSelectedResumeId(null)
+  }
+
+  const submitApplication = async () => {
+    if (!applyVacancy || !selectedResumeId) {
+      return
+    }
+
+    try {
+      setIsSubmittingApplication(true)
+      await createApplication({
+        vacancy_id: applyVacancy.id,
+        resume_id: selectedResumeId,
+        cover_letter: coverLetter || undefined,
+      })
+      await loadApplications()
+      closeApplyModal()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Не вдалося подати відгук")
+    } finally {
+      setIsSubmittingApplication(false)
     }
   }
 
@@ -433,6 +694,90 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
 
   const handleMenuItemClick = (section: Section) => {
     setActiveSection(section)
+  }
+
+  const visibleLanguageSuggestions = useMemo(() => {
+    const selected = new Set(
+      (formData.user_languages || []).map((item) => item.name.toLowerCase())
+    )
+    return languageSuggestions.filter((item) => !selected.has(item.name.toLowerCase()))
+  }, [formData.user_languages, languageSuggestions])
+
+  const addLanguage = () => {
+    if (!selectedLanguage || !selectedProficiency) {
+      return
+    }
+
+    setFormData((prev) => {
+      const currentLanguages = prev.user_languages || []
+      const exists = currentLanguages.some(
+        (item) => item.name.toLowerCase() === selectedLanguage.name.toLowerCase()
+      )
+      if (exists) {
+        return prev
+      }
+      return {
+        ...prev,
+        user_languages: [
+          ...currentLanguages,
+          { name: selectedLanguage.name, proficiency_level: selectedProficiency },
+        ],
+      }
+    })
+    setSelectedLanguage(null)
+    setSelectedProficiency("")
+    setLanguageQuery("")
+    setShowLanguageSuggestions(false)
+  }
+
+  const removeLanguage = (name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      user_languages: (prev.user_languages || []).filter((item) => item.name !== name),
+    }))
+  }
+
+  const addLink = () => {
+    const title = linkTitle.trim()
+    const url = linkUrl.trim()
+    if (!title || !url) {
+      return
+    }
+
+    setFormData((prev) => {
+      const currentLinks = prev.user_links || []
+      const exists = currentLinks.some((item) => item.url === url)
+      if (exists) {
+        return prev
+      }
+      return {
+        ...prev,
+        user_links: [...currentLinks, { title, url }],
+      }
+    })
+    setLinkTitle("")
+    setLinkUrl("")
+  }
+
+  const removeLink = (url: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      user_links: (prev.user_links || []).filter((item) => item.url !== url),
+    }))
+  }
+
+  const handleLanguageKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      const firstSuggestion = visibleLanguageSuggestions.find(
+        (item) => item.name.toLowerCase() === languageQuery.trim().toLowerCase(),
+      )
+      if (firstSuggestion) {
+        setSelectedLanguage(firstSuggestion)
+        setLanguageQuery("")
+        setShowLanguageSuggestions(false)
+      }
+    }
   }
 
   const menuItems = [
@@ -702,31 +1047,100 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                           <div className="flex-1">
                             <p className="text-xs text-slate-500">Мови</p>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={formData.languages?.join(", ") || ""}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    languages: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                                  })
-                                }
-                                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="Українська, Англійська..."
-                              />
+                              <div className="space-y-3">
+                                <div className="relative" ref={languageSuggestionBoxRef}>
+                                  <input
+                                    type="text"
+                                    value={languageQuery}
+                                    onChange={(e) => {
+                                      setLanguageQuery(e.target.value)
+                                      setShowLanguageSuggestions(true)
+                                    }}
+                                    onFocus={() => setShowLanguageSuggestions(true)}
+                                    onKeyDown={handleLanguageKeyDown}
+                                    className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="Почніть вводити назву мови..."
+                                  />
+                                  {showLanguageSuggestions && visibleLanguageSuggestions.length > 0 && (
+                                    <div className="absolute z-10 mt-2 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+                                      {visibleLanguageSuggestions.map((option) => (
+                                        <button
+                                          key={option.id}
+                                          className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-100"
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedLanguage(option)
+                                            setLanguageQuery("")
+                                            setShowLanguageSuggestions(false)
+                                          }}
+                                        >
+                                          {option.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {selectedLanguage && (
+                                  <div className="flex gap-2">
+                                    <select
+                                      value={selectedProficiency}
+                                      onChange={(e) => setSelectedProficiency(e.target.value)}
+                                      className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    >
+                                      <option value="">Оберіть рівень</option>
+                                      {proficiencyLevels.map((level) => (
+                                        <option key={level.value} value={level.value}>
+                                          {level.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      onClick={addLanguage}
+                                      className="rounded-lg bg-orange-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600"
+                                      type="button"
+                                    >
+                                      Додати
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             ) : (
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {profile?.languages?.length ? (
-                                  profile.languages.map((lang, idx) => (
+                                {profile?.user_languages?.length ? (
+                                  profile.user_languages.map((lang) => (
                                     <span
-                                      key={idx}
+                                      key={lang.id}
                                       className="rounded-lg bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm"
                                     >
-                                      {lang}
+                                      {lang.language_name} ({lang.proficiency_level})
                                     </span>
                                   ))
                                 ) : (
                                   <span className="text-slate-500">Не вказано</span>
+                                )}
+                              </div>
+                            )}
+                            {isEditing && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {formData.user_languages?.length ? (
+                                  formData.user_languages.map((lang) => (
+                                    <span
+                                      key={lang.name}
+                                      className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-medium text-orange-700"
+                                    >
+                                      {lang.name} ({lang.proficiency_level})
+                                      <button
+                                        className="text-orange-500 transition hover:text-orange-700"
+                                        type="button"
+                                        onClick={() => removeLanguage(lang.name)}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-sm text-slate-500">Мови ще не додані</span>
                                 )}
                               </div>
                             )}
@@ -742,30 +1156,64 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                           <div className="flex-1">
                             <p className="text-xs text-slate-500">Посилання</p>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={formData.links?.join(", ") || ""}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    links: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-                                  })
-                                }
-                                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
-                                placeholder="LinkedIn, GitHub, Portfolio..."
-                              />
+                              <div className="space-y-3">
+                                <div className="flex gap-1">
+                                  <input
+                                    type="text"
+                                    value={linkTitle}
+                                    onChange={(e) => setLinkTitle(e.target.value)}
+                                    className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="Назва"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    className="w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:border-orange-500 focus:outline-none"
+                                    placeholder="URL"
+                                  />
+                                  <button
+                                    onClick={addLink}
+                                    className="rounded-lg bg-orange-500 px-2 py-1.5 text-sm font-medium text-white transition hover:bg-orange-600 whitespace-nowrap"
+                                    type="button"
+                                  >
+                                    Додати
+                                  </button>
+                                </div>
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {formData.user_links?.length ? (
+                                    formData.user_links.map((link) => (
+                                      <span
+                                        key={link.url}
+                                        className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-medium text-orange-700"
+                                      >
+                                        {link.title}
+                                        <button
+                                          className="text-orange-500 transition hover:text-orange-700"
+                                          type="button"
+                                          onClick={() => removeLink(link.url)}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </button>
+                                      </span>
+                                    ))
+                                  ) : (
+                                    <span className="text-sm text-slate-500">Посилання ще не додані</span>
+                                  )}
+                                </div>
+                              </div>
                             ) : (
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {profile?.links?.length ? (
-                                  profile.links.map((link, idx) => (
+                                {profile?.user_links?.length ? (
+                                  profile.user_links.map((link) => (
                                     <a
-                                      key={idx}
-                                      href={link.startsWith("http") ? link : `https://${link}`}
+                                      key={link.id}
+                                      href={link.url.startsWith("http") ? link.url : `https://${link.url}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="rounded-lg bg-orange-100 px-3 py-1 text-sm font-medium text-orange-600 hover:bg-orange-200 transition"
                                     >
-                                      {link.length > 20 ? link.substring(0, 20) + "..." : link}
+                                      {link.title}
                                     </a>
                                   ))
                                 ) : (
@@ -1239,7 +1687,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               </section>
             </div>
           ) : activeSection === "applications" ? (
-            <div className="space-y-6">
+            <div key="applications-section" className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative flex items-center justify-between gap-4">
                   <div>
@@ -1304,7 +1752,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               </section>
             </div>
           ) : activeSection === "saved" ? (
-            <div className="space-y-6">
+            <div key="saved-section" className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative">
                   <h1 className="text-3xl font-bold">Обрані вакансії</h1>
@@ -1312,7 +1760,61 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                 </div>
               </section>
               <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть ваші збережені вакансії...</p>
+                {savedVacanciesError && (
+                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {savedVacanciesError}
+                  </div>
+                )}
+                {savedVacanciesLoading ? (
+                  <div className="py-12 text-center text-slate-500">Завантаження...</div>
+                ) : savedVacancies.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500">
+                    <Star className="mx-auto mb-3 h-12 w-12 text-slate-300" />
+                    <p>У вас ще немає збережених вакансій</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {savedVacancies.map((saved) => (
+                      <div
+                        key={saved.id}
+                        className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-orange-300 hover:bg-orange-50/30"
+                      >
+                        <div className="flex-1">
+                          <div
+                            className="flex items-center gap-2 cursor-pointer hover:text-orange-600 transition"
+                            onClick={() => handleViewVacancy(saved)}
+                          >
+                            <h3 className="font-semibold text-slate-900">
+                              {saved.vacancy?.title ?? `Вакансія #${saved.vacancy_id}`}
+                            </h3>
+                          </div>
+                          {saved.note && (
+                            <p className="mt-2 text-sm text-slate-600">{saved.note}</p>
+                          )}
+                          <p className="mt-2 text-xs text-slate-500">
+                            Збережено: {new Date(saved.created_at).toLocaleDateString("uk-UA")}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => window.open(`/vacancies/${saved.vacancy_id}`, "_blank")}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-700"
+                            title="Перегляти вакансію"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveSavedVacancy(saved.id)}
+                            className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                            title="Видалити"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             </div>
           ) : activeSection === "notifications" ? (
@@ -1413,6 +1915,25 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
           )}
         </main>
       </div>
+
+      <VacancyModal
+        vacancy={selectedVacancy}
+        onClose={() => setSelectedVacancy(null)}
+        onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
+        isApplyDisabled={applications.some((app) => app.vacancy_id === selectedVacancy?.id)}
+        applicationStatus={applications.find((app) => app.vacancy_id === selectedVacancy?.id)?.status}
+      />
+      <ApplyModal
+        vacancy={applyVacancy}
+        resumes={resumes}
+        selectedResumeId={selectedResumeId}
+        coverLetter={coverLetter}
+        isSubmitting={isSubmittingApplication}
+        onResumeChange={setSelectedResumeId}
+        onCoverLetterChange={setCoverLetter}
+        onClose={closeApplyModal}
+        onSubmit={submitApplication}
+      />
     </div>
   )
 }

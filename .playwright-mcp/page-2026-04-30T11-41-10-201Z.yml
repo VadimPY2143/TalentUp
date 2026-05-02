@@ -1,0 +1,168 @@
+- generic [ref=e3]:
+  - generic [ref=e237]:
+    - banner [ref=e238]:
+      - generic [ref=e239]:
+        - link "TalentUp" [ref=e240] [cursor=pointer]:
+          - /url: /
+          - img "TalentUp" [ref=e241]
+        - navigation [ref=e242]:
+          - link "Знайти роботу" [ref=e243] [cursor=pointer]:
+            - /url: /jobs
+          - link "Повідомлення" [ref=e244] [cursor=pointer]:
+            - /url: /messages
+        - generic [ref=e245]:
+          - button [ref=e247] [cursor=pointer]:
+            - img [ref=e248]
+          - link "Кабінет" [ref=e251] [cursor=pointer]:
+            - /url: /dashboard
+          - button "Вийти" [ref=e252] [cursor=pointer]
+    - main [ref=e253]:
+      - generic [ref=e255]:
+        - generic [ref=e256]:
+          - generic [ref=e257]:
+            - paragraph [ref=e258]: TalentUp
+            - heading "Робота та найм в одному місці" [level=1] [ref=e259]
+            - paragraph [ref=e260]: Шукайте вакансії, знаходьте кандидатів, відстежуйте відгуки та спілкуйтеся в чаті без перемикання між сервісами.
+          - generic [ref=e261]:
+            - textbox "Посада, навички, компанія або локація" [ref=e262]
+            - button "Шукати вакансії" [ref=e263] [cursor=pointer]
+          - generic [ref=e264]:
+            - link "Короткий опис ШІ" [ref=e265] [cursor=pointer]:
+              - /url: /dashboard
+            - link "Чат роботодавець-працівник" [ref=e266] [cursor=pointer]:
+              - /url: /messages
+            - link "Статуси відгуків" [ref=e267] [cursor=pointer]:
+              - /url: /dashboard
+          - generic [ref=e268]:
+            - link "До пошуку вакансій" [ref=e269] [cursor=pointer]:
+              - /url: /jobs
+            - link "Мій кабінет" [ref=e270] [cursor=pointer]:
+              - /url: /dashboard
+        - complementary [ref=e271]:
+          - paragraph [ref=e272]: Market pulse
+          - heading "Операційна панель найму" [level=2] [ref=e273]
+          - generic [ref=e274]:
+            - generic [ref=e275]:
+              - paragraph [ref=e276]: Нові вакансії сьогодні
+              - paragraph [ref=e277]: "42"
+            - generic [ref=e278]:
+              - paragraph [ref=e279]: Нові резюме сьогодні
+              - paragraph [ref=e280]: "67"
+            - generic [ref=e281]:
+              - paragraph [ref=e282]: Середня конверсія відгуку
+              - paragraph [ref=e283]: 14%
+          - generic [ref=e284]:
+            - paragraph [ref=e285]: Pipeline
+            - generic [ref=e286]:
+              - generic [ref=e288]:
+                - generic [ref=e289]: Подано
+                - generic [ref=e290]: 100%
+              - generic [ref=e294]:
+                - generic [ref=e295]: Переглянуто
+                - generic [ref=e296]: 63%
+              - generic [ref=e300]:
+                - generic [ref=e301]: Інтерв'ю
+                - generic [ref=e302]: 29%
+              - generic [ref=e306]:
+                - generic [ref=e307]: Офер
+                - generic [ref=e308]: 11%
+      - generic [ref=e313]:
+        - generic [ref=e315]:
+          - paragraph [ref=e316]: Market pulse
+          - heading "Ринок найму в реальному часі" [level=2] [ref=e317]
+        - generic [ref=e318]:
+          - article [ref=e319]:
+            - paragraph [ref=e320]: Швидкість відповіді
+            - paragraph [ref=e321]: < 24 год
+            - paragraph [ref=e322]: Середній час до першого фідбеку на активні відгуки.
+          - article [ref=e323]:
+            - paragraph [ref=e324]: Прозорі вакансії
+            - paragraph [ref=e325]: 81%
+            - paragraph [ref=e326]: Частка вакансій з відкритим salary range та форматом роботи.
+          - article [ref=e327]:
+            - paragraph [ref=e328]: Активні діалоги
+            - paragraph [ref=e329]: 320+
+            - paragraph [ref=e330]: Розпочаті чати роботодавець-кандидат за поточний тиждень.
+      - generic [ref=e332]:
+        - generic [ref=e333]:
+          - paragraph [ref=e334]: How it works
+          - heading "Два сценарії, одна платформа" [level=2] [ref=e335]
+          - paragraph [ref=e336]: TalentUp побудований для швидкої взаємодії кандидатів і роботодавців без зайвої рутини.
+        - generic [ref=e337]:
+          - article [ref=e338]:
+            - heading "Для кандидата" [level=3] [ref=e339]
+            - generic [ref=e340]:
+              - generic [ref=e341]:
+                - generic [ref=e342]: "1"
+                - generic [ref=e343]:
+                  - paragraph [ref=e344]: Створіть резюме
+                  - paragraph [ref=e345]: Заповніть профіль, додайте PDF та позначте активне резюме для роботодавців.
+              - generic [ref=e346]:
+                - generic [ref=e347]: "2"
+                - generic [ref=e348]:
+                  - paragraph [ref=e349]: Знайдіть вакансії
+                  - paragraph [ref=e350]: Використовуйте пошук і фільтри за локацією, зарплатою, форматом та досвідом.
+              - generic [ref=e351]:
+                - generic [ref=e352]: "3"
+                - generic [ref=e353]:
+                  - paragraph [ref=e354]: Відстежуйте відгуки
+                  - paragraph [ref=e355]: Дивіться статуси заявок і спілкуйтеся з роботодавцем прямо в чаті.
+            - link "Перейти до вакансій" [ref=e356] [cursor=pointer]:
+              - /url: /jobs
+          - article [ref=e357]:
+            - heading "Для роботодавця" [level=3] [ref=e358]
+            - generic [ref=e359]:
+              - generic [ref=e360]:
+                - generic [ref=e361]: "1"
+                - generic [ref=e362]:
+                  - paragraph [ref=e363]: Створіть компанію
+                  - paragraph [ref=e364]: Оформіть профіль компанії з контактами та базовою інформацією для кандидатів.
+              - generic [ref=e365]:
+                - generic [ref=e366]: "2"
+                - generic [ref=e367]:
+                  - paragraph [ref=e368]: Опублікуйте вакансії
+                  - paragraph [ref=e369]: Створюйте вакансії вручну або за допомогою AI-заповнення чернетки.
+              - generic [ref=e370]:
+                - generic [ref=e371]: "3"
+                - generic [ref=e372]:
+                  - paragraph [ref=e373]: Працюйте з відгуками
+                  - paragraph [ref=e374]: Переглядайте резюме, зберігайте кандидатів і починайте діалог у чаті.
+            - link "Почати найм" [ref=e375] [cursor=pointer]:
+              - /url: /register?role=employer
+      - generic [ref=e377]:
+        - generic [ref=e378]:
+          - paragraph [ref=e379]: Core features
+          - heading "Що дає TalentUp вже зараз" [level=2] [ref=e380]
+        - generic [ref=e381]:
+          - article [ref=e382]:
+            - generic [ref=e383]: AI
+            - heading "AI-інструменти для найму" [level=3] [ref=e384]
+            - paragraph [ref=e385]: AI генерація вакансії допомагає швидко створити драфт, а AI-вижимка резюме дає короткий підсумок і сильні сторони кандидата.
+            - link "Спробувати AI-функції" [ref=e386] [cursor=pointer]:
+              - /url: /dashboard
+          - article [ref=e387]:
+            - generic [ref=e388]: CH
+            - heading "Вбудований чат" [level=3] [ref=e389]
+            - paragraph [ref=e390]: Починайте діалог між роботодавцем і кандидатом без сторонніх месенджерів та втрати контексту.
+            - link "Перейти в повідомлення" [ref=e391] [cursor=pointer]:
+              - /url: /messages
+          - article [ref=e392]:
+            - generic [ref=e393]: TR
+            - heading "Трекінг відгуків" [level=3] [ref=e394]
+            - paragraph [ref=e395]: "Контролюйте статуси заявок: подано, переглянуто, прийнято або відхилено в кабінеті користувача."
+            - link "Подивитись вакансії" [ref=e396] [cursor=pointer]:
+              - /url: /jobs
+      - generic [ref=e398]:
+        - heading "Час знайти наступну роботу" [level=2] [ref=e399]
+        - paragraph [ref=e400]: Оновіть резюме, відкрийте нові вакансії і відстежуйте всі відгуки в одному кабінеті.
+        - generic [ref=e401]:
+          - link "Знайти вакансії" [ref=e402] [cursor=pointer]:
+            - /url: /jobs
+          - link "Мій кабінет" [ref=e403] [cursor=pointer]:
+            - /url: /dashboard
+  - contentinfo [ref=e167]:
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - generic [ref=e170]: OK
+        - text: Перевірена платформа TalentUp
+      - generic [ref=e171]: © 2026 TalentUp. All rights reserved.

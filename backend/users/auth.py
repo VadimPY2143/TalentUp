@@ -5,7 +5,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from jose.exceptions import ExpiredSignatureError
 import bcrypt
-from fastapi import Depends, HTTPException, Response, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,8 +25,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 REFRESH_COOKIE_NAME = os.getenv("REFRESH_COOKIE_NAME", "refresh_token")
-REFRESH_COOKIE_SECURE = os.getenv("REFRESH_COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes", "on"}
-REFRESH_COOKIE_SAMESITE = os.getenv("REFRESH_COOKIE_SAMESITE", "lax")
+REFRESH_COOKIE_SECURE_RAW = (os.getenv("REFRESH_COOKIE_SECURE") or "auto").strip().lower()
+REFRESH_COOKIE_SAMESITE = (os.getenv("REFRESH_COOKIE_SAMESITE") or "lax").strip().lower()
 REFRESH_COOKIE_PATH = os.getenv("REFRESH_COOKIE_PATH", "/")
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -88,25 +88,54 @@ def get_refresh_token_expiry() -> datetime:
     return datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
 
-def set_refresh_cookie(response: Response, refresh_token: str) -> None:
+def _resolve_refresh_cookie_secure(request: Request | None) -> bool:
+    forwarded_proto = ""
+    if request is not None:
+        forwarded_proto = (request.headers.get("x-forwarded-proto") or "").split(",")[0].strip().lower()
+    request_scheme = request.url.scheme.lower() if request is not None else ""
+    is_https = forwarded_proto == "https" or request_scheme == "https"
+
+    if REFRESH_COOKIE_SECURE_RAW in {"1", "true", "yes", "on"}:
+        # A Secure cookie on plain HTTP is ignored by browsers.
+        return is_https
+
+    if REFRESH_COOKIE_SECURE_RAW in {"0", "false", "no", "off"}:
+        return False
+
+    return is_https
+
+
+def _resolve_refresh_cookie_samesite(secure: bool) -> str:
+    requested = REFRESH_COOKIE_SAMESITE if REFRESH_COOKIE_SAMESITE in {"lax", "strict", "none"} else "lax"
+    if requested == "none" and not secure:
+        # Browsers reject SameSite=None when Secure is not set.
+        return "lax"
+    return requested
+
+
+def set_refresh_cookie(response: Response, refresh_token: str, request: Request | None = None) -> None:
+    secure = _resolve_refresh_cookie_secure(request)
+    samesite = _resolve_refresh_cookie_samesite(secure)
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
         value=refresh_token,
         httponly=True,
-        secure=REFRESH_COOKIE_SECURE,
-        samesite=REFRESH_COOKIE_SAMESITE,
+        secure=secure,
+        samesite=samesite,
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path=REFRESH_COOKIE_PATH,
     )
 
 
-def clear_refresh_cookie(response: Response) -> None:
+def clear_refresh_cookie(response: Response, request: Request | None = None) -> None:
+    secure = _resolve_refresh_cookie_secure(request)
+    samesite = _resolve_refresh_cookie_samesite(secure)
     response.delete_cookie(
         key=REFRESH_COOKIE_NAME,
         path=REFRESH_COOKIE_PATH,
         httponly=True,
-        secure=REFRESH_COOKIE_SECURE,
-        samesite=REFRESH_COOKIE_SAMESITE,
+        secure=secure,
+        samesite=samesite,
     )
 
 

@@ -228,7 +228,7 @@ export default function PaymentTest() {
           <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-cyan-300/20 blur-3xl" />
           <div className="pointer-events-none absolute bottom-[-90px] right-24 h-52 w-52 rounded-full border border-white/15" />
 
-          <div className="relative grid gap-5 lg:grid-cols-[1.2fr,0.8fr]">
+          <div className="relative grid gap-5 lg:grid-cols-[1.5fr,0.5fr]">
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-white/70">TalentUp Credits</p>
               <h1 className="mt-3 font-display text-2xl font-semibold md:text-4xl">
@@ -251,39 +251,13 @@ export default function PaymentTest() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur-sm">
-              <p className="text-xs uppercase tracking-[0.24em] text-white/70">Ваш стан</p>
-              <div className="mt-3 space-y-3">
-                <div className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3">
-                  <span className="text-sm text-white/80">Поточний баланс</span>
-                  <span className="text-xl font-semibold">{formatNumber(balance)}</span>
+            <div className="flex items-center justify-center rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm">
+              <div className="text-center">
+                <p className="text-xs uppercase tracking-[0.24em] text-white/70">Ваш баланс</p>
+                <div className="mt-3 flex items-baseline justify-center gap-2">
+                  <span className="text-4xl font-semibold md:text-5xl">{formatNumber(balance)}</span>
+                  <span className="text-base text-white/80">кредитів</span>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl border border-orange-200/50 bg-orange-300/15 px-4 py-3">
-                  <span className="text-sm text-white/90">Бракує зараз</span>
-                  <span className="text-xl font-semibold">{formatNumber(missingCredits)}</span>
-                </div>
-                <div className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3">
-                  <span className="text-sm text-white/80">Для функції</span>
-                  <span className="text-sm font-semibold">{featureLabel ?? "Поповнення балансу"}</span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <button
-                  className="flex-1 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
-                  type="button"
-                  onClick={() => selectedPackage && void handlePurchase(selectedPackage)}
-                  disabled={!selectedPackage || processingCode !== null}
-                >
-                  {processingCode ? "Переадресація..." : "Поповнити кредити"}
-                </button>
-                <button
-                  className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
-                  type="button"
-                  onClick={handleBack}
-                >
-                  Назад
-                </button>
               </div>
             </div>
           </div>

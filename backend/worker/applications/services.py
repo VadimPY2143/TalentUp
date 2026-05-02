@@ -31,15 +31,6 @@ class ApplicationService:
         if not vacancy.get("is_active", False):
             raise HTTPException(status_code=400, detail="Vacancy is not active")
 
-        expires_at = vacancy.get("expires_at")
-        if isinstance(expires_at, datetime):
-            now_utc = datetime.now(timezone.utc)
-            expires_at_utc = expires_at if expires_at.tzinfo else expires_at.replace(
-                tzinfo=timezone.utc
-            )
-            if expires_at_utc <= now_utc:
-                raise HTTPException(status_code=400, detail="Vacancy has expired")
-
     @staticmethod
     def validate_application_status_transition(
         current_status: ApplicationStatus,

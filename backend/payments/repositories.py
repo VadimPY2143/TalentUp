@@ -128,3 +128,24 @@ class PaymentsRepository:
         )
         rows = (await session.execute(stmt)).mappings().all()
         return [dict(row) for row in rows]
+
+    async def list_pending_orders_for_user(
+        self,
+        session: AsyncSession,
+        *,
+        user_id: int,
+        provider: str = "wayforpay",
+        limit: int = 5,
+    ) -> list[dict[str, Any]]:
+        stmt = (
+            select(payment_orders_table)
+            .where(
+                payment_orders_table.c.user_id == user_id,
+                payment_orders_table.c.status == "pending",
+                payment_orders_table.c.provider == provider,
+            )
+            .order_by(payment_orders_table.c.id.desc())
+            .limit(limit)
+        )
+        rows = (await session.execute(stmt)).mappings().all()
+        return [dict(row) for row in rows]

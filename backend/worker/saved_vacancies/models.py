@@ -3,7 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from employer.vacancy.models import VacancyResponse
-from worker.applications.models import ApplicationStatus
 
 
 class SavedVacancyCreateIn(BaseModel):
@@ -22,8 +21,4 @@ class SavedVacancyOut(BaseModel):
     note: str | None = None
     created_at: datetime
     updated_at: datetime
-    is_applied: bool
-    application_id: int | None = None
-    application_status: ApplicationStatus | None = None
     vacancy: VacancyResponse
-
