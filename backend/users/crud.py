@@ -3,6 +3,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, 
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import (
+    ChangePasswordRequest,
     LanguageOption,
     RefreshRequest,
     Token,
@@ -24,8 +25,11 @@ from .auth import (
     clear_refresh_cookie,
     set_refresh_cookie,
 )
+from .repositories import UserSecurityRepository
+from .services import UserSecurityService
 
 router = APIRouter(tags=["users"])
+security_service = UserSecurityService(repository=UserSecurityRepository())
 
 
 @router.get("/languages", response_model=list[LanguageOption])
@@ -135,6 +139,26 @@ async def user_login(
     return Token(
         access_token=access_token,
         token_type="bearer",
+    )
+
+
+@router.post("/user/change-password", response_model=Token)
+async def change_password(
+    payload: ChangePasswordRequest,
+    response: Response,
+    session: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+) -> Token:
+    token_pair = await security_service.change_password(
+        session=session,
+        current_user=current_user,
+        current_password=payload.current_password.get_secret_value(),
+        new_password=payload.new_password.get_secret_value(),
+    )
+    set_refresh_cookie(response, token_pair.refresh_token)
+    return Token(
+        access_token=token_pair.access_token,
+        token_type=token_pair.token_type,
     )
 
 

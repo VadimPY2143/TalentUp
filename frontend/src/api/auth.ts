@@ -1,5 +1,11 @@
 import { apiFetch, refreshAccessTokenViaCookie } from "./client"
-import type { RegisterPayload, UserResponse, LoginPayload, TokenResponse } from "../types/auth"
+import type {
+  ChangePasswordPayload,
+  RegisterPayload,
+  UserResponse,
+  LoginPayload,
+  TokenResponse,
+} from "../types/auth"
 
 export const registerUser = (payload: RegisterPayload) => {
   return apiFetch<UserResponse>("/user/register", {
@@ -10,6 +16,13 @@ export const registerUser = (payload: RegisterPayload) => {
 
 export const loginUser = (payload: LoginPayload) => {
   return apiFetch<TokenResponse>("/user/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+}
+
+export const changePassword = (payload: ChangePasswordPayload) => {
+  return apiFetch<TokenResponse>("/user/change-password", {
     method: "POST",
     body: JSON.stringify(payload),
   })
