@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import user_profiles_table
+from database import refresh_tokens_table, user_profiles_table, users_table
 
 
 class UserProfileRepository:
@@ -52,3 +52,42 @@ class UserProfileRepository:
         )
         result = await session.execute(stmt)
         return result.scalar_one_or_none() is not None
+
+
+class UserSecurityRepository:
+    async def update_password_hash(
+        self,
+        session: AsyncSession,
+        user_id: int,
+        password_hash: str,
+    ) -> None:
+        await session.execute(
+            update(users_table)
+            .where(users_table.c.id == user_id)
+            .values(password=password_hash)
+        )
+
+    async def revoke_refresh_tokens(self, session: AsyncSession, user_id: int) -> None:
+        await session.execute(
+            update(refresh_tokens_table)
+            .where(
+                refresh_tokens_table.c.user_id == user_id,
+                refresh_tokens_table.c.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.utcnow())
+        )
+
+    async def create_refresh_token(
+        self,
+        session: AsyncSession,
+        user_id: int,
+        token_hash: str,
+        expires_at: datetime,
+    ) -> None:
+        await session.execute(
+            insert(refresh_tokens_table).values(
+                user_id=user_id,
+                token_hash=token_hash,
+                expires_at=expires_at,
+            )
+        )

@@ -44,6 +44,7 @@ import type { ApplicationStatus, JobApplication } from "../types/application"
 import Navbar from "./layout/Navbar"
 import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
+import PasswordSettingsPanel from "./worker/PasswordSettingsPanel"
 
 interface WorkerProfileProps {
   userEmail?: string
@@ -1342,9 +1343,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                   <p className="mt-2 text-white/80">Змініть пароль та налаштуйте сповіщення</p>
                 </div>
               </section>
-              <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть налаштування...</p>
-              </section>
+              <PasswordSettingsPanel />
             </div>
           ) : (
             <div className="space-y-6">
