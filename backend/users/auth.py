@@ -204,10 +204,9 @@ async def get_current_user_by_token(token: str, session: AsyncSession) -> dict:
         )
 
     return {
-        'id': user["id"],
-        'username': user["username"],
-        'email': user["email"],
-        'password': user["password"],
-        'credits': user["credits"],
-        'role': user["role"],
+        "id": user["id"],
+        "username": user["username"],
+        "email": user["email"],
+        "credits": user.get("credits"),
+        "role": user["role"],
     }
