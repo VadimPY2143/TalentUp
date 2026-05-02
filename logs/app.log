@@ -6173,3 +6173,15 @@ fastapi.exceptions.HTTPException: 400: Invalid amount in payment payload
 2026-05-02 10:17:39 - moodshare - INFO - User 6 connected to chat 11
 2026-05-02 10:17:40 - moodshare - INFO - User 6 disconnected from chat 11
 2026-05-02 10:17:40 - moodshare - INFO - User 6 connected to chat 9
+2026-05-02 11:44:36 - moodshare - INFO - User 6 disconnected from chat 9
+2026-05-02 16:03:40 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:03:41 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:04:55 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:04:57 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:05:58 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:06:10 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:06:23 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:13:53 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:13:54 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:14:06 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:14:18 - moodshare - INFO - User 6 connected to notifications ws

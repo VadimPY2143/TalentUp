@@ -54,6 +54,62 @@ class UserProfileRepository:
         result = await session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
+    async def get_user_languages(
+        self, session: AsyncSession, user_id: int
+    ) -> list[dict[str, Any]]:
+        stmt = (
+            select(
+                user_languages_table.c.id,
+                user_languages_table.c.language_id,
+                languages_table.c.name.label("language_name"),
+                user_languages_table.c.proficiency_level,
+            )
+            .select_from(user_languages_table)
+            .join(languages_table, user_languages_table.c.language_id == languages_table.c.id)
+            .where(user_languages_table.c.user_id == user_id)
+        )
+        result = await session.execute(stmt)
+        return [dict(row) for row in result.mappings().all()]
+
+    async def upsert_user_languages(
+        self, session: AsyncSession, user_id: int, languages: list[dict[str, Any]]
+    ) -> None:
+        # Delete existing languages for user
+        await session.execute(
+            delete(user_languages_table).where(user_languages_table.c.user_id == user_id)
+        )
+        # Insert new languages
+        if languages:
+            values = [
+                {
+                    "user_id": user_id,
+                    "language_id": lang["language_id"],
+                    "proficiency_level": lang["proficiency_level"],
+                }
+                for lang in languages
+            ]
+            await session.execute(insert(user_languages_table).values(values))
+
+    async def get_user_links(self, session: AsyncSession, user_id: int) -> list[dict[str, Any]]:
+        stmt = select(user_links_table).where(user_links_table.c.user_id == user_id)
+        result = await session.execute(stmt)
+        return [dict(row) for row in result.mappings().all()]
+
+    async def upsert_user_links(
+        self, session: AsyncSession, user_id: int, links: list[dict[str, Any]]
+    ) -> None:
+        # Delete existing links for user
+        await session.execute(
+            delete(user_links_table).where(user_links_table.c.user_id == user_id)
+        )
+        # Insert new links
+        if links:
+            values = [
+                {"user_id": user_id, "title": link["title"], "url": link["url"]}
+                for link in links
+            ]
+            await session.execute(insert(user_links_table).values(values))
+
 
 class UserSecurityRepository:
     async def update_password_hash(
