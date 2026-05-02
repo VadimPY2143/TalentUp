@@ -53,17 +53,10 @@ async def list_company_vacancies(
         if company_exists is None:
             raise HTTPException(status_code=404, detail="Company not found")
 
-        now_utc = datetime.now(timezone.utc)
         stmt = (
             select(vacancies_table)
             .where(vacancies_table.c.company_id == company_id)
             .where(vacancies_table.c.is_active.is_(True))
-            .where(
-                or_(
-                    vacancies_table.c.expires_at.is_(None),
-                    vacancies_table.c.expires_at > now_utc,
-                )
-            )
             .order_by(vacancies_table.c.created_at.desc(), vacancies_table.c.id.desc())
         )
 
@@ -234,7 +227,6 @@ async def delete_vacancy_by_id(
             )
             .values(
                 is_active=False,
-                expires_at=now_utc,
                 updated_at=now_utc,
             )
             .returning(vacancies_table.c.id)

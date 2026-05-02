@@ -19,7 +19,6 @@ class Vacancy(BaseModel):
     experience_years_min: Optional[int] = Field(default=None, ge=0)
     experience_years_max: Optional[int] = Field(default=None, ge=0)
     work_format: Optional[list[str]] = None
-    expires_at: Optional[datetime] = None
 
 
 class VacancyAIFillRequest(BaseModel):
@@ -41,7 +40,6 @@ class VacancyUpdate(BaseModel):
     experience_years_min: Optional[int] = Field(default=None, ge=0)
     experience_years_max: Optional[int] = Field(default=None, ge=0)
     work_format: Optional[list[str]] = None
-    expires_at: Optional[datetime] = None
 
 
 class VacancyResponse(Vacancy):

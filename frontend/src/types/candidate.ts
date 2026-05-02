@@ -40,4 +40,5 @@ export interface CandidateSearchItem {
 export interface CandidateSearchResponse {
   total: number
   items: CandidateSearchItem[]
+  has_more?: boolean
 }

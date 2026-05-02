@@ -24,6 +24,7 @@ interface VacancySearchParams {
 interface VacancySearchResponse {
   items: VacancyResponse[]
   total: number
+  has_more: boolean
 }
 
 const appendParam = (
@@ -78,9 +79,13 @@ export const searchVacancies = async (
 ): Promise<VacancySearchResponse> => {
   const query = buildVacancySearchParams(payload)
   const path = query ? `/vacancy_search?${query}` : "/vacancy_search"
-  const data = await apiFetch<{ vacancies: VacancyResponse[] }>(path, { signal })
+  const data = await apiFetch<{ vacancies: VacancyResponse[]; total?: number }>(path, { signal })
   const items = data?.vacancies ?? []
-  return { total: items.length, items }
+  const total = typeof data?.total === "number" ? data.total : items.length
+  const pageSize = payload.page_size ?? items.length
+  const page = payload.page ?? 1
+  const hasMore = total > page * pageSize
+  return { total, items, has_more: hasMore }
 }
 
 export const getVacancyById = (vacancyId: number) => {
@@ -109,12 +114,15 @@ export const fetchRecommendedVacancies = async (
     }
   }
 
-  const data = await apiFetch<{ vacancies: VacancyResponse[] }>(
+  const data = await apiFetch<{ vacancies: VacancyResponse[]; total?: number }>(
     `/vacancy_search/recommendations?${params.toString()}`,
     { signal },
   )
   const items = data?.vacancies ?? []
-  return { total: items.length, items }
+  const page = Math.floor(offset / limit) + 1
+  const total = typeof data?.total === "number" ? data.total : ((page - 1) * limit) + items.length
+  const hasMore = total > page * limit
+  return { total, items, has_more: hasMore }
 }
 
 export const listCompanyVacancies = (companyId: number) => {

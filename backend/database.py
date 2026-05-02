@@ -93,7 +93,7 @@ users_table = Table(
     'users',
     metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('username', String(50), unique=True, nullable=False),
+    Column('username', String(50), unique=False, nullable=False),
     Column('email', String(255), unique=True, nullable=False),
     Column('password', String(255), nullable=False),
     Column('credits', Integer, nullable=False, default=50, server_default='0'),
@@ -337,7 +337,6 @@ vacancies_table = Table(
     Column('experience_years_min', Integer),
     Column('experience_years_max', Integer),
     Column('work_format', ARRAY(String(50))),
-    Column('expires_at', DateTime(timezone=True)),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
     Column(
         'updated_at',

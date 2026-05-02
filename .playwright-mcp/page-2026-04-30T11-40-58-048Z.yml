@@ -1,0 +1,35 @@
+- generic [ref=e3]:
+  - generic [ref=e206]:
+    - generic [ref=e207]:
+      - link "TalentUp" [ref=e208] [cursor=pointer]:
+        - /url: /
+        - img "TalentUp" [ref=e209]
+      - generic [ref=e210]:
+        - heading "Працюй там, де тебе цінують" [level=1] [ref=e211]
+        - list [ref=e212]:
+          - listitem [ref=e213]: 10 000+ кандидатів
+          - listitem [ref=e214]: Прозорий найм
+          - listitem [ref=e215]: Швидкий старт
+      - paragraph [ref=e216]: TalentUp Career Platform
+    - generic [ref=e218]:
+      - heading "Увійти в акаунт" [level=2] [ref=e219]
+      - generic [ref=e220]:
+        - textbox "Email" [ref=e221]
+        - textbox "Пароль" [ref=e222]
+        - link "Забули пароль?" [ref=e223] [cursor=pointer]:
+          - /url: /
+        - button "Увійти" [ref=e224] [cursor=pointer]
+      - generic [ref=e225]: або
+      - button "Продовжити з Google" [ref=e229] [cursor=pointer]:
+        - img [ref=e230]
+        - text: Продовжити з Google
+      - generic [ref=e235]:
+        - text: Немає акаунту?
+        - link "Зареєструватися" [ref=e236] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e167]:
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - generic [ref=e170]: OK
+        - text: Перевірена платформа TalentUp
+      - generic [ref=e171]: © 2026 TalentUp. All rights reserved.

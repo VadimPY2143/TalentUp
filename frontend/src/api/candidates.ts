@@ -60,7 +60,13 @@ export const searchCandidates = async (
   const path = query ? `/resume_search?${query}` : "/resume_search"
   const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(path, { signal })
   const items = data?.resumes ?? []
-  return { total: items.length, items }
+  const pageSize = payload.page_size
+  const page = payload.page ?? 1
+  const hasMore = pageSize !== undefined && items.length === pageSize
+  const estimatedTotal = pageSize
+    ? (hasMore ? (page * pageSize) + 1 : ((page - 1) * pageSize) + items.length)
+    : items.length
+  return { total: estimatedTotal, items, has_more: hasMore }
 }
 
 export const fetchRecommendedCandidates = async (
@@ -91,7 +97,10 @@ export const fetchRecommendedCandidates = async (
     { signal },
   )
   const items = data?.resumes ?? []
-  return { total: items.length, items }
+  const page = Math.floor(offset / limit) + 1
+  const hasMore = items.length === limit
+  const estimatedTotal = hasMore ? (page * limit) + 1 : ((page - 1) * limit) + items.length
+  return { total: estimatedTotal, items, has_more: hasMore }
 }
 
 export const openCandidateResume = async (resumeId: number): Promise<void> => {

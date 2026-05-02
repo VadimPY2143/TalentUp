@@ -74,15 +74,12 @@ const NotificationBell = () => {
       
       setError(null)
       try {
-        console.log(`Loading notifications: mode=${mode}, cursor=${cursorRef.current}`)
         const data = await listNotifications(10, mode === "more" ? cursorRef.current : null)
         const next = data?.notifications ?? []
-        console.log(`Loaded ${next.length} notifications, next_cursor=${data?.next_cursor}`)
         setNotifications((prev) => (mode === "more" ? [...prev, ...next] : next))
         setCursor(data?.next_cursor ?? null)
         setHasMore(Boolean(data?.next_cursor))
       } catch (e) {
-        console.error("Failed to load notifications:", e)
         setError(e instanceof Error ? e.message : "Не вдалося завантажити сповіщення")
       } finally {
         setLoading(false)
@@ -115,26 +112,22 @@ const NotificationBell = () => {
     wsRef.current = ws
 
     ws.onopen = () => {
-      console.log("WebSocket connected for notifications")
+      // WebSocket connected
     }
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-        console.log("Received notification via WebSocket:", data)
-        // Don't reload to preserve cursor for pagination
-        // User can close and reopen dropdown to see new notifications
       } catch (error) {
-        console.error("Failed to parse WebSocket message:", error)
       }
     }
 
     ws.onerror = (error) => {
-      console.error("WebSocket error:", error)
+      // WebSocket error
     }
 
     ws.onclose = () => {
-      console.log("WebSocket disconnected")
+      // WebSocket disconnected
     }
 
     return () => {

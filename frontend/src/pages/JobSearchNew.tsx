@@ -86,7 +86,7 @@ interface ApplyModalProps {
   onSubmit: () => void
 }
 
-const PAGE_SIZE = 6
+const PAGE_SIZE = 4
 
 const employmentTypeOptions = [
   { value: "Full-time", label: "Full-time" },
@@ -255,7 +255,7 @@ const FiltersPanel = ({
   onCitySelect,
   onClear,
 }: FiltersPanelProps) => (
-  <aside className="h-full rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
+  <aside className="h-fit self-start rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Фільтри</p>
@@ -270,13 +270,13 @@ const FiltersPanel = ({
       </button>
     </div>
 
-    <div className="mt-5 space-y-4 text-sm text-slate-700">
+    <div className="mt-4 space-y-3 text-sm text-slate-700">
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Локація
         </label>
         <CityAutocomplete
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
           placeholder="Оберіть місто"
           value={filters.location}
           onChange={(value) => onUpdateField("location", value)}
@@ -290,14 +290,14 @@ const FiltersPanel = ({
         </label>
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="Від"
             type="number"
             value={filters.yearsExperienceMin}
             onChange={(event) => onUpdateField("yearsExperienceMin", event.target.value)}
           />
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="До"
             type="number"
             value={filters.yearsExperienceMax}
@@ -312,14 +312,14 @@ const FiltersPanel = ({
         </label>
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="Від"
             type="number"
             value={filters.salaryMin}
             onChange={(event) => onUpdateField("salaryMin", event.target.value)}
           />
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="До"
             type="number"
             value={filters.salaryMax}
@@ -327,7 +327,7 @@ const FiltersPanel = ({
           />
         </div>
         <select
-          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-orange-400/70"
           value={filters.salaryCurrency}
           onChange={(event) => onUpdateField("salaryCurrency", event.target.value)}
         >

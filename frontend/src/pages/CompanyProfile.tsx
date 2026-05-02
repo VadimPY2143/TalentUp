@@ -72,17 +72,7 @@ const getCompanyInitials = (name: string) => {
 }
 
 const isVisibleWorkerVacancy = (vacancy: VacancyResponse) => {
-  if (!vacancy.is_active) {
-    return false
-  }
-  if (!vacancy.expires_at) {
-    return true
-  }
-  const expiration = Date.parse(vacancy.expires_at)
-  if (Number.isNaN(expiration)) {
-    return true
-  }
-  return expiration > Date.now()
+  return vacancy.is_active
 }
 
 const getVacancyBadges = (vacancy: VacancyResponse) => {

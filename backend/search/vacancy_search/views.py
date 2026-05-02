@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import insert, or_, select
+from sqlalchemy import func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cities.service import CityService
@@ -26,16 +26,7 @@ router = APIRouter(tags=["vacancy_search"])
 
 
 def _is_open_vacancy_for_worker(vacancy: dict[str, Any]) -> bool:
-    if vacancy.get("is_active") is not True:
-        return False
-
-    expires_at = vacancy.get("expires_at")
-    if not isinstance(expires_at, datetime):
-        return True
-
-    now_utc = datetime.now(timezone.utc)
-    expires_at_utc = expires_at if expires_at.tzinfo else expires_at.replace(tzinfo=timezone.utc)
-    return expires_at_utc > now_utc
+    return vacancy.get("is_active") is True
 
 
 def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
@@ -48,6 +39,30 @@ def _build_vacancy_conditions(tokens: list[str]) -> list[Any]:
         conditions.append(vacancies_table.c.responsibilities.ilike(pattern))
         conditions.append(vacancies_table.c.location.ilike(pattern))
     return conditions
+
+
+async def _load_vacancies_with_total(
+    *,
+    session: AsyncSession,
+    filters: VacancySearchFilters,
+    conditions: list[Any],
+    limit: int,
+    offset: int,
+) -> tuple[list[dict[str, Any]], int]:
+    base_stmt = select(vacancies_table).where(vacancies_table.c.is_active.is_(True)).where(or_(*conditions))
+    base_stmt = apply_vacancy_search_filters(base_stmt, filters)
+
+    count_stmt = select(func.count()).select_from(base_stmt.order_by(None).subquery())
+    total = int((await session.execute(count_stmt)).scalar_one() or 0)
+
+    rows_stmt = (
+        base_stmt.order_by(vacancies_table.c.updated_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows_result = await session.execute(rows_stmt)
+    vacancies = [dict(row) for row in rows_result.mappings().all()]
+    return vacancies, total
 
 
 async def get_vacancy_search_filters(
@@ -112,7 +127,7 @@ async def search_vacancy(
     term = vacancy_name.strip()
     tokens = [token for token in term.split() if len(token) >= 2]
     if not tokens:
-        return {"vacancies": []}
+        return {"vacancies": [], "total": 0}
 
     history_stmt = insert(vacancies_search_history_table).values(
         user_id=current_user["id"],
@@ -122,18 +137,14 @@ async def search_vacancy(
     await session.commit()
 
     conditions = _build_vacancy_conditions(tokens)
-    stmt = select(vacancies_table)
-    stmt = apply_vacancy_search_filters(stmt, filters)
-    stmt = (
-        stmt.where(vacancies_table.c.is_active.is_(True))
-        .where(or_(*conditions))
-        .order_by(vacancies_table.c.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+    vacancies, total = await _load_vacancies_with_total(
+        session=session,
+        filters=filters,
+        conditions=conditions,
+        limit=limit,
+        offset=offset,
     )
-    result = await session.execute(stmt)
-    vacancies = [dict(row) for row in result.mappings().all()]
-    return {"vacancies": vacancies}
+    return {"vacancies": vacancies, "total": total}
 
 
 @router.get("/vacancy_search/vacancy/{vacancy_id}")
@@ -225,18 +236,14 @@ async def vacancy_recommendations(
 
     tokens = [token for token in str(term).split() if len(token) >= 2]
     if not tokens:
-        return {"vacancies": []}
+        return {"vacancies": [], "total": 0}
 
     conditions = _build_vacancy_conditions(tokens)
-    stmt = select(vacancies_table)
-    stmt = apply_vacancy_search_filters(stmt, filters)
-    stmt = (
-        stmt.where(vacancies_table.c.is_active.is_(True))
-        .where(or_(*conditions))
-        .order_by(vacancies_table.c.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+    vacancies, total = await _load_vacancies_with_total(
+        session=session,
+        filters=filters,
+        conditions=conditions,
+        limit=limit,
+        offset=offset,
     )
-    result = await session.execute(stmt)
-    vacancies = [dict(row) for row in result.mappings().all()]
-    return {"vacancies": vacancies}
+    return {"vacancies": vacancies, "total": total}

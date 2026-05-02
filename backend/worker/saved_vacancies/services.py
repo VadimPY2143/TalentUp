@@ -49,7 +49,6 @@ class SavedVacancyService:
                 vacancies_table.c.experience_years_min.label("vacancy_experience_years_min"),
                 vacancies_table.c.experience_years_max.label("vacancy_experience_years_max"),
                 vacancies_table.c.work_format.label("vacancy_work_format"),
-                vacancies_table.c.expires_at.label("vacancy_expires_at"),
                 vacancies_table.c.created_at.label("vacancy_created_at"),
                 vacancies_table.c.updated_at.label("vacancy_updated_at"),
             )
@@ -82,7 +81,6 @@ class SavedVacancyService:
             experience_years_min=row.get("vacancy_experience_years_min"),
             experience_years_max=row.get("vacancy_experience_years_max"),
             work_format=row.get("vacancy_work_format"),
-            expires_at=row.get("vacancy_expires_at"),
             created_at=row["vacancy_created_at"],
             updated_at=row["vacancy_updated_at"],
         )
