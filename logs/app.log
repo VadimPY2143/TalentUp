@@ -6185,3 +6185,26 @@ fastapi.exceptions.HTTPException: 400: Invalid amount in payment payload
 2026-05-02 16:13:54 - moodshare - INFO - User 6 connected to notifications ws
 2026-05-02 16:14:06 - moodshare - INFO - User 6 connected to notifications ws
 2026-05-02 16:14:18 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:20:34 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:20:34 - moodshare - INFO - User 6 connected to chat 15
+2026-05-02 16:20:40 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-02 16:20:40 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:20:46 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:21:27 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-02 16:21:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:21:34 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:21:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:21:36 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:57:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:57:04 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:57:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:57:08 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 16:57:40 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 8
+2026-05-02 16:57:40 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-05-02 16:57:56 - moodshare - INFO - Candidate batch rerank finished: 8/8 results
+2026-05-02 16:59:40 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:01:35 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:01:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:01:51 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 6
+2026-05-02 17:01:51 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
+2026-05-02 17:02:08 - moodshare - INFO - Candidate batch rerank finished: 6/6 results

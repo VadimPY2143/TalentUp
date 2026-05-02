@@ -45,7 +45,7 @@ class _SessionBeginStub:
     async def __aenter__(self) -> None:
         return None
 
-    async def __aexit__(self, exc_type, exc, tb) -> bool:  # type: ignore[no-untyped-def]
+    async def __aexit__(self, exc_type, exc, tb) -> bool:
         del exc_type, exc, tb
         return False
 
@@ -63,9 +63,16 @@ class _SessionStub:
 
 
 class _RepositoryStub:
-    def __init__(self, vacancy: dict[str, object], candidates: list[dict[str, object]]) -> None:
+    def __init__(
+        self,
+        vacancy: dict[str, object],
+        candidates: list[dict[str, object]],
+        cached_rows: list[dict[str, object]] | None = None,
+    ) -> None:
         self._vacancy = vacancy
         self._candidates = candidates
+        self._cached_rows = cached_rows or []
+        self.upsert_calls: list[dict[str, object]] = []
 
     async def get_owned_vacancy(
         self,
@@ -84,6 +91,42 @@ class _RepositoryStub:
     ) -> list[dict[str, object]]:
         del session, vacancy
         return list(self._candidates)
+
+    async def get_cached_ai_results(
+        self,
+        session: object,
+        *,
+        vacancy_id: int,
+        vacancy_signature: str,
+        application_ids: list[int],
+    ) -> list[dict[str, object]]:
+        del session, vacancy_id
+        allowed_ids = set(application_ids)
+        return [
+            row
+            for row in self._cached_rows
+            if int(row["application_id"]) in allowed_ids
+            and str(row.get("vacancy_signature") or vacancy_signature) == vacancy_signature
+        ]
+
+    async def upsert_cached_ai_results(
+        self,
+        session: object,
+        *,
+        vacancy_id: int,
+        vacancy_signature: str,
+        model_name: str,
+        cache_rows: list[dict[str, object]],
+    ) -> None:
+        del session
+        self.upsert_calls.append(
+            {
+                "vacancy_id": vacancy_id,
+                "vacancy_signature": vacancy_signature,
+                "model_name": model_name,
+                "cache_rows": list(cache_rows),
+            }
+        )
 
 
 def _build_candidate(application_id: int, score_sql_hint: int) -> dict[str, object]:
@@ -123,8 +166,10 @@ def _install_common_task_stubs(
     monkeypatch: pytest.MonkeyPatch,
     vacancy: dict[str, object],
     candidates: list[dict[str, object]],
+    *,
+    cached_rows: list[dict[str, object]] | None = None,
 ) -> tuple[AsyncMock, AsyncMock]:
-    repository_stub = _RepositoryStub(vacancy=vacancy, candidates=candidates)
+    repository_stub = _RepositoryStub(vacancy=vacancy, candidates=candidates, cached_rows=cached_rows)
     charge_mock = AsyncMock(return_value=4)
     refund_mock = AsyncMock()
     monkeypatch.setattr(matching_tasks, "CandidateMatchingRepository", lambda: repository_stub)
@@ -392,3 +437,185 @@ async def test_run_candidate_matching_falls_back_to_sql_when_credits_are_insuffi
     assert refund_mock.await_count == 0
     assert payload["status"] == "done"
     assert {row["score_total"] for row in payload["result"]} == {55, 65}
+
+
+@pytest.mark.asyncio
+async def test_run_candidate_matching_reuses_all_cached_ai_results_without_new_charge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vacancy = _build_vacancy()
+    candidates = [
+        _build_candidate(application_id=11, score_sql_hint=60),
+        _build_candidate(application_id=22, score_sql_hint=70),
+    ]
+    app_signature_11 = matching_tasks._build_application_signature(candidates[0])
+    app_signature_22 = matching_tasks._build_application_signature(candidates[1])
+    cached_rows = [
+        {
+            "application_id": 11,
+            "application_signature": app_signature_11,
+            "score_total": 80,
+            "verdict": "match",
+            "summary": "Cached AI result for candidate 11.",
+            "model_name": "openrouter/free",
+            "analyzed_at": "2026-05-01T10:00:00+00:00",
+        },
+        {
+            "application_id": 22,
+            "application_signature": app_signature_22,
+            "score_total": 90,
+            "verdict": "strong_match",
+            "summary": "Cached AI result for candidate 22.",
+            "model_name": "openrouter/free",
+            "analyzed_at": "2026-05-01T10:00:00+00:00",
+        },
+    ]
+    charge_mock, refund_mock = _install_common_task_stubs(
+        monkeypatch,
+        vacancy,
+        candidates,
+        cached_rows=cached_rows,
+    )
+    rerank_mock = AsyncMock()
+    monkeypatch.setattr(matching_tasks, "rerank_candidates", rerank_mock)
+
+    payload = await matching_tasks._run_candidate_matching(
+        job_id="job-5",
+        vacancy_id=55,
+        employer_user_id=7,
+        requested_limit=2,
+    )
+
+    assert charge_mock.await_count == 0
+    assert rerank_mock.await_count == 0
+    assert refund_mock.await_count == 0
+    assert payload["status"] == "done"
+    by_application_id = {row["application_id"]: row for row in payload["result"]}
+    assert by_application_id[11]["score_total"] == 74
+    assert by_application_id[22]["score_total"] == 84
+
+
+@pytest.mark.asyncio
+async def test_run_candidate_matching_processes_only_uncached_candidates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vacancy = _build_vacancy()
+    candidates = [
+        _build_candidate(application_id=11, score_sql_hint=50),
+        _build_candidate(application_id=22, score_sql_hint=80),
+    ]
+    cached_rows = [
+        {
+            "application_id": 11,
+            "application_signature": matching_tasks._build_application_signature(candidates[0]),
+            "score_total": 70,
+            "verdict": "match",
+            "summary": "Cached AI result for candidate 11.",
+            "model_name": "openrouter/free",
+            "analyzed_at": "2026-05-01T10:00:00+00:00",
+        }
+    ]
+    charge_mock, refund_mock = _install_common_task_stubs(
+        monkeypatch,
+        vacancy,
+        candidates,
+        cached_rows=cached_rows,
+    )
+    rerank_mock = AsyncMock(
+        return_value={
+            22: CandidateRerankOutput(
+                score_total=85,
+                confidence=0.8,
+                verdict="strong_match",
+                matched_skills=["Python"],
+                missing_skills=[],
+                strengths=["Strong async backend profile"],
+                risks=[],
+                summary="Fresh AI result for candidate 22.",
+            )
+        }
+    )
+    monkeypatch.setattr(matching_tasks, "rerank_candidates", rerank_mock)
+
+    payload = await matching_tasks._run_candidate_matching(
+        job_id="job-6",
+        vacancy_id=55,
+        employer_user_id=7,
+        requested_limit=2,
+    )
+
+    assert charge_mock.await_count == 1
+    assert charge_mock.await_args.kwargs["analyzed_candidates"] == 1
+    assert rerank_mock.await_count == 1
+    reranked_candidates = rerank_mock.await_args.args[1]
+    assert len(reranked_candidates) == 1
+    assert reranked_candidates[0]["application_id"] == 22
+    assert refund_mock.await_count == 1
+    assert refund_mock.await_args.kwargs["amount"] == 2
+    assert payload["status"] == "done"
+
+
+@pytest.mark.asyncio
+async def test_run_candidate_matching_ignores_cache_when_vacancy_signature_changed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    vacancy = _build_vacancy()
+    candidates = [
+        _build_candidate(application_id=11, score_sql_hint=52),
+        _build_candidate(application_id=22, score_sql_hint=62),
+    ]
+    cached_rows = [
+        {
+            "application_id": 11,
+            "vacancy_signature": "stale-vacancy-signature",
+            "application_signature": matching_tasks._build_application_signature(candidates[0]),
+            "score_total": 95,
+            "verdict": "strong_match",
+            "summary": "Stale cache must not be reused.",
+            "model_name": "openrouter/free",
+            "analyzed_at": "2026-05-01T10:00:00+00:00",
+        }
+    ]
+    charge_mock, _ = _install_common_task_stubs(
+        monkeypatch,
+        vacancy,
+        candidates,
+        cached_rows=cached_rows,
+    )
+    rerank_mock = AsyncMock(
+        return_value={
+            11: CandidateRerankOutput(
+                score_total=60,
+                confidence=0.7,
+                verdict="match",
+                matched_skills=["Python"],
+                missing_skills=[],
+                strengths=["Fresh run"],
+                risks=[],
+                summary="Fresh analysis for candidate 11.",
+            ),
+            22: CandidateRerankOutput(
+                score_total=75,
+                confidence=0.7,
+                verdict="match",
+                matched_skills=["FastAPI"],
+                missing_skills=[],
+                strengths=["Fresh run"],
+                risks=[],
+                summary="Fresh analysis for candidate 22.",
+            ),
+        }
+    )
+    monkeypatch.setattr(matching_tasks, "rerank_candidates", rerank_mock)
+
+    payload = await matching_tasks._run_candidate_matching(
+        job_id="job-7",
+        vacancy_id=55,
+        employer_user_id=7,
+        requested_limit=2,
+    )
+
+    assert charge_mock.await_count == 1
+    assert charge_mock.await_args.kwargs["analyzed_candidates"] == 2
+    assert rerank_mock.await_count == 1
+    assert payload["status"] == "done"

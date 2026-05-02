@@ -217,3 +217,74 @@
 2026-04-23 22:33:05 - moodshare - INFO - Currency: UAH
 2026-04-23 22:33:05 - moodshare - INFO - Transaction status: Approved (normalized: success)
 2026-04-23 22:33:05 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-05-02 19:52:04 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 2
+2026-05-02 19:52:04 - moodshare - INFO - Candidate batch rerank finished: 2/2 results
+2026-05-02 19:52:04 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 1
+2026-05-02 19:52:15 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 2
+2026-05-02 19:52:15 - moodshare - INFO - Candidate batch rerank finished: 2/2 results
+2026-05-02 19:52:15 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 1
+2026-05-02 19:52:15 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-05-02 19:52:15 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-02 19:52:15 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 19:52:15 - moodshare - INFO - Order reference: wfp_order_1
+2026-05-02 19:52:15 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-05-02 19:52:15 - moodshare - INFO - Verifying callback signature...
+2026-05-02 19:52:15 - moodshare - INFO - Signature verified successfully
+2026-05-02 19:52:15 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-05-02 19:52:15 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-05-02 19:52:15 - moodshare - INFO - Currency: UAH
+2026-05-02 19:52:15 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-02 19:52:15 - moodshare - INFO - Callback status Approved, checking status before crediting...
+2026-05-02 19:52:15 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 19:52:15 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-05-02 19:52:15 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-05-02 19:52:15 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-05-02 19:52:15 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-05-02 19:52:15 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-02 19:52:15 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 19:52:15 - moodshare - INFO - Order reference: wfp_order_1
+2026-05-02 19:52:15 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-05-02 19:52:15 - moodshare - INFO - Verifying callback signature...
+2026-05-02 19:52:15 - moodshare - INFO - Signature verified successfully
+2026-05-02 19:52:15 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-05-02 19:52:15 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-05-02 19:52:15 - moodshare - INFO - Currency: UAH
+2026-05-02 19:52:15 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-02 19:52:15 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-05-02 19:59:03 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 2
+2026-05-02 19:59:03 - moodshare - INFO - Candidate batch rerank finished: 2/2 results
+2026-05-02 19:59:03 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 1
+2026-05-02 20:01:12 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 2
+2026-05-02 20:01:12 - moodshare - INFO - Candidate batch rerank finished: 2/2 results
+2026-05-02 20:01:12 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 1
+2026-05-02 20:01:18 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 2
+2026-05-02 20:01:18 - moodshare - INFO - Candidate batch rerank finished: 2/2 results
+2026-05-02 20:01:18 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 1
+2026-05-02 20:01:18 - moodshare - INFO - WFP idempotent order reuse order_id=11 provider_order_id=wfp_existing user_id=7
+2026-05-02 20:01:18 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-02 20:01:18 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 20:01:18 - moodshare - INFO - Order reference: wfp_order_1
+2026-05-02 20:01:18 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-05-02 20:01:18 - moodshare - INFO - Verifying callback signature...
+2026-05-02 20:01:18 - moodshare - INFO - Signature verified successfully
+2026-05-02 20:01:18 - moodshare - INFO - Order found: id=17, status=pending, user_id=7
+2026-05-02 20:01:18 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-05-02 20:01:18 - moodshare - INFO - Currency: UAH
+2026-05-02 20:01:18 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-02 20:01:18 - moodshare - INFO - Callback status Approved, checking status before crediting...
+2026-05-02 20:01:18 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 20:01:18 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-05-02 20:01:18 - moodshare - INFO - Applying credits to user_id=7, credits=50
+2026-05-02 20:01:18 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-05-02 20:01:18 - moodshare - INFO - WFP payment approved order_id=17 order_reference=wfp_order_1 check_status=Approved credits_applied=50
+2026-05-02 20:01:18 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-02 20:01:18 - moodshare - INFO - Webhook payload: {'merchantAccount': 'merchant_test', 'orderReference': 'wfp_order_1', 'amount': '249.00', 'currency': 'UAH', 'authCode': '123456', 'cardPan': '41****1111', 'transactionStatus': 'Approved', 'reasonCode': '1100', 'merchantSignature': 'sig'}
+2026-05-02 20:01:18 - moodshare - INFO - Order reference: wfp_order_1
+2026-05-02 20:01:18 - moodshare - INFO - Merchant account from payload: merchant_test, expected: merchant_test
+2026-05-02 20:01:18 - moodshare - INFO - Verifying callback signature...
+2026-05-02 20:01:18 - moodshare - INFO - Signature verified successfully
+2026-05-02 20:01:18 - moodshare - INFO - Order found: id=17, status=success, user_id=7
+2026-05-02 20:01:18 - moodshare - INFO - Amount check: callback=249.00, expected=249.00
+2026-05-02 20:01:18 - moodshare - INFO - Currency: UAH
+2026-05-02 20:01:18 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-02 20:01:18 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1

@@ -74,11 +74,9 @@ class UserProfileRepository:
     async def upsert_user_languages(
         self, session: AsyncSession, user_id: int, languages: list[dict[str, Any]]
     ) -> None:
-        # Delete existing languages for user
         await session.execute(
             delete(user_languages_table).where(user_languages_table.c.user_id == user_id)
         )
-        # Insert new languages
         if languages:
             values = [
                 {
@@ -98,11 +96,9 @@ class UserProfileRepository:
     async def upsert_user_links(
         self, session: AsyncSession, user_id: int, links: list[dict[str, Any]]
     ) -> None:
-        # Delete existing links for user
         await session.execute(
             delete(user_links_table).where(user_links_table.c.user_id == user_id)
         )
-        # Insert new links
         if links:
             values = [
                 {"user_id": user_id, "title": link["title"], "url": link["url"]}
