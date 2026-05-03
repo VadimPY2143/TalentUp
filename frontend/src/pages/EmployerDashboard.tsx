@@ -103,7 +103,6 @@ const currencyOptions = ["UAH", "USD"] as const
 const employmentTypeOptions = ["Full-time", "Part-time"] as const
 const workFormatOptions = ["Remote", "Hybrid", "Office"] as const
 const VACANCIES_PER_PAGE = 3
-const APPLICATIONS_PER_PAGE = 3
 
 const toText = (value: string) => {
   const normalized = value.trim()
@@ -429,7 +428,6 @@ const EmployerDashboard = () => {
   const [applicationsVacancyFilter, setApplicationsVacancyFilter] = useState<number | null>(null)
   const [showCandidateMatchPanel, setShowCandidateMatchPanel] = useState(false)
   const [candidateSectionsView, setCandidateSectionsView] = useState<"ai" | "all">("all")
-  const [applicationsPage, setApplicationsPage] = useState(1)
   const [matchRequestedLimit, setMatchRequestedLimit] = useState(10)
   const [isCandidateMatchingStarting, setIsCandidateMatchingStarting] = useState(false)
   const [isCandidateMatchingLoading, setIsCandidateMatchingLoading] = useState(false)
@@ -449,6 +447,8 @@ const EmployerDashboard = () => {
   const [aiDescription, setAiDescription] = useState("")
   const [isAIFilling, setIsAIFilling] = useState(false)
   const [showAIPromptEditor, setShowAIPromptEditor] = useState(false)
+  const [syncedTopPanelsHeight, setSyncedTopPanelsHeight] = useState<number | null>(null)
+  const companyProfilePanelRef = useRef<HTMLElement | null>(null)
   const aiTextareaRef = useRef<HTMLTextAreaElement | null>(null)
   const candidateMatchingPollingRef = useRef(false)
 
@@ -471,6 +471,40 @@ const EmployerDashboard = () => {
       document.body.style.overflow = previousOverflow
     }
   }, [selectedApplicationResume])
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof ResizeObserver === "undefined") {
+      return
+    }
+
+    const panel = companyProfilePanelRef.current
+    if (!panel) {
+      return
+    }
+
+    const syncPanelsHeight = () => {
+      if (window.innerWidth < 1024) {
+        setSyncedTopPanelsHeight(null)
+        return
+      }
+
+      const height = Math.ceil(panel.getBoundingClientRect().height)
+      setSyncedTopPanelsHeight((prev) => (prev === height ? prev : height))
+    }
+
+    syncPanelsHeight()
+
+    const observer = new ResizeObserver(() => {
+      syncPanelsHeight()
+    })
+    observer.observe(panel)
+    window.addEventListener("resize", syncPanelsHeight)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", syncPanelsHeight)
+    }
+  }, [])
 
   const loadCompany = async () => {
     try {
@@ -530,7 +564,6 @@ const EmployerDashboard = () => {
       setEmployerApplicationsError(null)
       const data = await listEmployerApplications(vacancyId)
       setEmployerApplications(data)
-      setApplicationsPage(1)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося завантажити відгуки"
       setEmployerApplicationsError(message)
@@ -811,13 +844,6 @@ const EmployerDashboard = () => {
   }, [vacancies.length, vacancyPage])
 
   useEffect(() => {
-    const maxPage = Math.max(1, Math.ceil(employerApplications.length / APPLICATIONS_PER_PAGE))
-    if (applicationsPage > maxPage) {
-      setApplicationsPage(maxPage)
-    }
-  }, [applicationsPage, employerApplications])
-
-  useEffect(() => {
     if (!company) {
       return
     }
@@ -1066,12 +1092,6 @@ const EmployerDashboard = () => {
   const vacancyPageStart = (vacancyPage - 1) * VACANCIES_PER_PAGE
   const paginatedVacancies = vacancies.slice(vacancyPageStart, vacancyPageStart + VACANCIES_PER_PAGE)
 
-  const totalApplicationsPages = Math.max(1, Math.ceil(employerApplications.length / APPLICATIONS_PER_PAGE))
-  const applicationsPageStart = (applicationsPage - 1) * APPLICATIONS_PER_PAGE
-  const paginatedApplications = employerApplications.slice(
-    applicationsPageStart,
-    applicationsPageStart + APPLICATIONS_PER_PAGE,
-  )
   const candidatesInSelectionCount = applicationsVacancyFilter ? employerApplications.length : 0
 
   const renderApplicationCard = (application: JobApplication) => {
@@ -1083,16 +1103,10 @@ const EmployerDashboard = () => {
     return (
       <article
         key={application.id}
-        className="relative rounded-2xl border border-slate-200 bg-white p-4 pr-36 shadow-soft"
+        className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-soft"
       >
-        <span
-          className={`absolute right-4 top-4 rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
-        >
-          {applicationStatusLabel[application.status]}
-        </span>
-
-        <div className="flex flex-wrap items-start gap-3">
-          <div>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <h3 className="text-base font-semibold text-slate-900">
               {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
             </h3>
@@ -1104,6 +1118,11 @@ const EmployerDashboard = () => {
               <span>Подано: {formatDateTime(application.created_at)}</span>
             </div>
           </div>
+          <span
+            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${applicationStatusClassName[application.status]}`}
+          >
+            {applicationStatusLabel[application.status]}
+          </span>
         </div>
 
         {application.cover_letter && (
@@ -1112,7 +1131,7 @@ const EmployerDashboard = () => {
           </p>
         )}
 
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-1">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
             className="shrink-0 rounded-xl bg-[#1f2f5e] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#1b294f] disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
@@ -1200,16 +1219,16 @@ const EmployerDashboard = () => {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-[1.12fr,0.88fr]">
-          <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
+        <div className="mt-6 grid items-start gap-4 lg:grid-cols-[minmax(380px,0.92fr),minmax(560px,1.08fr)]">
+          <section ref={companyProfilePanelRef} className="rounded-[24px] border border-slate-200/80 bg-gradient-to-b from-white to-slate-50/60 p-4 shadow-soft sm:p-5">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-2xl font-semibold text-slate-900">
+              <h2 className="font-display text-xl font-semibold text-slate-900 md:text-2xl">
                 {company ? "Профіль компанії" : "Створити компанію"}
               </h2>
               <div className="flex items-center gap-2">
                 {company && (
                   <button
-                    className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"
+                    className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
                     type="button"
                     onClick={() => setShowCompanyEditor((prev) => !prev)}
                   >
@@ -1217,7 +1236,7 @@ const EmployerDashboard = () => {
                   </button>
                 )}
                 <button
-                  className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400"
                   type="button"
                   onClick={loadCompany}
                   disabled={isCompanyLoading}
@@ -1234,8 +1253,8 @@ const EmployerDashboard = () => {
             </p>
 
             {company && !showCompanyEditor && (
-              <div className="mt-4 flex flex-1 flex-col gap-3">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mt-4 space-y-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="text-base font-semibold text-slate-900">{company.name}</div>
@@ -1261,16 +1280,17 @@ const EmployerDashboard = () => {
                   )}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-slate-200 bg-white p-2.5">
+                <div className="grid gap-3 lg:grid-cols-[0.95fr,1.05fr]">
+                  <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                  <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2.5">
                     <div className="text-xs uppercase tracking-wide text-slate-500">Відкриті вакансії</div>
                     <div className="mt-1 text-lg font-semibold text-slate-900">{vacancies.length}</div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-2.5">
+                  <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2.5">
                     <div className="text-xs uppercase tracking-wide text-slate-500">Заповненість профілю</div>
                     <div className="mt-1 text-lg font-semibold text-slate-900">{companyProfileCompleteness}%</div>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-2.5">
+                  <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2.5">
                     <div className="text-xs uppercase tracking-wide text-slate-500">Рік заснування</div>
                     <div className="mt-1 text-lg font-semibold text-slate-900">
                       {company.founded_year ? company.founded_year : "—"}
@@ -1278,11 +1298,11 @@ const EmployerDashboard = () => {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
+                <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5">
                   <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Контакти та дані компанії
                   </div>
-                  <div className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+                  <div className="mt-2.5 grid gap-1.5 text-sm text-slate-700 sm:grid-cols-2">
                     <div>
                       <span className="text-slate-500">Email:</span>{" "}
                       {company.email ?? "Не вказано"}
@@ -1312,14 +1332,15 @@ const EmployerDashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-auto text-xs text-slate-500">
+                <div className="text-[11px] uppercase tracking-wide text-slate-500">
                   Оновлено: {formatDate(company.updated_at)}
+                </div>
                 </div>
               </div>
             )}
 
             {(!company || showCompanyEditor) && (
-              <form className="mt-6 space-y-4" onSubmit={handleCompanySubmit}>
+              <form className="mt-4 space-y-4" onSubmit={handleCompanySubmit}>
               <input
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-500/60"
                 placeholder="Назва компанії *"
@@ -1444,9 +1465,12 @@ const EmployerDashboard = () => {
             )}
           </section>
 
-          <section className="flex h-full flex-col rounded-[24px] border border-slate-200 bg-white p-5 shadow-medium">
+          <section
+            className="rounded-[24px] border border-slate-200/80 bg-white p-4 shadow-soft sm:p-5 lg:flex lg:flex-col"
+            style={syncedTopPanelsHeight ? { height: syncedTopPanelsHeight } : undefined}
+          >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-2xl font-semibold text-slate-900">
+              <h2 className="font-display text-xl font-semibold text-slate-900 md:text-2xl">
                 {rightPanelView === "vacancies"
                   ? "Вакансії компанії"
                   : rightPanelView === "saved"
@@ -1454,7 +1478,7 @@ const EmployerDashboard = () => {
                     : "Відгуки кандидатів"}
               </h2>
               <button
-                className="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 onClick={() => {
                   if (!company) {
@@ -1486,7 +1510,7 @@ const EmployerDashboard = () => {
               </button>
             </div>
 
-            <div className="mt-3 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+            <div className="mt-3 inline-flex max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
               <button
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                   rightPanelView === "vacancies" ? "bg-white text-slate-900 shadow-soft" : "text-slate-600 hover:text-slate-800"
@@ -1518,7 +1542,8 @@ const EmployerDashboard = () => {
               </button>
             </div>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <div className="mt-2 min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+            <p className="text-sm text-slate-500">
               {company
                 ? `Компанія: ${company.name}`
                 : "Створіть компанію, щоб керувати вакансіями та збереженими кандидатами"}
@@ -1526,17 +1551,17 @@ const EmployerDashboard = () => {
 
             {rightPanelView === "vacancies" ? (
               !company ? (
-                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                   Вакансії стануть доступні після створення компанії.
                 </div>
               ) : isVacancyLoading ? (
-                <div className="mt-6 text-sm text-slate-500">Завантаження вакансій...</div>
+                <div className="mt-4 text-sm text-slate-500">Завантаження вакансій...</div>
               ) : vacancies.length === 0 ? (
-                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                   Поки що вакансій немає. Створіть першу вакансію.
                 </div>
               ) : (
-                <div className="mt-4 flex flex-1 flex-col">
+                <div className="mt-4">
                   <div className="space-y-3">
                     {paginatedVacancies.map((vacancy) => (
                       <article
@@ -1589,7 +1614,7 @@ const EmployerDashboard = () => {
                   </div>
 
                   {totalVacancyPages > 1 && (
-                    <div className="mt-auto pt-3">
+                    <div className="mt-3 pt-1">
                       <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                         <button
                           className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -1624,17 +1649,17 @@ const EmployerDashboard = () => {
                 )}
 
                 {!company ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                     Розділ активується після створення компанії.
                   </div>
                 ) : isSavedResumesLoading ? (
-                  <div className="mt-6 text-sm text-slate-500">Завантаження збережених резюме...</div>
+                  <div className="mt-4 text-sm text-slate-500">Завантаження збережених резюме...</div>
                 ) : savedResumes.length === 0 ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                     У вас поки немає збережених резюме.
                   </div>
                 ) : (
-                  <div className="mt-4 grid gap-3 md:grid-cols-1">
+                  <div className="mt-4 space-y-3">
                     {savedResumes.map((resume) => (
                       <article key={resume.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <div className="flex items-start justify-between gap-3">
@@ -1698,12 +1723,12 @@ const EmployerDashboard = () => {
                 )}
 
                 {!company ? (
-                  <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                     Розділ активується після створення компанії.
                   </div>
                 ) : (
                   <>
-                    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
                         Вакансія для відбору
                       </label>
@@ -1713,7 +1738,6 @@ const EmployerDashboard = () => {
                         onChange={(event) => {
                           const raw = event.target.value
                           setApplicationsVacancyFilter(raw ? Number(raw) : null)
-                          setApplicationsPage(1)
                           setCandidateSectionsView("all")
                           setExpandedApplicationId(null)
                           setCandidateMatchingError(null)
@@ -1982,9 +2006,9 @@ const EmployerDashboard = () => {
                     )}
 
                     {isEmployerApplicationsLoading ? (
-                      <div className="mt-6 text-sm text-slate-500">Завантаження відгуків...</div>
+                      <div className="mt-4 text-sm text-slate-500">Завантаження відгуків...</div>
                     ) : employerApplications.length === 0 ? (
-                      <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                      <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
                         По обраній вакансії поки немає відгуків.
                       </div>
                     ) : showCandidateMatchPanel && candidateMatchingJob?.status === "done" && candidateSectionsView === "ai" ? null : (
@@ -1992,45 +2016,20 @@ const EmployerDashboard = () => {
                         <div className="mb-2 flex items-center justify-between gap-2">
                           <h4 className="text-sm font-semibold text-slate-900">Всі кандидати</h4>
                           <span className="text-xs text-slate-500">
-                            Показано {paginatedApplications.length} з {employerApplications.length}
+                            Показано {employerApplications.length} з {employerApplications.length}
                           </span>
                         </div>
 
                         <div className="space-y-3">
-                          {paginatedApplications.map((application) => renderApplicationCard(application))}
+                          {employerApplications.map((application) => renderApplicationCard(application))}
                         </div>
-
-                        {totalApplicationsPages > 1 && (
-                          <div className="mt-4">
-                            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                              <button
-                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                type="button"
-                                onClick={() => setApplicationsPage((prev) => Math.max(1, prev - 1))}
-                                disabled={applicationsPage === 1}
-                              >
-                                Попередня
-                              </button>
-                              <div className="text-xs font-semibold text-slate-600">
-                                Сторінка {applicationsPage} з {totalApplicationsPages}
-                              </div>
-                              <button
-                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                type="button"
-                                onClick={() => setApplicationsPage((prev) => Math.min(totalApplicationsPages, prev + 1))}
-                                disabled={applicationsPage === totalApplicationsPages}
-                              >
-                                Наступна
-                              </button>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     )}
                   </>
                 )}
               </>
             )}
+            </div>
           </section>
         </div>
 
