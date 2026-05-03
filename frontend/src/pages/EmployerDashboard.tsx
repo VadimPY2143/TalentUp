@@ -1288,7 +1288,7 @@ const EmployerDashboard = () => {
                   )}
                 </div>
 
-                <div className="grid gap-3 lg:grid-cols-[0.95fr,1.05fr]">
+                <div className="grid gap-3 lg:grid-cols-[0.72fr,1.28fr]">
                   <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
                   <div className="rounded-xl border border-slate-200/90 bg-white px-3 py-2.5">
                     <div className="text-xs uppercase tracking-wide text-slate-500">Відкриті вакансії</div>
@@ -1310,16 +1310,16 @@ const EmployerDashboard = () => {
                   <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Контакти та дані компанії
                   </div>
-                  <div className="mt-2.5 grid gap-1.5 text-sm text-slate-700 sm:grid-cols-2">
-                    <div>
+                  <div className="mt-2.5 grid gap-1.5 text-sm text-slate-700 sm:grid-cols-1 xl:grid-cols-2">
+                    <div className="break-words">
                       <span className="text-slate-500">Email:</span>{" "}
                       {company.email ?? "Не вказано"}
                     </div>
-                    <div>
+                    <div className="break-words">
                       <span className="text-slate-500">Телефон:</span>{" "}
                       {company.phone ?? "Не вказано"}
                     </div>
-                    <div className="sm:col-span-2">
+                    <div className="break-words xl:col-span-2">
                       <span className="text-slate-500">Вебсайт:</span>{" "}
                       {companyWebsiteUrl ? (
                         <a
@@ -1334,7 +1334,7 @@ const EmployerDashboard = () => {
                         "Не вказано"
                       )}
                     </div>
-                    <div className="sm:col-span-2">
+                    <div className="break-words xl:col-span-2">
                       <span className="text-slate-500">Адреса:</span>{" "}
                       {[company.country, company.city, company.address].filter(Boolean).join(", ") || "Не вказано"}
                     </div>
@@ -1907,9 +1907,9 @@ const EmployerDashboard = () => {
                     )}
 
                     {showCandidateMatchPanel && candidateMatchingJob?.status === "done" && (
-                      <div className="mt-4 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+                      <div className="mt-4 flex w-full rounded-xl border border-slate-200 bg-slate-50 p-1">
                         <button
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          className={`flex-1 rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition ${
                             candidateSectionsView === "ai"
                               ? "bg-white text-slate-900 shadow-soft"
                               : "text-slate-600 hover:text-slate-800"
@@ -1920,7 +1920,7 @@ const EmployerDashboard = () => {
                           AI-рекомендації кандидатів
                         </button>
                         <button
-                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                          className={`flex-1 rounded-lg px-3 py-1.5 text-center text-xs font-semibold transition ${
                             candidateSectionsView === "all"
                               ? "bg-white text-slate-900 shadow-soft"
                               : "text-slate-600 hover:text-slate-800"
