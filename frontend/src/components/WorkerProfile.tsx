@@ -1920,8 +1920,8 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         vacancy={selectedVacancy}
         onClose={() => setSelectedVacancy(null)}
         onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
-        isApplyDisabled={applications.some((app) => app.vacancy_id === selectedVacancy?.id)}
-        applicationStatus={applications.find((app) => app.vacancy_id === selectedVacancy?.id)?.status}
+        isApplyDisabled={false}
+        applicationStatus={undefined}
       />
       <ApplyModal
         vacancy={applyVacancy}
