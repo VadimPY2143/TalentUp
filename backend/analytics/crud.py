@@ -109,7 +109,7 @@ class _DaysQuery(BaseModel):
 async def dashboard(
     days: int = Query(30, ge=1, le=365),
     session: AsyncSession = Depends(get_session),
-    current_user: dict = Depends(require_roles(["worker"])),
+    current_user: dict = Depends(require_roles(["worker", "employer"])),
 ) -> AnalyticsDashboardOut:
 
     days = _clamp_days(days)
@@ -186,7 +186,7 @@ async def dashboard(
 
     pv_ts_stmt = (
         select(
-            func.date_trunc("day", analytics_events_table.c.occurred_at).label("d"),
+            func.date( analytics_events_table.c.occurred_at).label("d"),
             func.count(analytics_events_table.c.id).label("cnt"),
         )
         .where(
@@ -199,13 +199,13 @@ async def dashboard(
         .order_by("d")
     )
     for r in (await session.execute(pv_ts_stmt)).mappings().all():
-        d = r["d"].date() if isinstance(r["d"], datetime) else r["d"]
+        d = r["d"].date() if isinstance(r["d"], datetime) else (datetime.fromisoformat(r["d"]).date() if isinstance(r["d"], str) else r["d"])
         _get_point(d).profile_views = int(r["cnt"])
 
     if resume_ids:
         rv_ts_stmt = (
             select(
-                func.date_trunc("day", analytics_events_table.c.occurred_at).label("d"),
+                func.date( analytics_events_table.c.occurred_at).label("d"),
                 func.count(analytics_events_table.c.id).label("cnt"),
             )
             .where(
@@ -218,12 +218,12 @@ async def dashboard(
             .order_by("d")
         )
         for r in (await session.execute(rv_ts_stmt)).mappings().all():
-            d = r["d"].date() if isinstance(r["d"], datetime) else r["d"]
+            d = r["d"].date() if isinstance(r["d"], datetime) else (datetime.fromisoformat(r["d"]).date() if isinstance(r["d"], str) else r["d"])
             _get_point(d).resume_views = int(r["cnt"])
 
     apps_ts_stmt = (
         select(
-            func.date_trunc("day", job_applications_table.c.created_at).label("d"),
+            func.date( job_applications_table.c.created_at).label("d"),
             func.count(job_applications_table.c.id).label("cnt"),
         )
         .where(
@@ -235,7 +235,7 @@ async def dashboard(
         .order_by("d")
     )
     for r in (await session.execute(apps_ts_stmt)).mappings().all():
-        d = r["d"].date() if isinstance(r["d"], datetime) else r["d"]
+        d = r["d"].date() if isinstance(r["d"], datetime) else (datetime.fromisoformat(r["d"]).date() if isinstance(r["d"], str) else r["d"])
         _get_point(d).applications_sent = int(r["cnt"])
 
     all_days: list[AnalyticsTimeseriesPointOut] = []

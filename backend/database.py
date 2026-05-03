@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from sqlalchemy import (
-    ARRAY,
     Boolean,
     CheckConstraint,
     Column,
@@ -19,7 +18,6 @@ from sqlalchemy import (
     func,
     Index,
 )
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -203,8 +201,8 @@ user_profiles_table = Table(
     Column('bio', Text),
     Column('birth_date', Date),
     Column('phone', String(50)),
-    Column('languages', ARRAY(String(100))),
-    Column('links', ARRAY(String(255))),
+    Column('languages', JSON),
+    Column('links', JSON),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
     Column(
         'updated_at',
@@ -258,7 +256,7 @@ resumes_table = Table(
     Column('title', String(255), nullable=False),
     Column('summary', Text),
     Column('desired_role', String(255)),
-    Column('employment_type', ARRAY(String(50))),
+    Column('employment_type', JSON),
     Column('city_id', Integer, ForeignKey('cities.id', ondelete='SET NULL')),
     Column('location', String(255)),
     Column('salary_min', Integer),
@@ -328,7 +326,7 @@ vacancies_table = Table(
     Column('responsibilities', Text),
     Column('requirements', Text),
     Column('is_active', Boolean, nullable=False, server_default='true'),
-    Column('employment_type', ARRAY(String(50))),
+    Column('employment_type', JSON),
     Column('city_id', Integer, ForeignKey('cities.id', ondelete='SET NULL')),
     Column('location', String(255)),
     Column('salary_min', Integer),
@@ -336,7 +334,7 @@ vacancies_table = Table(
     Column('salary_currency', String(10)),
     Column('experience_years_min', Integer),
     Column('experience_years_max', Integer),
-    Column('work_format', ARRAY(String(50))),
+    Column('work_format', JSON),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
     Column(
         'updated_at',
@@ -604,7 +602,7 @@ notifications_table = Table(
     Column("body", Text),
     Column("entity_type", String(100)),
     Column("entity_id", Integer),
-    Column("payload_json", JSONB),
+    Column("payload_json", JSON),
     Column("is_read", Boolean, nullable=False, server_default="false"),
     Column("read_at", DateTime(timezone=True)),
     Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),

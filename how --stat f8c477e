@@ -1,0 +1,18 @@
+[33mcommit f8c477e94df648200c46e430b9b960fb35e26a20[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: VadimPY2143 <vadimpapusha2310@gmail.com>
+Date:   Sun Mar 22 12:08:21 2026 +0200
+
+    fixes
+
+backend/database.py
+backend/employer/vacancy/ai_filling.py
+backend/requirements.txt
+backend/search/resume_search/filters.py
+backend/search/resume_search/views.py
+backend/worker/crud.py
+backend/worker/models.py
+frontend/src/api/candidates.ts
+frontend/src/pages/CandidateSearch.tsx
+frontend/src/types/candidate.ts
+frontend/src/types/resume.ts
+logs/app.log
