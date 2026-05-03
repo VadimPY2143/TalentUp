@@ -22,8 +22,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Manrope", "Segoe UI", "Arial", "sans-serif"],
-        display: ["Sora", "Segoe UI", "Arial", "sans-serif"],
+        sans: ["Inter", "Roboto", "Segoe UI", "Arial", "sans-serif"],
+        display: ["Inter", "Roboto", "Segoe UI", "Arial", "sans-serif"],
       },
       boxShadow: {
         soft: "0 8px 20px rgba(10, 20, 40, 0.08)",
