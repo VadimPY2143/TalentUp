@@ -41,10 +41,10 @@ const Navbar = () => {
           {!isAuthenticated && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Znajty robotu
+                Знайти роботу
               </Link>
               <Link className="transition hover:text-orange-300" to="/register?role=employer">
-                Rozmistyty vakansiju
+                Розмістити вакансію
               </Link>
             </>
           )}
@@ -52,10 +52,10 @@ const Navbar = () => {
           {isAuthenticated && role === "worker" && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Znajty robotu
+                Знайти роботу
               </Link>
               <Link className="transition hover:text-orange-300" to="/analytics">
-                Analityka (A+C)
+                Аналітика (A+C)
               </Link>
             </>
           )}
@@ -63,10 +63,10 @@ const Navbar = () => {
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
-                Baza rezume
+                База резюме
               </Link>
               <Link className="transition hover:text-orange-300" to="/payment?return_to=/dashboard">
-                Kuputy kredyty
+                Купити кредити
               </Link>
             </>
           )}
@@ -107,19 +107,19 @@ const Navbar = () => {
                 to="/dashboard"
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
               >
-                Kabinet
+                Кабінет
               </Link>
               <button className={primaryButton} type="button" onClick={handleLogout}>
-                Vyjty
+                Вийти
               </button>
             </>
           ) : (
             <>
               <Link to="/register" className={primaryButton}>
-                Zarejestruvatysja
+                Зареєструватися
               </Link>
               <Link to="/login" className={secondaryButton}>
-                Uvijty
+                Увійти
               </Link>
             </>
           )}
