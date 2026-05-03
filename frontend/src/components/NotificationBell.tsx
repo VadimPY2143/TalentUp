@@ -1,8 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Bell, X, MessageSquare, Briefcase, CheckCircle2 } from "lucide-react"
-import { listNotifications, markNotificationRead, markAllNotificationsRead, buildNotificationsWebSocketUrl } from "../api/notifications"
+import { Bell, MessageSquare, Briefcase, CheckCircle2 } from "lucide-react"
+import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  buildNotificationsWebSocketUrl,
+} from "../api/notifications"
 import { useAuth } from "../auth/useAuth"
 import type { Notification } from "../types/notification"
+import type { NotificationSocketEvent } from "../types/notification"
 
 const formatTime = (iso: string) => {
   const date = new Date(iso)
@@ -117,12 +123,26 @@ const NotificationBell = () => {
 
     ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data)
-      } catch (error) {
+        const payload = JSON.parse(event.data) as NotificationSocketEvent
+        if (payload?.type === "notification_created" && payload.notification) {
+          const incoming = payload.notification as Notification
+          setNotifications((prev) => {
+            if (prev.some((item) => item.id === incoming.id)) {
+              return prev
+            }
+            return [incoming, ...prev]
+          })
+          return
+        }
+        if (payload?.type === "notification_enqueued") {
+          void loadNotifications("initial")
+        }
+      } catch {
+        // ignore malformed websocket payloads
       }
     }
 
-    ws.onerror = (error) => {
+    ws.onerror = () => {
       // WebSocket error
     }
 
@@ -134,7 +154,7 @@ const NotificationBell = () => {
       ws.close()
       wsRef.current = null
     }
-  }, [token, loadNotifications, isOpen])
+  }, [token, loadNotifications])
 
   const markAsRead = async (id: number) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)))

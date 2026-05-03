@@ -6208,3 +6208,124 @@ fastapi.exceptions.HTTPException: 400: Invalid amount in payment payload
 2026-05-02 17:01:51 - moodshare - INFO - Starting candidate batch rerank with model: openai/gpt-4o-mini, candidates count: 6
 2026-05-02 17:01:51 - moodshare - INFO - Using candidate match model: openai/gpt-4o-mini
 2026-05-02 17:02:08 - moodshare - INFO - Candidate batch rerank finished: 6/6 results
+2026-05-02 17:11:21 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:11:23 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:11:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-02 17:11:46 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:10:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:10:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:10:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:11:22 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:11:23 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:12:10 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:12:10 - moodshare - INFO - User 4 connected to chat 15
+2026-05-03 08:12:10 - moodshare - INFO - User 4 connected to chat 13
+2026-05-03 08:12:10 - moodshare - INFO - User 4 disconnected from chat 13
+2026-05-03 08:12:10 - moodshare - INFO - User 4 connected to chat 12
+2026-05-03 08:12:14 - moodshare - INFO - User 4 disconnected from chat 12
+2026-05-03 08:12:14 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:12:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:12:16 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:12:46 - moodshare - INFO - Using vacancy AI fill model: google/gemma-4-31b-it
+2026-05-03 08:13:59 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:14:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:14:37 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:14:37 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:15:14 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:15:36 - moodshare - INFO - WFP order created order_id=46 provider_order_id=wfp_a0f26b161ff944159f10bbac5ca0959f user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-05-03 08:16:11 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:16:13 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:16:15 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:16:15 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_a0f26b161ff944159f10bbac5ca0959f', 'amount': 5, 'currency': 'UAH', 'authCode': '390634', 'createdDate': 1777796136, 'processingDate': 1777796148, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': 'fdaf957c56074ca9e444162ebcad15ab'}
+2026-05-03 08:16:15 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-05-03 08:16:15 - moodshare - INFO - Applying credits to user_id=4, credits=50
+2026-05-03 08:16:15 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-05-03 08:16:15 - moodshare - INFO - WFP reconcile success order_id=46 order_reference=wfp_a0f26b161ff944159f10bbac5ca0959f credits_applied=50
+2026-05-03 08:16:17 - moodshare - INFO - WFP order created order_id=47 provider_order_id=wfp_0be6aea38a9a43719ba9f50309d974a1 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-05-03 08:16:30 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-03 08:16:30 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_0be6aea38a9a43719ba9f50309d974a1', 'merchantSignature': 'abb4be9093f49dc0d125ed6da84da612', 'amount': 5, 'currency': 'UAH', 'authCode': '910635', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1777796178, 'processingDate': 1777796189, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
+2026-05-03 08:16:30 - moodshare - INFO - Order reference: wfp_0be6aea38a9a43719ba9f50309d974a1
+2026-05-03 08:16:30 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-05-03 08:16:30 - moodshare - INFO - Verifying callback signature...
+2026-05-03 08:16:30 - moodshare - INFO - Signature verified successfully
+2026-05-03 08:16:30 - moodshare - INFO - Order found: id=47, status=pending, user_id=4
+2026-05-03 08:16:30 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
+2026-05-03 08:16:30 - moodshare - INFO - Currency: UAH
+2026-05-03 08:16:30 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-03 08:16:30 - moodshare - INFO - Callback status Approved, checking status before crediting...
+2026-05-03 08:16:30 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_0be6aea38a9a43719ba9f50309d974a1', 'amount': 5, 'currency': 'UAH', 'authCode': '910635', 'createdDate': 1777796178, 'processingDate': 1777796189, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0.1, 'merchantSignature': '8a5b98270fa8f81e90ddf0b44305a96d'}
+2026-05-03 08:16:30 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-05-03 08:16:30 - moodshare - INFO - Applying credits to user_id=4, credits=50
+2026-05-03 08:16:30 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-05-03 08:16:30 - moodshare - INFO - WFP payment approved order_id=47 order_reference=wfp_0be6aea38a9a43719ba9f50309d974a1 check_status=Approved credits_applied=50
+2026-05-03 08:16:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:16:47 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:16:47 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-03 08:16:47 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_a0f26b161ff944159f10bbac5ca0959f', 'merchantSignature': 'cc52a1138e8c0ba3533e41c38d6b6047', 'amount': 5, 'currency': 'UAH', 'authCode': '390634', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1777796136, 'processingDate': 1777796148, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0.1, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
+2026-05-03 08:16:47 - moodshare - INFO - Order reference: wfp_a0f26b161ff944159f10bbac5ca0959f
+2026-05-03 08:16:47 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-05-03 08:16:47 - moodshare - INFO - Verifying callback signature...
+2026-05-03 08:16:47 - moodshare - INFO - Signature verified successfully
+2026-05-03 08:16:47 - moodshare - INFO - Order found: id=46, status=success, user_id=4
+2026-05-03 08:16:47 - moodshare - INFO - Amount check: callback=5.00, expected=5.00
+2026-05-03 08:16:47 - moodshare - INFO - Currency: UAH
+2026-05-03 08:16:47 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-03 08:16:47 - moodshare - INFO - WFP duplicate callback order_id=46 order_reference=wfp_a0f26b161ff944159f10bbac5ca0959f
+2026-05-03 08:17:06 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:17:06 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:17:10 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:18:23 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:18:23 - moodshare - INFO - User 6 connected to chat 15
+2026-05-03 08:18:26 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-03 08:18:26 - moodshare - INFO - User 6 connected to chat 11
+2026-05-03 08:18:28 - moodshare - INFO - User 6 disconnected from chat 11
+2026-05-03 08:18:28 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:18:45 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:18:47 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:18:47 - moodshare - INFO - User 6 connected to chat 15
+2026-05-03 08:18:57 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-03 08:18:57 - moodshare - INFO - User 6 connected to chat 9
+2026-05-03 08:18:57 - moodshare - INFO - User 6 disconnected from chat 9
+2026-05-03 08:18:57 - moodshare - INFO - User 6 connected to chat 10
+2026-05-03 08:19:00 - moodshare - INFO - User 6 disconnected from chat 10
+2026-05-03 08:19:00 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:19:55 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:20:03 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:05 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:12 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:13 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:21 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:21 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:24 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:31 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:20:31 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:20:32 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:20:50 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:20:51 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:21:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:23:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:24:24 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:24:25 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:24:28 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:24:29 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:08 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:25:10 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:25:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:17 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:21 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:25:21 - moodshare - INFO - User 6 connected to chat 15
+2026-05-03 08:25:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:38 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:40 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:41 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:25:43 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:27:22 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:27:42 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:27:56 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:28:47 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-03 08:28:49 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-03 08:28:49 - moodshare - INFO - User 6 connected to chat 15
+2026-05-03 08:28:51 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:28:51 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-03 08:29:03 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-03 08:29:03 - moodshare - INFO - User 6 connected to notifications ws
