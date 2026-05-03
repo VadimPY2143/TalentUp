@@ -65,28 +65,6 @@ export const setApiUrlOverride = (nextUrl: string | null) => {
   }
 }
 
-const isNetworkError = (error: unknown) =>
-  error instanceof TypeError ||
-  (error instanceof Error && /fetch/i.test(error.message))
-
-const fetchWithApiFallback = async (path: string, options?: RequestInit) => {
-  const currentUrl = API_URL
-
-  try {
-    return await fetch(`${currentUrl}${path}`, options)
-  } catch (error) {
-    const defaultUrl = resolveDefaultApiUrl()
-    const hasOverride = currentUrl !== defaultUrl
-
-    if (!hasOverride || !isNetworkError(error)) {
-      throw error
-    }
-
-    setApiUrlOverride(null)
-    return fetch(`${API_URL}${path}`, options)
-  }
-}
-
 let accessTokenMemory: string | null = null
 let refreshInFlight: Promise<string | null> | null = null
 
@@ -172,7 +150,7 @@ export const refreshAccessTokenViaCookie = async (): Promise<string> => {
 
 export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<T> => {
   const token = accessTokenMemory
-  const response = await fetchWithApiFallback(path, {
+  const response = await fetch(`${API_URL}${path}`, {
     headers: buildHeaders(token, options),
     credentials: "include",
     ...options,
@@ -181,7 +159,7 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
   if (response.status === 401 && path !== "/user/refresh") {
     const newToken = await refreshAccessToken()
     if (newToken) {
-      const retry = await fetchWithApiFallback(path, {
+      const retry = await fetch(`${API_URL}${path}`, {
         headers: buildHeaders(newToken, options),
         credentials: "include",
         ...options,
@@ -220,7 +198,7 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
 
 export const apiFetchBlob = async (path: string, options?: RequestInit): Promise<Blob> => {
   const token = accessTokenMemory
-  const response = await fetchWithApiFallback(path, {
+  const response = await fetch(`${API_URL}${path}`, {
     headers: buildHeaders(token, options),
     credentials: "include",
     ...options,
@@ -229,7 +207,7 @@ export const apiFetchBlob = async (path: string, options?: RequestInit): Promise
   if (response.status === 401 && path !== "/user/refresh") {
     const newToken = await refreshAccessToken()
     if (newToken) {
-      const retry = await fetchWithApiFallback(path, {
+      const retry = await fetch(`${API_URL}${path}`, {
         headers: buildHeaders(newToken, options),
         credentials: "include",
         ...options,
