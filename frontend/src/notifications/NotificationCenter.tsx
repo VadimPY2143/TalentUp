@@ -25,15 +25,15 @@ const translateNotification = (notification: Notification) => {
   const translated = { ...notification }
 
   if (translated.title === "New message") {
-    translated.title = "РќРѕРІРµ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ"
+    translated.title = "Нове повідомлення"
   } else if (translated.title === "Application status updated") {
-    translated.title = "РЎС‚Р°С‚СѓСЃ Р·Р°СЏРІРєРё РѕРЅРѕРІР»РµРЅРѕ"
+    translated.title = "Статус заявки оновлено"
   } else if (translated.title === "Your resume was saved") {
-    translated.title = "Р’Р°С€Рµ СЂРµР·СЋРјРµ Р·Р±РµСЂРµР¶РµРЅРѕ"
+    translated.title = "Ваше резюме збережено"
   }
 
   if (translated.body) {
-    translated.body = translated.body.replace("I applied", "РЇ РїРѕРґР°РІ Р·Р°СЏРІРєСѓ")
+    translated.body = translated.body.replace("I applied", "Я подав заявку")
   }
 
   return translated
@@ -67,7 +67,7 @@ export const NotificationCenter = ({
         setCursor(data?.next_cursor ?? null)
         setHasMore(Boolean(data?.next_cursor))
       } catch (e) {
-        setError(e instanceof Error ? e.message : "РќРµ РІРґР°Р»РѕСЃСЏ Р·Р°РІР°РЅС‚Р°Р¶РёС‚Рё СЃРїРѕРІС–С‰РµРЅРЅСЏ")
+        setError(e instanceof Error ? e.message : "Не вдалося завантажити сповіщення")
       } finally {
         setLoading(false)
       }
@@ -128,7 +128,7 @@ export const NotificationCenter = ({
       }
     } catch {
       setItems((prev) => prev.map((n) => (n.is_read && !n.read_at ? { ...n, is_read: false } : n)))
-      setError("РќРµ РІРґР°Р»РѕСЃСЏ РїРѕР·РЅР°С‡РёС‚Рё РІСЃС– СЏРє РїСЂРѕС‡РёС‚Р°РЅС–")
+      setError("Не вдалося позначити всі як прочитані")
       void prevUnread
     }
   }
@@ -191,7 +191,7 @@ export const NotificationCenter = ({
       <div className={embedded ? "mt-3 min-h-0 flex-1 space-y-3 overflow-auto pr-1" : "mt-6 space-y-3"}>
         {!items.length && !loading && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-700">
-            РџРѕРєРё С‰Рѕ РЅРµРјР°С” СЃРїРѕРІС–С‰РµРЅСЊ.
+            Поки що немає сповіщень.
           </div>
         )}
 
@@ -222,7 +222,7 @@ export const NotificationCenter = ({
                     onClick={() => onMarkRead(n.id)}
                     className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                   >
-                    РџРѕР·РЅР°С‡РёС‚Рё РїСЂРѕС‡РёС‚Р°РЅРёРј
+                    Позначити прочитаним
                   </button>
                 )}
               </div>
@@ -238,7 +238,7 @@ export const NotificationCenter = ({
               onClick={() => load("more")}
               className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
             >
-              {loading ? "Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ..." : "Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё С‰Рµ"}
+              {loading ? "Завантаження..." : "Завантажити ще"}
             </button>
           </div>
         )}
@@ -246,4 +246,3 @@ export const NotificationCenter = ({
     </section>
   )
 }
-
