@@ -41,10 +41,10 @@ const Navbar = () => {
           {!isAuthenticated && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
+                Znajty robotu
               </Link>
               <Link className="transition hover:text-orange-300" to="/register?role=employer">
-                Р В Р С•Р В·Р СРЎвЂ“РЎРѓРЎвЂљР С‘РЎвЂљР С‘ Р Р†Р В°Р С”Р В°Р Р…РЎРѓРЎвЂ“РЎР‹
+                Rozmistyty vakansiju
               </Link>
             </>
           )}
@@ -52,10 +52,10 @@ const Navbar = () => {
           {isAuthenticated && role === "worker" && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
+                Znajty robotu
               </Link>
               <Link className="transition hover:text-orange-300" to="/analytics">
-                РђРЅР°Р»С–С‚РёРєР° (A+C)
+                Analityka (A+C)
               </Link>
             </>
           )}
@@ -63,10 +63,10 @@ const Navbar = () => {
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
-                Р вЂР В°Р В·Р В° РЎР‚Р ВµР В·РЎР‹Р СР Вµ
+                Baza rezume
               </Link>
               <Link className="transition hover:text-orange-300" to="/payment?return_to=/dashboard">
-                Р С™РЎС“Р С—Р С‘РЎвЂљР С‘ Р С”РЎР‚Р ВµР Т‘Р С‘РЎвЂљР С‘
+                Kuputy kredyty
               </Link>
             </>
           )}
@@ -107,19 +107,19 @@ const Navbar = () => {
                 to="/dashboard"
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
               >
-                Р С™Р В°Р В±РЎвЂ“Р Р…Р ВµРЎвЂљ
+                Kabinet
               </Link>
               <button className={primaryButton} type="button" onClick={handleLogout}>
-                Р вЂ™Р С‘Р в„–РЎвЂљР С‘
+                Vyjty
               </button>
             </>
           ) : (
             <>
               <Link to="/register" className={primaryButton}>
-                Р—Р°СЂРµС”СЃС‚СЂСѓРІР°С‚РёСЃСЏ
+                Zarejestruvatysja
               </Link>
               <Link to="/login" className={secondaryButton}>
-                Р Р€Р Р†РЎвЂ“Р в„–РЎвЂљР С‘
+                Uvijty
               </Link>
             </>
           )}
