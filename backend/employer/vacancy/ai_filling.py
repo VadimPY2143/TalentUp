@@ -22,7 +22,6 @@ Hard rules:
 5) If some details are missing, infer realistic values from the role and context. Every field must be filled.
 6) Salary must be monthly (for 1 month), integer values only.
 7) Salary range must be logical: salary_min <= salary_max.
-8) expires_at must be valid ISO datetime in the future.
 
 Field quality requirements:
 - title: specific, professional, and market-ready.

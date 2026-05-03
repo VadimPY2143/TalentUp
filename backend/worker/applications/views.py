@@ -25,7 +25,10 @@ from .models import (
     JobApplicationStatusUpdateIn,
 )
 from .services import ApplicationService
-from notifications.events import notify_application_status_changed
+from notifications.events import (
+    notify_application_status_changed,
+    notify_new_application_to_employer,
+)
 
 router = APIRouter(tags=["applications"])
 
@@ -110,6 +113,24 @@ async def create_application(
     app_row["company_id"] = vacancy["company_id"]
     app_row["resume_title"] = selected_resume.get("title")
     app_row["candidate_name"] = current_user.get("username")
+
+    try:
+        employer_user_id = vacancy.get("created_by_user_id")
+        if employer_user_id is not None and int(employer_user_id) != int(current_user["id"]):
+            await notify_new_application_to_employer(
+                session=session,
+                employer_user_id=int(employer_user_id),
+                worker_user_id=int(current_user["id"]),
+                application_id=int(app_row["id"]),
+                vacancy_id=int(app_row["vacancy_id"]),
+                vacancy_title=app_row.get("vacancy_title"),
+                candidate_name=app_row.get("candidate_name"),
+                resume_id=app_row.get("resume_id"),
+            )
+    except Exception:
+        # Notifications must not break core business flow.
+        pass
+
     return ApplicationService.build_application_out(app_row, history_rows)
 
 

@@ -4,6 +4,7 @@ from typing import Any
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from database import refresh_tokens_table, user_profiles_table, users_table
 from database import user_profiles_table, user_languages_table, languages_table, user_links_table
 
 
@@ -53,96 +54,93 @@ class UserProfileRepository:
         result = await session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
-    async def get_user_languages(self, session: AsyncSession, user_id: int) -> list[dict[str, Any]]:
+    async def get_user_languages(
+        self, session: AsyncSession, user_id: int
+    ) -> list[dict[str, Any]]:
         stmt = (
-            select(user_languages_table, languages_table.c.name)
+            select(
+                user_languages_table.c.id,
+                user_languages_table.c.language_id,
+                languages_table.c.name.label("language_name"),
+                user_languages_table.c.proficiency_level,
+            )
+            .select_from(user_languages_table)
             .join(languages_table, user_languages_table.c.language_id == languages_table.c.id)
             .where(user_languages_table.c.user_id == user_id)
-            .order_by(user_languages_table.c.created_at)
         )
         result = await session.execute(stmt)
-        rows = result.mappings().all()
-        return [
-            {
-                "id": row["id"],
-                "language_id": row["language_id"],
-                "language_name": row["name"],
-                "proficiency_level": row["proficiency_level"],
-            }
-            for row in rows
-        ]
+        return [dict(row) for row in result.mappings().all()]
 
     async def upsert_user_languages(
-        self,
-        session: AsyncSession,
-        user_id: int,
-        languages: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
-        # Delete existing user languages
+        self, session: AsyncSession, user_id: int, languages: list[dict[str, Any]]
+    ) -> None:
         await session.execute(
             delete(user_languages_table).where(user_languages_table.c.user_id == user_id)
         )
-
-        # Insert new user languages
         if languages:
-            for lang in languages:
-                # Get language_id from language name
-                lang_stmt = select(languages_table.c.id).where(
-                    func.lower(languages_table.c.name) == func.lower(lang["name"])
-                )
-                lang_result = await session.execute(lang_stmt)
-                language_id = lang_result.scalar_one_or_none()
-
-                if language_id:
-                    await session.execute(
-                        insert(user_languages_table).values(
-                            user_id=user_id,
-                            language_id=language_id,
-                            proficiency_level=lang["proficiency_level"],
-                        )
-                    )
-
-        await session.commit()
-        return await self.get_user_languages(session, user_id)
+            values = [
+                {
+                    "user_id": user_id,
+                    "language_id": lang["language_id"],
+                    "proficiency_level": lang["proficiency_level"],
+                }
+                for lang in languages
+            ]
+            await session.execute(insert(user_languages_table).values(values))
 
     async def get_user_links(self, session: AsyncSession, user_id: int) -> list[dict[str, Any]]:
-        stmt = (
-            select(user_links_table)
-            .where(user_links_table.c.user_id == user_id)
-            .order_by(user_links_table.c.created_at)
-        )
+        stmt = select(user_links_table).where(user_links_table.c.user_id == user_id)
         result = await session.execute(stmt)
-        rows = result.mappings().all()
-        return [
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "url": row["url"],
-            }
-            for row in rows
-        ]
+        return [dict(row) for row in result.mappings().all()]
 
     async def upsert_user_links(
-        self,
-        session: AsyncSession,
-        user_id: int,
-        links: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
-        # Delete existing user links
+        self, session: AsyncSession, user_id: int, links: list[dict[str, Any]]
+    ) -> None:
         await session.execute(
             delete(user_links_table).where(user_links_table.c.user_id == user_id)
         )
-
-        # Insert new user links
         if links:
-            for link in links:
-                await session.execute(
-                    insert(user_links_table).values(
-                        user_id=user_id,
-                        title=link["title"],
-                        url=link["url"],
-                    )
-                )
+            values = [
+                {"user_id": user_id, "title": link["title"], "url": link["url"]}
+                for link in links
+            ]
+            await session.execute(insert(user_links_table).values(values))
 
-        await session.commit()
-        return await self.get_user_links(session, user_id)
+
+class UserSecurityRepository:
+    async def update_password_hash(
+        self,
+        session: AsyncSession,
+        user_id: int,
+        password_hash: str,
+    ) -> None:
+        await session.execute(
+            update(users_table)
+            .where(users_table.c.id == user_id)
+            .values(password=password_hash)
+        )
+
+    async def revoke_refresh_tokens(self, session: AsyncSession, user_id: int) -> None:
+        await session.execute(
+            update(refresh_tokens_table)
+            .where(
+                refresh_tokens_table.c.user_id == user_id,
+                refresh_tokens_table.c.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.utcnow())
+        )
+
+    async def create_refresh_token(
+        self,
+        session: AsyncSession,
+        user_id: int,
+        token_hash: str,
+        expires_at: datetime,
+    ) -> None:
+        await session.execute(
+            insert(refresh_tokens_table).values(
+                user_id=user_id,
+                token_hash=token_hash,
+                expires_at=expires_at,
+            )
+        )

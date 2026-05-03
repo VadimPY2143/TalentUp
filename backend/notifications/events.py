@@ -32,7 +32,6 @@ async def _create_and_publish(
         prefer_async=prefer_async,
     )
 
-    # If task was enqueued we can't publish the full saved row. Publish a lightweight event.
     if row.get("enqueued"):
         await publish_to_user(user_id, {"type": "notification_enqueued", "payload": row})
         return
@@ -135,3 +134,39 @@ async def notify_resume_saved(
         prefer_async=False,
     )
 
+
+async def notify_new_application_to_employer(
+    session: AsyncSession,
+    *,
+    employer_user_id: int,
+    worker_user_id: int,
+    application_id: int,
+    vacancy_id: int,
+    vacancy_title: str | None,
+    candidate_name: str | None,
+    resume_id: int | None,
+) -> None:
+    title = "Новий відгук на вакансію"
+    body_parts: list[str] = []
+    if vacancy_title:
+        body_parts.append(vacancy_title)
+    if candidate_name:
+        body_parts.append(f"Кандидат: {candidate_name}")
+    body = " | ".join(body_parts)[:500] or None
+
+    await _create_and_publish(
+        session=session,
+        user_id=employer_user_id,
+        type="application_created",
+        title=title,
+        body=body,
+        entity_type="application",
+        entity_id=application_id,
+        payload_json={
+            "application_id": application_id,
+            "vacancy_id": vacancy_id,
+            "resume_id": resume_id,
+            "worker_user_id": worker_user_id,
+        },
+        prefer_async=False,
+    )

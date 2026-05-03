@@ -8,6 +8,7 @@ import redis.asyncio as redis
 from fastapi import HTTPException
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.pool import NullPool
 
 from payments.billing import CreditBillingService, get_candidate_matching_credits
 from employer.candidate_matching.ai_rerank import rerank_candidates
@@ -21,7 +22,7 @@ from employer.candidate_matching.cache import (
 )
 from employer.candidate_matching.models import CandidateRerankOutput
 from employer.candidate_matching.repository import CandidateMatchingRepository
-from employer.candidate_matching.utils import normalize_work_formats
+from employer.candidate_matching.utils import build_content_signature, normalize_work_formats
 from worker.messages.celery_app import celery_app
 
 LOGGER = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ billing_service = CreditBillingService()
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 MATCH_CACHE_TTL_SECONDS = 3600
+MAX_AI_CANDIDATES = 20
 
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
@@ -45,10 +47,7 @@ CELERY_DATABASE_URL = (
 CELERY_ENGINE = create_async_engine(
     CELERY_DATABASE_URL,
     echo=False,
-    pool_size=1,
-    max_overflow=0,
-    pool_pre_ping=False,
-    pool_recycle=300,
+    poolclass=NullPool,
 )
 CELERY_SESSION_FACTORY = async_sessionmaker(
     bind=CELERY_ENGINE,
@@ -279,6 +278,44 @@ def _build_ai_payload(ai_result: CandidateRerankOutput, sql_score: int) -> dict[
     }
 
 
+def _build_vacancy_signature(vacancy: dict[str, Any]) -> str:
+    payload = {
+        "title": vacancy.get("title"),
+        "description": vacancy.get("description"),
+        "responsibilities": vacancy.get("responsibilities"),
+        "requirements": vacancy.get("requirements"),
+        "employment_type": vacancy.get("employment_type"),
+        "work_format": vacancy.get("work_format"),
+        "location": vacancy.get("location"),
+        "experience_years_min": vacancy.get("experience_years_min"),
+        "experience_years_max": vacancy.get("experience_years_max"),
+        "salary_min": vacancy.get("salary_min"),
+        "salary_max": vacancy.get("salary_max"),
+        "salary_currency": vacancy.get("salary_currency"),
+    }
+    return build_content_signature(payload)
+
+
+def _build_application_signature(candidate: dict[str, Any]) -> str:
+    payload = {
+        "resume_id": candidate.get("resume_id"),
+        "candidate_user_id": candidate.get("candidate_user_id"),
+        "candidate_name": candidate.get("candidate_name"),
+        "resume_title": candidate.get("resume_title"),
+        "desired_role": candidate.get("desired_role"),
+        "resume_summary": candidate.get("resume_summary"),
+        "employment_type": candidate.get("employment_type"),
+        "location": candidate.get("location"),
+        "years_experience": candidate.get("years_experience"),
+        "salary_min": candidate.get("salary_min"),
+        "salary_max": candidate.get("salary_max"),
+        "salary_currency": candidate.get("salary_currency"),
+        "cover_letter": candidate.get("cover_letter"),
+        "resume_updated_at": candidate.get("resume_updated_at"),
+    }
+    return build_content_signature(payload)
+
+
 @celery_app.task(
     name="employer.candidate_matching.tasks.run_candidate_matching",
     bind=True,
@@ -395,56 +432,141 @@ async def _run_candidate_matching(
             len(candidates),
         )
 
-        ai_results_by_application_id: dict[int, CandidateRerankOutput] = {}
-        try:
-            charged_credits = await _charge_candidate_matching_credits(
-                employer_user_id=employer_user_id,
-                vacancy_id=vacancy_id,
-                job_id=job_id,
-                analyzed_candidates=len(filtered_candidates),
-            )
-        except HTTPException as exc:
-            if exc.status_code == 402:
-                LOGGER.warning(
-                    "Insufficient credits for candidate matching vacancy_id=%s, job_id=%s. "
-                    "Falling back to SQL scores.",
-                    vacancy_id,
-                    job_id,
-                )
-            else:
-                raise
-        else:
-            try:
-                ai_results_by_application_id = await rerank_candidates(vacancy, filtered_candidates)
-            except Exception:
-                LOGGER.warning(
-                    "Batch AI rerank failed for vacancy_id=%s, job_id=%s. Falling back to SQL scores.",
-                    vacancy_id,
-                    job_id,
-                    exc_info=True,
-                )
-                ai_results_by_application_id = {}
+        filtered_candidates = sorted(
+            filtered_candidates,
+            key=lambda r: sql_scores_by_application_id[int(r["application_id"])],
+            reverse=True
+        )[:MAX_AI_CANDIDATES]
 
-            actual_credits = get_candidate_matching_credits(len(ai_results_by_application_id))
-            refund_amount = max(charged_credits - actual_credits, 0)
-            if refund_amount > 0:
-                await _refund_candidate_matching_credits(
+        LOGGER.info(
+            "AI limit: %d candidates selected for AI processing (max %d)",
+            len(filtered_candidates),
+            MAX_AI_CANDIDATES,
+        )
+
+        vacancy_signature = _build_vacancy_signature(vacancy)
+        application_signature_by_application_id = {
+            int(candidate["application_id"]): _build_application_signature(candidate)
+            for candidate in filtered_candidates
+        }
+
+        cached_ai_results_by_application_id: dict[int, CandidateRerankOutput] = {}
+        filtered_application_ids = [int(candidate["application_id"]) for candidate in filtered_candidates]
+        async with _celery_session_scope() as session:
+            cached_rows = await repository.get_cached_ai_results(
+                session=session,
+                vacancy_id=vacancy_id,
+                vacancy_signature=vacancy_signature,
+                application_ids=filtered_application_ids,
+            )
+
+        for row in cached_rows:
+            application_id = int(row["application_id"])
+            expected_signature = application_signature_by_application_id.get(application_id)
+            if expected_signature is None:
+                continue
+            if row.get("application_signature") != expected_signature:
+                continue
+            if application_id in cached_ai_results_by_application_id:
+                continue
+            cached_ai_results_by_application_id[application_id] = CandidateRerankOutput(
+                score_total=int(row["score_total"]),
+                verdict=str(row["verdict"]),
+                summary=str(row["summary"]),
+            )
+
+        to_rerank_candidates = [
+            candidate for candidate in filtered_candidates
+            if int(candidate["application_id"]) not in cached_ai_results_by_application_id
+        ]
+
+        LOGGER.info(
+            "Candidate matching cache reuse for vacancy_id=%s: cached=%s, to_rerank=%s, filtered=%s",
+            vacancy_id,
+            len(cached_ai_results_by_application_id),
+            len(to_rerank_candidates),
+            len(filtered_candidates),
+        )
+
+        ai_results_by_application_id: dict[int, CandidateRerankOutput] = dict(cached_ai_results_by_application_id)
+        fresh_ai_results_by_application_id: dict[int, CandidateRerankOutput] = {}
+
+        if to_rerank_candidates:
+            try:
+                charged_credits = await _charge_candidate_matching_credits(
                     employer_user_id=employer_user_id,
                     vacancy_id=vacancy_id,
                     job_id=job_id,
-                    amount=refund_amount,
-                    reason="partial_ai_results",
-                    idempotency_suffix="partial",
+                    analyzed_candidates=len(to_rerank_candidates),
                 )
-                charged_credits -= refund_amount
+            except HTTPException as exc:
+                if exc.status_code == 402:
+                    LOGGER.warning(
+                        "Insufficient credits for candidate matching vacancy_id=%s, job_id=%s. "
+                        "Falling back to SQL scores for uncached candidates.",
+                        vacancy_id,
+                        job_id,
+                    )
+                else:
+                    raise
+            else:
+                try:
+                    fresh_ai_results_by_application_id = await rerank_candidates(vacancy, to_rerank_candidates)
+                except Exception:
+                    LOGGER.warning(
+                        "Batch AI rerank failed for vacancy_id=%s, job_id=%s. Falling back to SQL scores.",
+                        vacancy_id,
+                        job_id,
+                        exc_info=True,
+                    )
+                    fresh_ai_results_by_application_id = {}
 
-        if 0 < len(ai_results_by_application_id) < len(filtered_candidates):
+                if fresh_ai_results_by_application_id:
+                    model_name = os.getenv("CANDIDATE_MATCH_MODEL", "openrouter/free")
+                    upsert_rows = [
+                        {
+                            "application_id": application_id,
+                            "application_signature": application_signature_by_application_id[application_id],
+                            "score_total": ai_result.score_total,
+                            "verdict": ai_result.verdict,
+                            "summary": ai_result.summary,
+                        }
+                        for application_id, ai_result in fresh_ai_results_by_application_id.items()
+                        if application_id in application_signature_by_application_id
+                    ]
+                    if upsert_rows:
+                        async with _celery_session_scope() as session:
+                            async with session.begin():
+                                await repository.upsert_cached_ai_results(
+                                    session=session,
+                                    vacancy_id=vacancy_id,
+                                    vacancy_signature=vacancy_signature,
+                                    model_name=model_name,
+                                    cache_rows=upsert_rows,
+                                )
+
+                ai_results_by_application_id.update(fresh_ai_results_by_application_id)
+
+                actual_credits = get_candidate_matching_credits(len(fresh_ai_results_by_application_id))
+                refund_amount = max(charged_credits - actual_credits, 0)
+                if refund_amount > 0:
+                    await _refund_candidate_matching_credits(
+                        employer_user_id=employer_user_id,
+                        vacancy_id=vacancy_id,
+                        job_id=job_id,
+                        amount=refund_amount,
+                        reason="partial_ai_results",
+                        idempotency_suffix="partial",
+                    )
+                    charged_credits -= refund_amount
+
+        if 0 < len(fresh_ai_results_by_application_id) < len(to_rerank_candidates):
             LOGGER.warning(
-                "Batch AI rerank returned partial results for vacancy_id=%s, job_id=%s: %s/%s (filtered from %s total)",
+                "Batch AI rerank returned partial fresh results for vacancy_id=%s, job_id=%s: %s/%s (filtered from %s total)",
                 vacancy_id,
                 job_id,
-                len(ai_results_by_application_id),
-                len(filtered_candidates),
+                len(fresh_ai_results_by_application_id),
+                len(to_rerank_candidates),
                 len(candidates),
             )
 

@@ -4,10 +4,11 @@ import {
   useState,
   type FormEvent,
 } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import { useChatWidget } from "../chat/ChatWidgetContext"
 import ResumeModal from "../components/ResumeModal"
 import {
   fetchCandidateResumeSummary,
@@ -76,7 +77,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void
 }
 
-const PAGE_SIZE = 6
+const PAGE_SIZE = 4
 
 const employmentTypeOptions = [
   { value: "Remote", label: "Remote" },
@@ -188,7 +189,7 @@ const FiltersPanel = ({
   onCitySelect,
   onClear,
 }: FiltersPanelProps) => (
-  <aside className="h-full rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
+  <aside className="h-fit self-start rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Фільтри</p>
@@ -203,13 +204,13 @@ const FiltersPanel = ({
       </button>
     </div>
 
-    <div className="mt-5 space-y-4 text-sm text-slate-700">
+    <div className="mt-4 space-y-3 text-sm text-slate-700">
       <div>
         <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Локація
         </label>
         <CityAutocomplete
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
           placeholder="Оберіть місто"
           value={filters.location}
           onChange={(value) => onUpdateField("location", value)}
@@ -222,7 +223,7 @@ const FiltersPanel = ({
           Досвід (роки)
         </label>
         <select
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-orange-400/70"
           value={filters.yearsExperience}
           onChange={(event) => onUpdateField("yearsExperience", event.target.value)}
         >
@@ -247,14 +248,14 @@ const FiltersPanel = ({
         </label>
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="Від"
             type="number"
             value={filters.salaryMin}
             onChange={(event) => onUpdateField("salaryMin", event.target.value)}
           />
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-400/70"
             placeholder="До"
             type="number"
             value={filters.salaryMax}
@@ -262,7 +263,7 @@ const FiltersPanel = ({
           />
         </div>
         <select
-          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-orange-400/70"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-orange-400/70"
           value={filters.salaryCurrency}
           onChange={(event) => onUpdateField("salaryCurrency", event.target.value)}
         >
@@ -480,7 +481,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const CandidateSearch = () => {
-  const navigate = useNavigate()
+  const { open: openChatWidget } = useChatWidget()
   const [urlSearchParams] = useSearchParams()
   const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
   const [searchInput, setSearchInput] = useState(queryFromParams)
@@ -508,6 +509,7 @@ const CandidateSearch = () => {
     candidateId: number
     title: string
     summary: string
+    strengths: string[]
     cached: boolean
   } | null>(null)
   const [summaryLoadingId, setSummaryLoadingId] = useState<number | null>(null)
@@ -817,6 +819,7 @@ const CandidateSearch = () => {
         candidateId: candidate.id,
         title: candidate.title || candidate.desired_role || "Резюме",
         summary: data?.summary ?? "",
+        strengths: data?.strengths ?? [],
         cached: Boolean(data?.cached),
       })
     } catch (err) {
@@ -864,12 +867,8 @@ const CandidateSearch = () => {
     if (!chatModal || !chatVacancyId) {
       return
     }
-    const params = new URLSearchParams({
-      resumeId: String(chatModal.candidateResumeId),
-      vacancyId: chatVacancyId,
-    })
     setChatModal(null)
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: chatModal.candidateResumeId, vacancyId: Number(chatVacancyId) })
   }
 
   const showEmptyState = !isLoading && !error && candidates.length === 0
@@ -1055,6 +1054,21 @@ const CandidateSearch = () => {
             ) : (
               <>
                 <p className="mt-4 text-sm text-slate-700">{summaryModal.summary}</p>
+                {summaryModal.strengths && summaryModal.strengths.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ключові навички</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {summaryModal.strengths.map((strength, idx) => (
+                        <span
+                          key={idx}
+                          className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700"
+                        >
+                          {strength}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

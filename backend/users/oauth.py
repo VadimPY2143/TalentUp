@@ -214,5 +214,5 @@ async def auth_google_callback(
         access_token=access_token,
         api_origin=_get_server_origin(request),
     )
-    set_refresh_cookie(response, refresh_token)
+    set_refresh_cookie(response, refresh_token, request)
     return response

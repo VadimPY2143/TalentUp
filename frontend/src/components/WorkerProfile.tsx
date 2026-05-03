@@ -45,17 +45,15 @@ import {
 } from "../api/resumes"
 import { listMyApplications, createApplication } from "../api/applications"
 import { listSavedVacancies, deleteSavedVacancy } from "../api/savedVacancies"
-import { getCompanyById } from "../api/companies"
-import { getVacancyById } from "../api/vacancies"
 import type { CityOption } from "../types/city"
 import type { CurrencyType, EmploymentType, Resume } from "../types/resume"
 import type { ApplicationStatus, JobApplication } from "../types/application"
-import type { CompanyResponse } from "../types/company"
 import type { SavedVacancy } from "../api/savedVacancies"
 import type { VacancyResponse } from "../types/vacancy"
 import Navbar from "./layout/Navbar"
 import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
+import PasswordSettingsPanel from "./worker/PasswordSettingsPanel"
 
 interface WorkerProfileProps {
   userEmail?: string
@@ -273,10 +271,8 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
   const [savedVacancies, setSavedVacancies] = useState<SavedVacancy[]>([])
   const [savedVacanciesLoading, setSavedVacanciesLoading] = useState(false)
   const [savedVacanciesError, setSavedVacanciesError] = useState<string | null>(null)
-  const [companyById, setCompanyById] = useState<Record<number, CompanyResponse>>({})
-  const [vacancyById, setVacancyById] = useState<Record<number, any>>({})
-  const [selectedVacancy, setSelectedVacancy] = useState<any | null>(null)
-  const [applyVacancy, setApplyVacancy] = useState<any | null>(null)
+  const [selectedVacancy, setSelectedVacancy] = useState<VacancyResponse | null>(null)
+  const [applyVacancy, setApplyVacancy] = useState<VacancyResponse | null>(null)
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [coverLetter, setCoverLetter] = useState("")
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false)
@@ -451,54 +447,6 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
       setSavedVacanciesError(null)
       const data = await listSavedVacancies()
       setSavedVacancies(data)
-      
-      const missingVacancyIds = Array.from(
-        new Set(data.map((s) => s.vacancy_id).filter((id) => !vacancyById[id])),
-      )
-      
-      if (missingVacancyIds.length > 0) {
-        const vacancies = await Promise.all(
-          missingVacancyIds.map(async (vacancyId) => {
-            try {
-              return await getVacancyById(vacancyId)
-            } catch {
-              return null
-            }
-          }),
-        )
-        const validVacancies = vacancies.filter((v): v is any => v !== null)
-        setVacancyById((prev) => {
-          const next = { ...prev }
-          for (const vacancy of validVacancies) {
-            next[vacancy.id] = vacancy
-          }
-          return next
-        })
-        
-        const missingCompanyIds = Array.from(
-          new Set(validVacancies.map((v) => v.company_id).filter((id) => !companyById[id])),
-        )
-        
-        if (missingCompanyIds.length > 0) {
-          const companies = await Promise.all(
-            missingCompanyIds.map(async (companyId) => {
-              try {
-                return await getCompanyById(companyId)
-              } catch {
-                return null
-              }
-            }),
-          )
-          const validCompanies = companies.filter((c): c is CompanyResponse => c !== null)
-          setCompanyById((prev) => {
-            const next = { ...prev }
-            for (const company of validCompanies) {
-              next[company.id] = company
-            }
-            return next
-          })
-        }
-      }
     } catch (err) {
       setSavedVacanciesError(err instanceof Error ? err.message : "Не вдалося завантажити збережені вакансії")
     } finally {
@@ -519,14 +467,13 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
     }
   }
 
-  const handleViewVacancy = (vacancyId: number) => {
-    const vacancy = vacancyById[vacancyId]
-    if (vacancy) {
-      setSelectedVacancy(vacancy)
+  const handleViewVacancy = (savedVacancy: SavedVacancy) => {
+    if (savedVacancy.vacancy) {
+      setSelectedVacancy(savedVacancy.vacancy)
     }
   }
 
-  const openApplyModal = (vacancy: any) => {
+  const openApplyModal = (vacancy: VacancyResponse) => {
     if (resumes.length === 0) {
       alert("Спочатку створіть хоча б одне резюме.")
       return
@@ -1740,7 +1687,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               </section>
             </div>
           ) : activeSection === "applications" ? (
-            <div className="space-y-6">
+            <div key="applications-section" className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative flex items-center justify-between gap-4">
                   <div>
@@ -1805,7 +1752,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               </section>
             </div>
           ) : activeSection === "saved" ? (
-            <div className="space-y-6">
+            <div key="saved-section" className="space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative">
                   <h1 className="text-3xl font-bold">Обрані вакансії</h1>
@@ -1835,16 +1782,11 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                         <div className="flex-1">
                           <div
                             className="flex items-center gap-2 cursor-pointer hover:text-orange-600 transition"
-                            onClick={() => handleViewVacancy(saved.vacancy_id)}
+                            onClick={() => handleViewVacancy(saved)}
                           >
                             <h3 className="font-semibold text-slate-900">
-                              {vacancyById[saved.vacancy_id]?.title || `Вакансія #${saved.vacancy_id}`}
+                              {saved.vacancy?.title ?? `Вакансія #${saved.vacancy_id}`}
                             </h3>
-                            {companyById[saved.vacancy_id] && (
-                              <span className="text-sm text-slate-600">
-                                • {companyById[saved.vacancy_id].name}
-                              </span>
-                            )}
                           </div>
                           {saved.note && (
                             <p className="mt-2 text-sm text-slate-600">{saved.note}</p>
@@ -1903,9 +1845,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                   <p className="mt-2 text-white/80">Змініть пароль та налаштуйте сповіщення</p>
                 </div>
               </section>
-              <section className="rounded-3xl bg-white p-8 shadow-medium">
-                <p className="text-slate-600">Тут будуть налаштування...</p>
-              </section>
+              <PasswordSettingsPanel />
             </div>
           ) : (
             <div className="space-y-6">

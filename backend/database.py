@@ -93,7 +93,7 @@ users_table = Table(
     'users',
     metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('username', String(50), unique=True, nullable=False),
+    Column('username', String(50), unique=False, nullable=False),
     Column('email', String(255), unique=True, nullable=False),
     Column('password', String(255), nullable=False),
     Column('credits', Integer, nullable=False, default=50, server_default='0'),
@@ -337,7 +337,6 @@ vacancies_table = Table(
     Column('experience_years_min', Integer),
     Column('experience_years_max', Integer),
     Column('work_format', ARRAY(String(50))),
-    Column('expires_at', DateTime(timezone=True)),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
     Column(
         'updated_at',
@@ -506,6 +505,39 @@ job_applications_table = Table(
     Index("ix_job_applications_user_id", "user_id"),
     Index("ix_job_applications_vacancy_id", "vacancy_id"),
     Index("ix_job_applications_resume_id", "resume_id"),
+)
+
+candidate_match_ai_cache_table = Table(
+    "candidate_match_ai_cache",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("vacancy_id", Integer, ForeignKey("vacancies.id", ondelete="CASCADE"), nullable=False),
+    Column("application_id", Integer, ForeignKey("job_applications.id", ondelete="CASCADE"), nullable=False),
+    Column("vacancy_signature", String(64), nullable=False),
+    Column("application_signature", String(64), nullable=False),
+    Column("score_total", Integer, nullable=False),
+    Column("verdict", String(32), nullable=False),
+    Column("summary", Text, nullable=False),
+    Column("model_name", String(128), nullable=False),
+    Column("analyzed_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+    Column(
+        "updated_at",
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    ),
+    CheckConstraint("score_total >= 0 AND score_total <= 100", name="ck_candidate_match_ai_cache_score_total"),
+    UniqueConstraint(
+        "vacancy_id",
+        "application_id",
+        "vacancy_signature",
+        "application_signature",
+        name="uq_candidate_match_ai_cache_signature",
+    ),
+    Index("ix_candidate_match_ai_cache_vacancy_application", "vacancy_id", "application_id"),
+    Index("ix_candidate_match_ai_cache_analyzed_at", "analyzed_at"),
 )
 
 

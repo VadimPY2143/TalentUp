@@ -152,6 +152,154 @@ class PaymentsService:
             checkout_fields=checkout_fields,
         )
 
+    async def _process_check_status_for_order(
+        self,
+        session: AsyncSession,
+        *,
+        provider: WayForPayProvider,
+        order: dict,
+        order_reference: str,
+        expected_amount: Decimal,
+        provider_payload: dict[str, object],
+    ) -> tuple[str, str, int | None]:
+        check_status_payload = await self._check_status(provider=provider, order_reference=order_reference)
+        LOGGER.info("CHECK_STATUS response: %s", check_status_payload)
+        provider_payload["check_status"] = check_status_payload
+
+        if not provider.verify_check_status_signature(check_status_payload):
+            LOGGER.error("Invalid CHECK_STATUS signature")
+            raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+
+        check_merchant = str(check_status_payload.get("merchantAccount") or "").strip()
+        if check_merchant != provider.merchant_account:
+            LOGGER.error(
+                "Invalid CHECK_STATUS merchantAccount: %s != %s",
+                check_merchant,
+                provider.merchant_account,
+            )
+            raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS merchantAccount")
+
+        check_reference = str(check_status_payload.get("orderReference") or "").strip()
+        if check_reference != order_reference:
+            LOGGER.error("Invalid CHECK_STATUS orderReference: %s != %s", check_reference, order_reference)
+            raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS orderReference")
+
+        check_transaction_status = str(check_status_payload.get("transactionStatus") or "")
+        normalized_check_status = provider.normalize_order_status(check_transaction_status)
+        LOGGER.info(
+            "CHECK_STATUS transaction status: %s (normalized: %s)",
+            check_transaction_status,
+            normalized_check_status,
+        )
+
+        if normalized_check_status == "success":
+            check_amount = _parse_amount(check_status_payload.get("amount"))
+            if check_amount != expected_amount:
+                LOGGER.error("Invalid CHECK_STATUS amount: %s != %s", check_amount, expected_amount)
+                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS amount")
+
+            check_currency = str(check_status_payload.get("currency") or "").upper()
+            if check_currency != "UAH":
+                LOGGER.error("Invalid CHECK_STATUS currency: %s", check_currency)
+                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS currency")
+
+            await self.repository.update_order_status(
+                session=session,
+                order_id=int(order["id"]),
+                status="success",
+                provider_payload=provider_payload,
+                paid_at=datetime.now(timezone.utc),
+            )
+            package = await self.repository.get_package_by_id(
+                session=session,
+                package_id=int(order["package_id"]),
+            )
+            if not package:
+                LOGGER.error("Order package not found for package_id=%s", order["package_id"])
+                raise HTTPException(status_code=500, detail="Order package not found")
+
+            LOGGER.info("Applying credits to user_id=%s, credits=%s", order["user_id"], package["credits"])
+            LOGGER.info("Package found: %s, credits: %s", package["name"], package["credits"])
+            await self.credit_billing_service.apply_purchase(
+                session=session,
+                user_id=int(order["user_id"]),
+                credits=int(package["credits"]),
+                idempotency_key=f"purchase:order:{order['id']}",
+                reference_type="payment_order",
+                reference_id=str(order["id"]),
+                meta={
+                    "provider": "wayforpay",
+                    "provider_order_id": order_reference,
+                },
+            )
+            return normalized_check_status, check_transaction_status, int(package["credits"])
+
+        await self.repository.update_order_status(
+            session=session,
+            order_id=int(order["id"]),
+            status=normalized_check_status,
+            provider_payload=provider_payload,
+        )
+        return normalized_check_status, check_transaction_status, None
+
+    async def _reconcile_pending_orders_for_user(
+        self,
+        session: AsyncSession,
+        *,
+        user_id: int,
+    ) -> None:
+        provider = self._build_provider()
+        pending_orders = await self.repository.list_pending_orders_for_user(
+            session=session,
+            user_id=user_id,
+            provider="wayforpay",
+            limit=5,
+        )
+        if not pending_orders:
+            return
+
+        for pending_order in pending_orders:
+            order_reference = str(pending_order["provider_order_id"])
+            try:
+                order = await self.repository.get_order_by_provider_order_id_for_update(
+                    session=session,
+                    provider_order_id=order_reference,
+                    provider="wayforpay",
+                )
+                if not order or str(order["status"]) != "pending":
+                    await session.rollback()
+                    continue
+
+                expected_amount = _parse_amount(order["amount_uah"])
+                raw_payload = order.get("provider_payload")
+                provider_payload = dict(raw_payload) if isinstance(raw_payload, dict) else {}
+                normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                    session=session,
+                    provider=provider,
+                    order=order,
+                    order_reference=order_reference,
+                    expected_amount=expected_amount,
+                    provider_payload=provider_payload,
+                )
+                await session.commit()
+                if normalized_status == "success":
+                    LOGGER.info(
+                        "WFP reconcile success order_id=%s order_reference=%s credits_applied=%s",
+                        order["id"],
+                        order_reference,
+                        credits_applied,
+                    )
+                else:
+                    LOGGER.info(
+                        "WFP reconcile status order_id=%s order_reference=%s status=%s",
+                        order["id"],
+                        order_reference,
+                        normalized_status,
+                    )
+            except Exception:
+                await session.rollback()
+                LOGGER.exception("WFP reconcile failed for order_reference=%s", order_reference)
+
     async def process_wayforpay_webhook(
         self,
         session: AsyncSession,
@@ -222,93 +370,32 @@ class PaymentsService:
 
         provider_payload: dict[str, object] = {"callback": payload}
 
-        if provider.is_approved(callback_status):
-            LOGGER.info("Payment approved by callback, checking status...")
-            check_status_payload = await self._check_status(provider=provider, order_reference=order_reference)
-            LOGGER.info("CHECK_STATUS response: %s", check_status_payload)
-            provider_payload["check_status"] = check_status_payload
-
-            if not provider.verify_check_status_signature(check_status_payload):
-                LOGGER.error("Invalid CHECK_STATUS signature")
-                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
-
-            check_merchant = str(check_status_payload.get("merchantAccount") or "").strip()
-            if check_merchant != provider.merchant_account:
-                LOGGER.error("Invalid CHECK_STATUS merchantAccount: %s != %s", check_merchant, provider.merchant_account)
-                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS merchantAccount")
-
-            check_reference = str(check_status_payload.get("orderReference") or "").strip()
-            if check_reference != order_reference:
-                LOGGER.error("Invalid CHECK_STATUS orderReference: %s != %s", check_reference, order_reference)
-                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS orderReference")
-
-            check_amount = _parse_amount(check_status_payload.get("amount"))
-            if check_amount != expected_amount:
-                LOGGER.error("Invalid CHECK_STATUS amount: %s != %s", check_amount, expected_amount)
-                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS amount")
-
-            check_currency = str(check_status_payload.get("currency") or "").upper()
-            if check_currency != "UAH":
-                LOGGER.error("Invalid CHECK_STATUS currency: %s", check_currency)
-                raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS currency")
-
-            check_transaction_status = str(check_status_payload.get("transactionStatus") or "")
-            normalized_check_status = provider.normalize_order_status(check_transaction_status)
-            LOGGER.info("CHECK_STATUS transaction status: %s (normalized: %s)", check_transaction_status, normalized_check_status)
-
+        if normalized_callback_status in {"success", "pending"}:
+            LOGGER.info("Callback status %s, checking status before crediting...", callback_status)
+            normalized_check_status, check_transaction_status, credits_applied = await self._process_check_status_for_order(
+                session=session,
+                provider=provider,
+                order=order,
+                order_reference=order_reference,
+                expected_amount=expected_amount,
+                provider_payload=provider_payload,
+            )
+            await session.commit()
             if normalized_check_status == "success":
-                await self.repository.update_order_status(
-                    session=session,
-                    order_id=int(order["id"]),
-                    status="success",
-                    provider_payload=provider_payload,
-                    paid_at=datetime.now(timezone.utc),
-                )
-                package = await self.repository.get_package_by_id(
-                    session=session,
-                    package_id=int(order["package_id"]),
-                )
-                if not package:
-                    LOGGER.error("Order package not found for package_id=%s", order["package_id"])
-                    raise HTTPException(status_code=500, detail="Order package not found")
-
-                LOGGER.info("Applying credits to user_id=%s, credits=%s", order["user_id"], package["credits"])
-                LOGGER.info("Package found: %s, credits: %s", package["name"], package["credits"])
-                await self.credit_billing_service.apply_purchase(
-                    session=session,
-                    user_id=int(order["user_id"]),
-                    credits=int(package["credits"]),
-                    idempotency_key=f"purchase:order:{order['id']}",
-                    reference_type="payment_order",
-                    reference_id=str(order["id"]),
-                    meta={
-                        "provider": "wayforpay",
-                        "provider_order_id": order_reference,
-                    },
-                )
-                await session.commit()
                 LOGGER.info(
                     "WFP payment approved order_id=%s order_reference=%s check_status=%s credits_applied=%s",
                     order["id"],
                     order_reference,
                     check_transaction_status,
-                    package["credits"],
+                    credits_applied,
                 )
-                return ack
-
-            await self.repository.update_order_status(
-                session=session,
-                order_id=int(order["id"]),
-                status=normalized_check_status,
-                provider_payload=provider_payload,
-            )
-            await session.commit()
-            LOGGER.info(
-                "WFP payment not approved by CHECK_STATUS order_id=%s order_reference=%s check_status=%s",
-                order["id"],
-                order_reference,
-                check_transaction_status,
-            )
+            else:
+                LOGGER.info(
+                    "WFP payment not approved by CHECK_STATUS order_id=%s order_reference=%s check_status=%s",
+                    order["id"],
+                    order_reference,
+                    check_transaction_status,
+                )
             return ack
 
         await self.repository.update_order_status(
@@ -346,6 +433,7 @@ class PaymentsService:
         return payload
 
     async def get_balance(self, session: AsyncSession, *, user_id: int) -> int:
+        await self._reconcile_pending_orders_for_user(session=session, user_id=user_id)
         return await self.credit_billing_service.get_balance(session=session, user_id=user_id)
 
     async def list_transactions(

@@ -1,0 +1,41 @@
+- generic [ref=e3]:
+  - generic [ref=e173]:
+    - generic [ref=e174]:
+      - link "TalentUp" [ref=e175] [cursor=pointer]:
+        - /url: /
+        - img "TalentUp" [ref=e176]
+      - generic [ref=e177]:
+        - heading "Створи профіль та знайди роботу швидше" [level=1] [ref=e178]
+        - list [ref=e179]:
+          - listitem [ref=e180]: Реєстрація за 1 хвилину
+          - listitem [ref=e181]: Ролі для шукача і роботодавця
+          - listitem [ref=e182]: Швидкий доступ до вакансій
+      - paragraph [ref=e183]: TalentUp Career Platform
+    - generic [ref=e185]:
+      - heading "Створити акаунт" [level=2] [ref=e186]
+      - generic [ref=e187]:
+        - button "🧑‍💻 Я шукач роботи Хочу знайти роботу" [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]: 🧑‍💻
+          - generic [ref=e190]:
+            - generic [ref=e191]: Я шукач роботи
+            - generic [ref=e192]: Хочу знайти роботу
+        - button "🏢 Я роботодавець Хочу наймати спеціалістів" [ref=e193] [cursor=pointer]:
+          - generic [ref=e194]: 🏢
+          - generic [ref=e195]:
+            - generic [ref=e196]: Я роботодавець
+            - generic [ref=e197]: Хочу наймати спеціалістів
+        - textbox "Ім'я користувача" [ref=e198]: jobseeker_30042026
+        - textbox "Email" [ref=e199]: jobseeker_30042026@talentup.local
+        - textbox "Пароль (мін. 8 символів)" [ref=e200]: TalentUp2026!
+        - generic [ref=e204]: "body.email: value is not a valid email address: The part after the @-sign is a special-use or reserved name that cannot be used with email."
+        - button "Створити акаунт" [ref=e201] [cursor=pointer]
+      - generic [ref=e202]:
+        - text: Вже маєте акаунт?
+        - link "Увійти" [ref=e203] [cursor=pointer]:
+          - /url: /login
+  - contentinfo [ref=e167]:
+    - generic [ref=e168]:
+      - generic [ref=e169]:
+        - generic [ref=e170]: OK
+        - text: Перевірена платформа TalentUp
+      - generic [ref=e171]: © 2026 TalentUp. All rights reserved.

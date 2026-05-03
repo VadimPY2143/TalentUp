@@ -158,15 +158,6 @@ def apply_vacancy_search_filters(stmt: Select, f: VacancySearchFilters) -> Selec
     if f.published_within:
         conditions.append(vacancies_table.c.created_at >= _published_since(f.published_within))
 
-    if f.exclude_expired:
-        now = datetime.now(timezone.utc)
-        conditions.append(
-            or_(
-                vacancies_table.c.expires_at.is_(None),
-                vacancies_table.c.expires_at > now,
-            )
-        )
-
     if conditions:
         stmt = stmt.where(and_(*conditions))
     return stmt

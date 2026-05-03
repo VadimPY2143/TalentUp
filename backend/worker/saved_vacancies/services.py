@@ -5,11 +5,9 @@ from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import (
-    job_applications_table,
     saved_vacancies_table,
     vacancies_table,
 )
-from worker.applications.models import ApplicationStatus
 
 from employer.vacancy.models import VacancyResponse
 from .models import SavedVacancyOut
@@ -51,20 +49,13 @@ class SavedVacancyService:
                 vacancies_table.c.experience_years_min.label("vacancy_experience_years_min"),
                 vacancies_table.c.experience_years_max.label("vacancy_experience_years_max"),
                 vacancies_table.c.work_format.label("vacancy_work_format"),
-                vacancies_table.c.expires_at.label("vacancy_expires_at"),
                 vacancies_table.c.created_at.label("vacancy_created_at"),
                 vacancies_table.c.updated_at.label("vacancy_updated_at"),
-                job_applications_table.c.id.label("application_id"),
-                job_applications_table.c.status.label("application_status"),
             )
             .select_from(
                 saved_vacancies_table.join(
                     vacancies_table,
                     vacancies_table.c.id == saved_vacancies_table.c.vacancy_id,
-                ).outerjoin(
-                    job_applications_table,
-                    (job_applications_table.c.vacancy_id == saved_vacancies_table.c.vacancy_id)
-                    & (job_applications_table.c.user_id == saved_vacancies_table.c.user_id),
                 )
             )
             .where(saved_vacancies_table.c.user_id == user_id)
@@ -90,18 +81,9 @@ class SavedVacancyService:
             experience_years_min=row.get("vacancy_experience_years_min"),
             experience_years_max=row.get("vacancy_experience_years_max"),
             work_format=row.get("vacancy_work_format"),
-            expires_at=row.get("vacancy_expires_at"),
             created_at=row["vacancy_created_at"],
             updated_at=row["vacancy_updated_at"],
         )
-
-        application_status_raw = row.get("application_status")
-        application_status: ApplicationStatus | None = None
-        if application_status_raw is not None:
-            try:
-                application_status = ApplicationStatus(str(application_status_raw))
-            except ValueError:
-                application_status = None
 
         return SavedVacancyOut(
             id=row["id"],
@@ -110,9 +92,6 @@ class SavedVacancyService:
             note=row.get("note"),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
-            is_applied=row.get("application_id") is not None,
-            application_id=row.get("application_id"),
-            application_status=application_status,
             vacancy=vacancy,
         )
 

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
-import { useNavigate } from "react-router-dom"
 import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import { useChatWidget } from "../chat/ChatWidgetContext"
 import {
   getCandidateMatchingJob,
   getLatestCandidateMatchingJob,
@@ -64,7 +64,6 @@ interface VacancyFormState {
   experience_years_max: string
   employment_type: string[]
   work_format: string[]
-  expires_at: string
   is_active: boolean
 }
 
@@ -97,7 +96,6 @@ const emptyVacancyForm: VacancyFormState = {
   experience_years_max: "",
   employment_type: [],
   work_format: [],
-  expires_at: "",
   is_active: true,
 }
 
@@ -141,7 +139,6 @@ const toVacancyPayload = (form: VacancyFormState): VacancyPayload => ({
   experience_years_max: form.experience_years_max ? Number(form.experience_years_max) : undefined,
   employment_type: form.employment_type.length ? form.employment_type : undefined,
   work_format: form.work_format.length ? form.work_format : undefined,
-  expires_at: form.expires_at ? `${form.expires_at}T00:00:00` : undefined,
   is_active: form.is_active,
 })
 
@@ -174,7 +171,6 @@ const vacancyToForm = (vacancy: VacancyResponse): VacancyFormState => ({
   experience_years_max: vacancy.experience_years_max ? String(vacancy.experience_years_max) : "",
   employment_type: vacancy.employment_type ?? [],
   work_format: vacancy.work_format ?? [],
-  expires_at: vacancy.expires_at ? vacancy.expires_at.slice(0, 10) : "",
   is_active: vacancy.is_active ?? true,
 })
 
@@ -265,7 +261,6 @@ const aiVacancyToForm = (vacancy: VacancyPayload): VacancyFormState => {
     experience_years_max: vacancy.experience_years_max ? String(vacancy.experience_years_max) : "",
     employment_type: employment,
     work_format: workFormat,
-    expires_at: toDateInputValue(vacancy.expires_at),
     is_active: vacancy.is_active ?? true,
   }
 }
@@ -405,7 +400,7 @@ const mapSavedResumeToApplicationResume = (resume: Resume): ApplicationResume =>
 })
 
 const EmployerDashboard = () => {
-  const navigate = useNavigate()
+  const { open: openChatWidget } = useChatWidget()
   const [company, setCompany] = useState<CompanyResponse | null>(null)
   const [extraCompaniesCount, setExtraCompaniesCount] = useState(0)
   const [showCompanyEditor, setShowCompanyEditor] = useState(false)
@@ -713,11 +708,7 @@ const EmployerDashboard = () => {
       return
     }
     setSavedResumesError(null)
-    const params = new URLSearchParams({
-      resumeId: String(resume.id),
-      vacancyId: String(vacancyId),
-    })
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: resume.id, vacancyId })
   }
 
   const handleOpenApplicationResume = async (application: JobApplication) => {
@@ -763,11 +754,7 @@ const EmployerDashboard = () => {
         setApplicationStatusUpdatingId(null)
       }
     }
-    const params = new URLSearchParams({
-      resumeId: String(application.resume_id),
-      vacancyId: String(application.vacancy_id),
-    })
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: application.resume_id, vacancyId: application.vacancy_id })
   }
 
   const handleOpenApplicationResumePdf = async (resumeId?: number | null) => {
@@ -2312,19 +2299,6 @@ const EmployerDashboard = () => {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Дата закриття вакансії
-              </label>
-              <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-orange-500/60"
-                type="date"
-                value={vacancyForm.expires_at}
-                onChange={(event) => setVacancyField("expires_at", event.target.value)}
-                disabled={!company}
-              />
             </div>
 
             <label className="flex items-center gap-2 text-sm text-slate-600">

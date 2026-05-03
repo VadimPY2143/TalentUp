@@ -74,6 +74,11 @@ class UserLogin(BaseModel):
     password: SecretStr
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: SecretStr
+    new_password: SecretStr
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str
 

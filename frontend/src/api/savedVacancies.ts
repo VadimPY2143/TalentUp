@@ -1,4 +1,5 @@
 import { apiFetch } from "./client"
+import type { VacancyResponse } from "../types/vacancy"
 
 export interface SavedVacancy {
   id: number
@@ -7,6 +8,7 @@ export interface SavedVacancy {
   note: string | null
   created_at: string
   updated_at: string
+  vacancy: VacancyResponse
 }
 
 export interface SavedVacancyCreate {
