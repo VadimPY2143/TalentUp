@@ -50,14 +50,9 @@ const Navbar = () => {
           )}
 
           {isAuthenticated && role === "worker" && (
-            <>
-              <Link className="transition hover:text-orange-300" to="/jobs">
-                Знайти роботу
-              </Link>
-              <Link className="transition hover:text-orange-300" to="/analytics">
-                Аналітика (A+C)
-              </Link>
-            </>
+            <Link className="transition hover:text-orange-300" to="/jobs">
+              Знайти роботу
+            </Link>
           )}
 
           {isAuthenticated && role === "employer" && (
