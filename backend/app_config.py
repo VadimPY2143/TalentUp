@@ -53,9 +53,19 @@ def _resolve_cors_origins() -> list[str]:
     if not origins:
         origins.append("http://localhost:5173")
 
+    expanded: list[str] = []
+    for origin in origins:
+        expanded.append(origin)
+        parsed = urlparse(origin)
+        hostname = parsed.hostname or ""
+        if hostname == "localhost":
+            expanded.append(origin.replace("localhost", "127.0.0.1", 1))
+        elif hostname == "127.0.0.1":
+            expanded.append(origin.replace("127.0.0.1", "localhost", 1))
+
     deduplicated: list[str] = []
     seen: set[str] = set()
-    for origin in origins:
+    for origin in expanded:
         if origin not in seen:
             deduplicated.append(origin)
             seen.add(origin)

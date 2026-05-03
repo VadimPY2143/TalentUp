@@ -51,7 +51,7 @@ import type { ApplicationStatus, JobApplication } from "../types/application"
 import type { SavedVacancy } from "../api/savedVacancies"
 import type { VacancyResponse } from "../types/vacancy"
 import Navbar from "./layout/Navbar"
-import AnalyticsDashboard from "./analytics/AnalyticsDashboard"
+import AnalyticsDashboard from "./analytics/AnalyticsDashboardV2"
 import VacancySubscriptionsPanel from "./worker/VacancySubscriptionsPanel"
 import PasswordSettingsPanel from "./worker/PasswordSettingsPanel"
 
