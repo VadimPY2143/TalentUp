@@ -6,7 +6,7 @@ import {
   type FormEvent,
 } from "react"
 import { Link, useSearchParams } from "react-router-dom"
-import { createApplication, listMyApplications } from "../api/applications"
+import { createApplication } from "../api/applications"
 import { getCompanyById } from "../api/companies"
 import { listResumes } from "../api/resumes"
 import { createSavedVacancy, deleteSavedVacancy, listSavedVacancies } from "../api/savedVacancies"
@@ -14,7 +14,7 @@ import CityAutocomplete from "../components/CityAutocomplete"
 import Navbar from "../components/layout/Navbar"
 import VacancyModal from "../components/VacancyModal"
 import { fetchRecommendedVacancies, getVacancyById, searchVacancies } from "../api/vacancies"
-import type { ApplicationStatus, JobApplication } from "../types/application"
+import type { ApplicationStatus } from "../types/application"
 import type { CityOption } from "../types/city"
 import type { CompanyResponse } from "../types/company"
 import type { Resume } from "../types/resume"
@@ -687,7 +687,6 @@ const JobSearchNew = () => {
   const [selectedVacancy, setSelectedVacancy] = useState<VacancyResponse | null>(null)
   const [applyVacancy, setApplyVacancy] = useState<VacancyResponse | null>(null)
   const [workerResumes, setWorkerResumes] = useState<Resume[]>([])
-  const [myApplications, setMyApplications] = useState<JobApplication[]>([])
   const [savedVacancies, setSavedVacancies] = useState<Set<number>>(new Set())
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null)
   const [coverLetter, setCoverLetter] = useState("")
@@ -695,14 +694,6 @@ const JobSearchNew = () => {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasQuery = query.trim().length >= 2
-
-  const applicationByVacancyId = useMemo(() => {
-    const next = new Map<number, JobApplication>()
-    for (const application of myApplications) {
-      next.set(application.vacancy_id, application)
-    }
-    return next
-  }, [myApplications])
 
   const availableResumes = useMemo(
     () => workerResumes.filter((resume) => resume.is_active),
@@ -766,7 +757,6 @@ const JobSearchNew = () => {
   useEffect(() => {
     if (!isAuthenticated || role !== "worker") {
       setWorkerResumes([])
-      setMyApplications([])
       setSavedVacancies(new Set())
       return
     }
@@ -774,16 +764,14 @@ const JobSearchNew = () => {
     let mounted = true
     void (async () => {
       try {
-        const [resumes, applications, saved] = await Promise.all([
+        const [resumes, saved] = await Promise.all([
           listResumes(),
-          listMyApplications(),
           listSavedVacancies(),
         ])
         if (!mounted) {
           return
         }
         setWorkerResumes(resumes)
-        setMyApplications(applications)
         setSavedVacancies(new Set(saved.map((s) => s.vacancy_id)))
       } catch (err) {
         if (!mounted) {
@@ -1015,11 +1003,6 @@ const JobSearchNew = () => {
       return
     }
 
-    if (applicationByVacancyId.has(vacancy.id)) {
-      setActionError("Ви вже відгукнулися на цю вакансію.")
-      return
-    }
-
     if (workerResumes.length === 0) {
       setActionError("Спочатку створіть хоча б одне резюме в Dashboard.")
       return
@@ -1054,12 +1037,11 @@ const JobSearchNew = () => {
     try {
       setIsSubmittingApplication(true)
       setActionError(null)
-      const created = await createApplication({
+      await createApplication({
         vacancy_id: applyVacancy.id,
         resume_id: selectedResumeId,
         cover_letter: coverLetter.trim() || undefined,
       })
-      setMyApplications((prev) => [created, ...prev])
       setActionSuccess("Відгук успішно надіслано.")
       setApplyVacancy(null)
       setCoverLetter("")
@@ -1147,7 +1129,6 @@ const JobSearchNew = () => {
             {vacancies.length > 0 && (
               <div className="grid gap-4 md:grid-cols-2">
                 {vacancies.map((vacancy) => {
-                  const existingApplication = applicationByVacancyId.get(vacancy.id)
                   return (
                   <VacancyCard
                     key={vacancy.id}
@@ -1155,8 +1136,8 @@ const JobSearchNew = () => {
                     companyName={companyById[vacancy.company_id]?.name ?? "Company"}
                     onViewDetails={() => handleViewDetails(vacancy)}
                     onApply={() => openApplyModal(vacancy)}
-                    isApplyDisabled={Boolean(existingApplication)}
-                    applicationStatus={existingApplication?.status}
+                    isApplyDisabled={false}
+                    applicationStatus={undefined}
                     isApplying={isSubmittingApplication && applyVacancy?.id === vacancy.id}
                     isSaved={savedVacancies.has(vacancy.id)}
                     onSave={() => handleSaveVacancy(vacancy.id)}
@@ -1178,8 +1159,8 @@ const JobSearchNew = () => {
         vacancy={selectedVacancy}
         onClose={handleModalClose}
         onApply={() => selectedVacancy && openApplyModal(selectedVacancy)}
-        isApplyDisabled={selectedVacancy ? applicationByVacancyId.has(selectedVacancy.id) : false}
-        applicationStatus={selectedVacancy ? applicationByVacancyId.get(selectedVacancy.id)?.status : undefined}
+        isApplyDisabled={false}
+        applicationStatus={undefined}
       />
 
       <ApplyModal
