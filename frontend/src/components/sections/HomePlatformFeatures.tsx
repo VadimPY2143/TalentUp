@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom"
+import { useChatWidget } from "../../chat/ChatWidgetContext"
+import { useAuth } from "../../auth/useAuth"
 
 const features = [
   {
@@ -15,7 +17,7 @@ const features = [
     description:
       "Починайте діалог між роботодавцем і кандидатом без сторонніх месенджерів та втрати контексту.",
     ctaLabel: "Перейти в повідомлення",
-    ctaTo: "/messages",
+    ctaTo: "/dashboard",
   },
   {
     code: "TR",
@@ -28,6 +30,9 @@ const features = [
 ]
 
 const HomePlatformFeatures = () => {
+  const { isAuthenticated } = useAuth()
+  const { open: openChatWidget } = useChatWidget()
+
   return (
     <section className="bg-[#edf2f8] py-14 md:py-16">
       <div className="mx-auto max-w-[1120px] px-4">
@@ -49,12 +54,31 @@ const HomePlatformFeatures = () => {
               </div>
               <h3 className="mt-4 text-lg font-semibold text-slate-900">{feature.title}</h3>
               <p className="mt-2 flex-1 text-sm text-slate-600">{feature.description}</p>
-              <Link
-                className="mt-5 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                to={feature.ctaTo}
-              >
-                {feature.ctaLabel}
-              </Link>
+              {feature.code === "CH" ? (
+                isAuthenticated ? (
+                  <button
+                    type="button"
+                    className="mt-5 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
+                    onClick={() => openChatWidget()}
+                  >
+                    {feature.ctaLabel}
+                  </button>
+                ) : (
+                  <Link
+                    className="mt-5 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
+                    to="/login"
+                  >
+                    {feature.ctaLabel}
+                  </Link>
+                )
+              ) : (
+                <Link
+                  className="mt-5 inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
+                  to={feature.ctaTo}
+                >
+                  {feature.ctaLabel}
+                </Link>
+              )}
             </article>
           ))}
         </div>

@@ -4,10 +4,11 @@ import {
   useState,
   type FormEvent,
 } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
+import { useChatWidget } from "../chat/ChatWidgetContext"
 import ResumeModal from "../components/ResumeModal"
 import {
   fetchCandidateResumeSummary,
@@ -480,7 +481,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const CandidateSearch = () => {
-  const navigate = useNavigate()
+  const { open: openChatWidget } = useChatWidget()
   const [urlSearchParams] = useSearchParams()
   const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
   const [searchInput, setSearchInput] = useState(queryFromParams)
@@ -866,12 +867,8 @@ const CandidateSearch = () => {
     if (!chatModal || !chatVacancyId) {
       return
     }
-    const params = new URLSearchParams({
-      resumeId: String(chatModal.candidateResumeId),
-      vacancyId: chatVacancyId,
-    })
     setChatModal(null)
-    navigate(`/messages?${params.toString()}`)
+    openChatWidget({ resumeId: chatModal.candidateResumeId, vacancyId: Number(chatVacancyId) })
   }
 
   const showEmptyState = !isLoading && !error && candidates.length === 0

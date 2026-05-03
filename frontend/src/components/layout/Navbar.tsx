@@ -1,11 +1,17 @@
+import { Bell, MessageSquareText } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../auth/useAuth"
 import logo from "../../assets/talentup-logo.png"
-import NotificationBell from "../NotificationBell"
+import { useChatWidget } from "../../chat/ChatWidgetContext"
+import { useNotificationWidget } from "../../notifications/NotificationWidgetContext"
+import { useUnreadNotificationsContext } from "../../notifications/UnreadNotificationsContext"
 
 const Navbar = () => {
   const navigate = useNavigate()
   const { isAuthenticated, role, logout } = useAuth()
+  const { toggle: toggleChat, unreadCount: unreadChats } = useChatWidget()
+  const { toggle: toggleNotifications } = useNotificationWidget()
+  const { unreadCount } = useUnreadNotificationsContext()
 
   const primaryButton =
     "inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600"
@@ -35,10 +41,10 @@ const Navbar = () => {
           {!isAuthenticated && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Знайти роботу
+                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
               </Link>
               <Link className="transition hover:text-orange-300" to="/register?role=employer">
-                Розмістити вакансію
+                Р В Р С•Р В·Р СРЎвЂ“РЎРѓРЎвЂљР С‘РЎвЂљР С‘ Р Р†Р В°Р С”Р В°Р Р…РЎРѓРЎвЂ“РЎР‹
               </Link>
             </>
           )}
@@ -46,10 +52,10 @@ const Navbar = () => {
           {isAuthenticated && role === "worker" && (
             <>
               <Link className="transition hover:text-orange-300" to="/jobs">
-                Знайти роботу
+                Р вЂ”Р Р…Р В°Р в„–РЎвЂљР С‘ РЎР‚Р С•Р В±Р С•РЎвЂљРЎС“
               </Link>
-              <Link className="transition hover:text-orange-300" to="/messages">
-                Повідомлення
+              <Link className="transition hover:text-orange-300" to="/analytics">
+                РђРЅР°Р»С–С‚РёРєР° (A+C)
               </Link>
             </>
           )}
@@ -57,13 +63,10 @@ const Navbar = () => {
           {isAuthenticated && role === "employer" && (
             <>
               <Link className="transition hover:text-orange-300" to="/candidates">
-                База резюме
+                Р вЂР В°Р В·Р В° РЎР‚Р ВµР В·РЎР‹Р СР Вµ
               </Link>
               <Link className="transition hover:text-orange-300" to="/payment?return_to=/dashboard">
-                Купити кредити
-              </Link>
-              <Link className="transition hover:text-orange-300" to="/messages">
-                Повідомлення
+                Р С™РЎС“Р С—Р С‘РЎвЂљР С‘ Р С”РЎР‚Р ВµР Т‘Р С‘РЎвЂљР С‘
               </Link>
             </>
           )}
@@ -72,24 +75,51 @@ const Navbar = () => {
         <div className="flex items-center gap-2 md:gap-3">
           {isAuthenticated ? (
             <>
-              <NotificationBell />
+              <button
+                type="button"
+                onClick={toggleChat}
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"
+                aria-label="Messages"
+              >
+                <MessageSquareText className="h-5 w-5" />
+                {unreadChats > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                    {unreadChats > 99 ? "99+" : unreadChats}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleNotifications}
+                className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 text-white transition hover:border-white/40"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
               <Link
                 to="/dashboard"
                 className="inline-flex items-center justify-center rounded-xl border border-white/25 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/40"
               >
-                Кабінет
+                Р С™Р В°Р В±РЎвЂ“Р Р…Р ВµРЎвЂљ
               </Link>
               <button className={primaryButton} type="button" onClick={handleLogout}>
-                Вийти
+                Р вЂ™Р С‘Р в„–РЎвЂљР С‘
               </button>
             </>
           ) : (
             <>
               <Link to="/register" className={primaryButton}>
-                Зареєструватися
+                Р—Р°СЂРµС”СЃС‚СЂСѓРІР°С‚РёСЃСЏ
               </Link>
               <Link to="/login" className={secondaryButton}>
-                Увійти
+                Р Р€Р Р†РЎвЂ“Р в„–РЎвЂљР С‘
               </Link>
             </>
           )}
