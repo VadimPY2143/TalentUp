@@ -686,8 +686,8 @@ const Messages = ({ embedded = false, resumeId: resumeIdProp, vacancyId: vacancy
                   onChange={(event) => setSelectedVacancyId(event.target.value ? Number(event.target.value) : null)}
                   disabled={isVacanciesLoading}
                 >
-                  <option value="">Р’СЃС– РІР°РєР°РЅСЃС–С—</option>
-                  {!vacancies.length && <option value="">РќРµРјР°С” РґРѕСЃС‚СѓРїРЅРёС… РІР°РєР°РЅСЃС–Р№</option>}
+                  <option value="">Всі вакансії</option>
+                  {!vacancies.length && <option value="">Немає доступних вакансій</option>}
                   {vacancies.map((vacancy) => (
                     <option key={vacancy.id} value={vacancy.id}>
                       {vacancy.title}
