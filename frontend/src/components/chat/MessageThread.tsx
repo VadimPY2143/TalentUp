@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react"
-import { Send, FileText, Briefcase, Check, CheckCheck, MoreVertical, Phone, Video } from "lucide-react"
+import { useEffect, useRef, type KeyboardEvent } from "react"
+import { Send, FileText, Briefcase, Check, CheckCheck, MoreVertical } from "lucide-react"
 import type { ChatUiMessage } from "../../types/chat"
 
 interface MessageThreadProps {
@@ -14,6 +14,7 @@ interface MessageThreadProps {
   isTyping?: boolean
   onOpenVacancy?: () => void
   onOpenResume?: () => void
+  onOpenParticipantProfile?: () => void
   onDraftChange: (value: string) => void
   onSend: () => void
 }
@@ -95,11 +96,11 @@ export const MessageThread = ({
   isTyping = false,
   onOpenVacancy,
   onOpenResume,
+  onOpenParticipantProfile,
   onDraftChange,
   onSend,
 }: MessageThreadProps) => {
   const listRef = useRef<HTMLDivElement | null>(null)
-  const [showOptions, setShowOptions] = useState(false)
 
   useEffect(() => {
     const node = listRef.current
@@ -139,7 +140,17 @@ export const MessageThread = ({
           </div>
 
           <div>
-            <h2 className="text-base font-semibold text-slate-900">{participantLabel}</h2>
+            {onOpenParticipantProfile ? (
+              <button
+                className="text-left text-base font-semibold text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                type="button"
+                onClick={onOpenParticipantProfile}
+              >
+                {participantLabel}
+              </button>
+            ) : (
+              <h2 className="text-base font-semibold text-slate-900">{participantLabel}</h2>
+            )}
             <div className="flex items-center gap-2">
               {vacancyTitle && (
                 <p className="text-xs text-slate-500 flex items-center gap-1">
@@ -179,7 +190,6 @@ export const MessageThread = ({
           <div className="relative">
             <button
               type="button"
-              onClick={() => setShowOptions(!showOptions)}
               className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
             >
               <MoreVertical className="h-4 w-4" />

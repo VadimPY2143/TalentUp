@@ -813,6 +813,10 @@ const EmployerDashboard = () => {
     }
   }
 
+  const handleOpenWorkerProfile = (workerUserId: number) => {
+    navigate(`/workers/${workerUserId}`)
+  }
+
   useEffect(() => {
     loadCompany()
   }, [])
@@ -1119,7 +1123,18 @@ const EmployerDashboard = () => {
               {application.vacancy?.title ?? `Вакансія #${application.vacancy_id}`}
             </h3>
             <p className="mt-1 text-sm text-slate-600">
-              {`Кандидат: ${application.candidate_name || "Невідомий кандидат"}`}
+              Кандидат:{" "}
+              {application.candidate_name ? (
+                <button
+                  className="font-semibold text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                  type="button"
+                  onClick={() => handleOpenWorkerProfile(application.user_id)}
+                >
+                  {application.candidate_name}
+                </button>
+              ) : (
+                "Невідомий кандидат"
+              )}
             </p>
             <div className="mt-1 flex flex-wrap gap-3 text-xs text-slate-500">
               <span>Резюме: {application.resume_title ?? "Без назви"}</span>
@@ -1960,7 +1975,13 @@ const EmployerDashboard = () => {
                                         #{item.rank}
                                       </span>
                                       <h5 className="truncate text-sm font-semibold text-slate-900">
-                                        {item.candidate_name}
+                                        <button
+                                          className="truncate text-left text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                                          type="button"
+                                          onClick={() => handleOpenWorkerProfile(item.candidate_user_id)}
+                                        >
+                                          {item.candidate_name}
+                                        </button>
                                       </h5>
                                     </div>
                                     <p className="mt-1 text-sm text-slate-600">
