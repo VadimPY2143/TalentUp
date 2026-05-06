@@ -319,3 +319,395 @@
 2026-05-03 11:22:44 - moodshare - INFO - Currency: UAH
 2026-05-03 11:22:44 - moodshare - INFO - Transaction status: Approved (normalized: success)
 2026-05-03 11:22:44 - moodshare - INFO - WFP duplicate callback order_id=17 order_reference=wfp_order_1
+2026-05-03 19:02:39 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:03:35 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:52 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:03:53 - moodshare - INFO - User 2 connected to notifications ws
+2026-05-03 19:04:05 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:04:27 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:06:38 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:13 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:13 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:13 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:13 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:07:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:08:53 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:10:51 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:11:56 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:11 - moodshare - INFO - WFP order created order_id=1 provider_order_id=wfp_9871f0e515774a7b8f5ad35e33fcaa13 user_id=3 service_url=http://127.0.0.1:8000/payments/webhook/wayforpay
+2026-05-03 19:12:24 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:30 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:12:35 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:12:35 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:12:35 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:12:36 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:12:36 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:12:36 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:16:20 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:16:20 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:16:20 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:16:20 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:16:20 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:16:34 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:16:34 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:16:34 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:16:35 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:16:35 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:16:35 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:19:40 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:40 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:45 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:45 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:51 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:51 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:52 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:52 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:52 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:19:52 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:19:52 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:19:53 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:19:53 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:19:53 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:19:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:59 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:59 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:59 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:19:59 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:19:59 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:19:59 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:19:59 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:00 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:00 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:00 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:00 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:00 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:00 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:01 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:01 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:01 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:02 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:02 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:05 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:05 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:08 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:08 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:09 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:09 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:09 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:10 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:10 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:10 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:10 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:10 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:11 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:11 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:12 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:12 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:12 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:12 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:12 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:12 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:14 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:15 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:15 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:22 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:23 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:23 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:23 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:23 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:23 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:20:23 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:20:23 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:20:27 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:27 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:28 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:28 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:34 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:20:34 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:21:25 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:21:26 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:21:26 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:21:26 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:21:26 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:21:26 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:21:26 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:22:25 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:22:26 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:22:26 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:22:34 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:22:34 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:55 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:56 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:56 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:56 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:23:56 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:23:56 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:23:57 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:57 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:57 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:23:57 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:23:57 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:23:57 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:23:57 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:23:57 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:23:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:23:58 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:23:58 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:23:58 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:43:48 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:48 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:48 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:50 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:50 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:50 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:51 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:51 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:52 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:43:52 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:43:52 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:43:52 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:43:53 - moodshare - INFO - CHECK_STATUS response: {'reasonCode': 1118, 'reason': 'Merchant Restriction'}
+2026-05-03 19:43:53 - moodshare - ERROR - Invalid CHECK_STATUS signature
+2026-05-03 19:43:53 - moodshare - ERROR - WFP reconcile failed for order_reference=wfp_9871f0e515774a7b8f5ad35e33fcaa13
+Traceback (most recent call last):
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 276, in _reconcile_pending_orders_for_user
+    normalized_status, _, credits_applied = await self._process_check_status_for_order(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vital\WebstormProjects\TalentUp\backend\payments\services.py", line 171, in _process_check_status_for_order
+    raise HTTPException(status_code=502, detail="Invalid CHECK_STATUS signature")
+fastapi.exceptions.HTTPException: 502: Invalid CHECK_STATUS signature
+2026-05-03 19:46:23 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:46:23 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:46:23 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:53:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:53:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:53:58 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:03 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:03 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:03 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:03 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:26 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:26 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:29 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:29 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 19:54:29 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:41 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:41 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:42 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:46 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:46 - moodshare - INFO - User 3 connected to notifications ws
+2026-05-03 20:05:46 - moodshare - INFO - User 3 connected to notifications ws

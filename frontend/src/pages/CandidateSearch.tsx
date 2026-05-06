@@ -4,11 +4,10 @@ import {
   useState,
   type FormEvent,
 } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import CityAutocomplete from "../components/CityAutocomplete"
 import AISparkleIcon from "../components/icons/AISparkleIcon"
 import Navbar from "../components/layout/Navbar"
-import { useChatWidget } from "../chat/ChatWidgetContext"
 import ResumeModal from "../components/ResumeModal"
 import {
   fetchCandidateResumeSummary,
@@ -481,7 +480,7 @@ const Pagination = ({ page, totalPages, onPageChange }: PaginationProps) => (
 )
 
 const CandidateSearch = () => {
-  const { open: openChatWidget } = useChatWidget()
+  const navigate = useNavigate()
   const [urlSearchParams] = useSearchParams()
   const queryFromParams = (urlSearchParams.get("query") ?? "").trim()
   const [searchInput, setSearchInput] = useState(queryFromParams)
@@ -867,8 +866,12 @@ const CandidateSearch = () => {
     if (!chatModal || !chatVacancyId) {
       return
     }
+    const params = new URLSearchParams({
+      resumeId: String(chatModal.candidateResumeId),
+      vacancyId: chatVacancyId,
+    })
     setChatModal(null)
-    openChatWidget({ resumeId: chatModal.candidateResumeId, vacancyId: Number(chatVacancyId) })
+    navigate(`/messages?${params.toString()}`)
   }
 
   const showEmptyState = !isLoading && !error && candidates.length === 0
@@ -965,8 +968,8 @@ const CandidateSearch = () => {
         </div>
       </div>
       {chatModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-strong">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/35 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-4 shadow-strong sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
@@ -1026,8 +1029,8 @@ const CandidateSearch = () => {
         </div>
       )}
       {summaryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-sm px-4 py-6">
-          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-strong">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/35 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+          <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-4 shadow-strong sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">

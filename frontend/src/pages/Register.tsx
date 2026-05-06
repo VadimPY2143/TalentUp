@@ -1,16 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { registerUser } from "../api/auth"
-import type { UserRole } from "../types/auth"
 import logo from "../assets/talentup-logo.png"
+import type { UserRole } from "../types/auth"
 
 const Register = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialRole = searchParams.get("role")
-  const [role, setRole] = useState<UserRole>(
-    initialRole === "employer" ? "employer" : "worker",
-  )
+  const [role, setRole] = useState<UserRole>(initialRole === "employer" ? "employer" : "worker")
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -19,9 +17,7 @@ const Register = () => {
 
   useEffect(() => {
     const roleParam = searchParams.get("role")
-    if (roleParam === "worker" || roleParam === "employer") {
-      setRole(roleParam)
-    }
+    if (roleParam === "worker" || roleParam === "employer") setRole(roleParam)
   }, [searchParams])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -56,19 +52,13 @@ const Register = () => {
   return (
     <div className="min-h-screen w-full bg-[#e9edf4]">
       <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-2">
-        <div className="relative flex min-h-[42vh] flex-col justify-between gap-8 bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white md:p-12 lg:min-h-screen">
+        <div className="relative flex min-h-[36vh] flex-col justify-between gap-8 bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white md:p-12 lg:min-h-screen">
           <Link to="/" className="inline-flex items-center">
-            <img
-              src={logo}
-              alt="TalentUp"
-              className="h-16 w-auto origin-left scale-[1.35] md:h-20"
-            />
+            <img src={logo} alt="TalentUp" className="h-14 w-auto origin-left scale-[1.25] sm:h-16 md:h-20" />
           </Link>
           <div>
-            <h1 className="font-display text-3xl font-semibold md:text-4xl">
-              Створи профіль та знайди роботу швидше
-            </h1>
-            <ul className="mt-6 space-y-2 text-sm text-white/80">
+            <h1 className="text-2xl font-semibold sm:text-3xl md:text-4xl">Створи профіль та знайди роботу швидше</h1>
+            <ul className="mt-4 space-y-2 text-sm text-white/80 sm:mt-6">
               <li>Реєстрація за 1 хвилину</li>
               <li>Ролі для шукача і роботодавця</li>
               <li>Швидкий доступ до вакансій</li>
@@ -77,9 +67,9 @@ const Register = () => {
           <p className="text-xs text-white/55">TalentUp Career Platform</p>
         </div>
 
-        <div className="flex min-h-[58vh] items-center justify-center bg-[#f4f6fa] p-8 md:p-10 lg:min-h-screen">
-          <div className="w-full max-w-[520px]">
-            <h2 className="text-center font-display text-2xl font-semibold text-slate-900">Створити акаунт</h2>
+        <div className="flex min-h-[60vh] items-center justify-center bg-[#f4f6fa] p-4 sm:p-6 md:p-10 lg:min-h-screen">
+          <div className="w-full max-w-[520px] rounded-2xl bg-white p-4 shadow-soft sm:p-6 md:bg-transparent md:p-0 md:shadow-none">
+            <h2 className="text-center text-2xl font-semibold text-slate-900">Створити акаунт</h2>
 
             <form className="mt-7 space-y-3" onSubmit={handleSubmit}>
               <button type="button" className={roleButton("worker")} onClick={() => setRole("worker")}>
@@ -99,20 +89,20 @@ const Register = () => {
               </button>
 
               <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
                 placeholder="Ім'я користувача"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
               />
               <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
                 placeholder="Email"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
               />
               <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 placeholder:text-slate-500 outline-none focus:border-orange-500/60"
                 placeholder="Пароль (мін. 8 символів)"
                 type="password"
                 value={password}
@@ -126,7 +116,7 @@ const Register = () => {
               )}
 
               <button
-                className="mt-2 w-full rounded-xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-2 h-11 w-full rounded-xl bg-orange-500 px-6 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
                 type="submit"
                 disabled={isSubmitting}
               >
@@ -135,7 +125,10 @@ const Register = () => {
             </form>
 
             <div className="mt-6 text-center text-sm text-slate-500">
-              Вже маєте акаунт? <Link className="font-semibold text-orange-500" to="/login">Увійти</Link>
+              Вже маєте акаунт?{" "}
+              <Link className="font-semibold text-orange-500" to="/login">
+                Увійти
+              </Link>
             </div>
           </div>
         </div>

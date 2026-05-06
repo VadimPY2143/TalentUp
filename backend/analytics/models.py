@@ -51,7 +51,6 @@ class AnalyticsTimeseriesPointOut(BaseModel):
 
 class AnalyticsFunnelStepOut(BaseModel):
     step: str
-
     count: int
 
 

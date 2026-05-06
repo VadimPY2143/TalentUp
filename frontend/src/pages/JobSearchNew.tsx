@@ -255,7 +255,7 @@ const FiltersPanel = ({
   onCitySelect,
   onClear,
 }: FiltersPanelProps) => (
-  <aside className="h-fit self-start rounded-[26px] border border-slate-200 bg-white p-5 shadow-medium">
+  <aside className="h-fit self-start rounded-[24px] border border-slate-200 bg-white p-4 shadow-medium sm:rounded-[26px] sm:p-5">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Фільтри</p>
@@ -438,9 +438,9 @@ const VacancyCard = ({
   )
 
   return (
-    <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300">
+    <article className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-soft transition hover:-translate-y-0.5 hover:border-orange-300 sm:p-5">
       <div>
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="flex-1">
             <h3 className="text-base font-semibold text-slate-900">{vacancy.title}</h3>
             <Link
@@ -450,7 +450,7 @@ const VacancyCard = ({
               {companyName}
             </Link>
           </div>
-          <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+          <div className="max-w-full self-start rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
             {formatExperience(vacancy.experience_years_min, vacancy.experience_years_max)}
           </div>
         </div>
@@ -505,7 +505,7 @@ const VacancyCard = ({
         )}
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <button
           className="flex-1 rounded-lg bg-[#1f2f5e] px-4 py-2.5 text-xs font-semibold text-white shadow-soft transition hover:bg-[#1b294f]"
           type="button"
@@ -595,8 +595,8 @@ const ApplyModal = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
-      <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-slate-900/40 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+      <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-strong sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Application</p>
@@ -1064,8 +1064,8 @@ const JobSearchNew = () => {
     <div className="min-h-screen bg-[#e9edf4]">
       <Navbar />
 
-      <div className="mx-auto max-w-[1240px] px-4 pb-12 pt-8">
-        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium md:p-8">
+      <div className="mx-auto max-w-[1240px] px-3 pb-10 pt-6 sm:px-4 sm:pb-12 sm:pt-8">
+        <section className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-4 text-white shadow-medium sm:rounded-[30px] sm:p-6 md:p-8">
           <div className="pointer-events-none absolute -right-12 top-2 h-44 w-44 rounded-full bg-orange-400/20 blur-3xl" />
           <div className="pointer-events-none absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
 
@@ -1088,7 +1088,7 @@ const JobSearchNew = () => {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[320px,1fr]">
+        <div className="mt-5 grid gap-4 sm:mt-6 sm:gap-6 lg:grid-cols-[320px,1fr]">
           <FiltersPanel
             filters={filters}
             onToggleEmployment={toggleEmploymentType}

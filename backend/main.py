@@ -14,18 +14,6 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 app = FastAPI()
 http_settings = load_http_settings()
 
-@app.middleware("http")
-async def security_headers_middleware(request, call_next):
-    """
-    Baseline security headers. These are safe defaults for most APIs and also
-    improve protection for the built-in /docs Swagger UI.
-    """
-    response = await call_next(request)
-    response.headers.setdefault("X-Content-Type-Options", "nosniff")
-    response.headers.setdefault("X-Frame-Options", "DENY")
-    response.headers.setdefault("Referrer-Policy", "no-referrer")
-    return response
-
 from cities.views import router as cities_router
 from employer.company.views import router as company_router
 from employer.candidate_matching.views import router as candidate_matching_router
