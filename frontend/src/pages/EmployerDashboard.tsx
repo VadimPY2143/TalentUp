@@ -1214,8 +1214,8 @@ const EmployerDashboard = () => {
     <div className="min-h-screen bg-[#edf2f8]">
       <Navbar />
 
-      <div className="mx-auto max-w-[1280px] px-4 pb-12 pt-8">
-        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-7 text-white shadow-medium md:p-10">
+      <div className="mx-auto max-w-[1280px] px-3 pb-8 pt-4 sm:px-4 sm:pb-12 sm:pt-8">
+        <section className="relative overflow-hidden rounded-[30px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-5 text-white shadow-medium sm:p-7 md:p-10">
           <div className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-orange-400/20 blur-2xl" />
           <div className="pointer-events-none absolute -left-8 bottom-0 h-44 w-44 rounded-full bg-cyan-300/20 blur-2xl" />
           <div className="relative">
@@ -2362,8 +2362,8 @@ const EmployerDashboard = () => {
         )}
 
         {selectedApplicationResume && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 py-6 backdrop-blur-sm">
-            <div className="w-full max-h-[92vh] max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-strong">
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+            <div className="w-full max-h-[92vh] max-w-3xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-strong sm:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Повне резюме</p>

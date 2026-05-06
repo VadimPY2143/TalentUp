@@ -63,12 +63,11 @@ const Messages = () => {
   const navigate = useNavigate()
   const isEmployer = role === "employer"
   const [searchParams] = useSearchParams()
+
   const resumeId = Number(searchParams.get("resumeId"))
   const vacancyId = Number(searchParams.get("vacancyId"))
-  const normalizedResumeId =
-    Number.isFinite(resumeId) && resumeId > 0 ? resumeId : null
-  const normalizedVacancyId =
-    Number.isFinite(vacancyId) && vacancyId > 0 ? vacancyId : null
+  const normalizedResumeId = Number.isFinite(resumeId) && resumeId > 0 ? resumeId : null
+  const normalizedVacancyId = Number.isFinite(vacancyId) && vacancyId > 0 ? vacancyId : null
 
   const [chats, setChats] = useState<MyChatResponse[]>([])
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null)
@@ -86,10 +85,25 @@ const Messages = () => {
   const [openedVacancy, setOpenedVacancy] = useState<VacancyResponse | null>(null)
   const [openedResume, setOpenedResume] = useState<ChatResumeResponse | null>(null)
 
+  const [isMobileLayout, setIsMobileLayout] = useState(() => (typeof window !== "undefined" ? window.innerWidth < 1024 : false))
+  const [mobilePane, setMobilePane] = useState<"list" | "thread">("list")
+
   const socketRef = useRef<WebSocket | null>(null)
   const chatsRef = useRef<MyChatResponse[]>([])
   const vacancyMapRef = useRef<Record<number, VacancyResponse>>({})
   const autoOpenHandledRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    const onResize = () => {
+      const nextIsMobile = window.innerWidth < 1024
+      setIsMobileLayout(nextIsMobile)
+      if (!nextIsMobile) {
+        setMobilePane("list")
+      }
+    }
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
 
   useEffect(() => {
     chatsRef.current = chats
@@ -101,24 +115,21 @@ const Messages = () => {
 
   const loadVacancyContextForChats = useCallback(async (nextChats: MyChatResponse[]) => {
     const vacancyIds = Array.from(new Set(nextChats.map((chat) => chat.vacancy_id)))
-    const missingIds = vacancyIds.filter((vacancyId) => !vacancyMapRef.current[vacancyId])
-    if (!missingIds.length) {
-      return
-    }
+    const missingIds = vacancyIds.filter((id) => !vacancyMapRef.current[id])
+    if (!missingIds.length) return
+
     const resolved = await Promise.all(
-      missingIds.map(async (vacancyId) => {
+      missingIds.map(async (id) => {
         try {
-          const vacancy = await getVacancyById(vacancyId)
-          return vacancy
+          return await getVacancyById(id)
         } catch {
           return null
         }
       }),
     )
     const mapped = resolved.filter((item): item is VacancyResponse => item !== null)
-    if (!mapped.length) {
-      return
-    }
+    if (!mapped.length) return
+
     setChatVacancyById((prev) => {
       const next = { ...prev }
       for (const vacancy of mapped) {
@@ -142,9 +153,7 @@ const Messages = () => {
   )
 
   const visibleChats = useMemo(() => {
-    if (!isEmployer || selectedVacancyId === null) {
-      return chats
-    }
+    if (!isEmployer || selectedVacancyId === null) return chats
     return chats.filter((chat) => chat.vacancy_id === selectedVacancyId)
   }, [chats, isEmployer, selectedVacancyId])
 
@@ -154,9 +163,7 @@ const Messages = () => {
   )
 
   const activeMessages = useMemo(() => {
-    if (!selectedChatId) {
-      return []
-    }
+    if (!selectedChatId) return []
     return messagesByChatId[selectedChatId] ?? []
   }, [messagesByChatId, selectedChatId])
 
@@ -198,14 +205,13 @@ const Messages = () => {
 
   const openOrCreateConversation = useCallback(
     async (resumeIdToOpen: number) => {
-      if (!isEmployer) {
-        return null
-      }
+      if (!isEmployer) return null
       const existingChat = chatsRef.current.find(
         (chat) => chat.resume_id === resumeIdToOpen && chat.vacancy_id === selectedVacancyId,
       )
       if (existingChat) {
         setSelectedChatId(existingChat.id)
+        if (isMobileLayout) setMobilePane("thread")
         return existingChat.id
       }
 
@@ -215,18 +221,13 @@ const Messages = () => {
       }
 
       try {
-        const created = await createChat({
-          vacancy_id: selectedVacancyId,
-          resume_id: resumeIdToOpen,
-        })
-        const createdChat: MyChatResponse = {
-          ...created,
-          unread_count: 0,
-        }
+        const created = await createChat({ vacancy_id: selectedVacancyId, resume_id: resumeIdToOpen })
+        const createdChat: MyChatResponse = { ...created, unread_count: 0 }
         setChats((prev) => sortChatsByRecent([createdChat, ...prev.filter((chat) => chat.id !== created.id)]))
         void loadVacancyContextForChats([createdChat])
         setPreviewByChatId((prev) => ({ ...prev, [created.id]: null }))
         setSelectedChatId(created.id)
+        if (isMobileLayout) setMobilePane("thread")
         return created.id
       } catch (err) {
         const detail = err instanceof Error ? err.message : "Не вдалося створити чат"
@@ -237,6 +238,7 @@ const Messages = () => {
           )
           if (matched) {
             setSelectedChatId(matched.id)
+            if (isMobileLayout) setMobilePane("thread")
             return matched.id
           }
         }
@@ -244,7 +246,7 @@ const Messages = () => {
         return null
       }
     },
-    [isEmployer, loadChatsAndPreviews, loadVacancyContextForChats, selectedVacancyId],
+    [isEmployer, isMobileLayout, loadChatsAndPreviews, loadVacancyContextForChats, selectedVacancyId],
   )
 
   useEffect(() => {
@@ -265,9 +267,7 @@ const Messages = () => {
       setIsVacanciesLoading(true)
       try {
         const companies = await listCompanies()
-        if (!isMounted) {
-          return
-        }
+        if (!isMounted) return
         const primaryCompanyId = companies[0]?.id
         if (!primaryCompanyId) {
           setVacancies([])
@@ -275,26 +275,19 @@ const Messages = () => {
           return
         }
         const companyVacancies = await listCompanyVacancies(primaryCompanyId)
-        if (!isMounted) {
-          return
-        }
+        if (!isMounted) return
         setVacancies(companyVacancies)
-        const vacancyFromQueryExists =
+        const queryExists =
           normalizedVacancyId !== null && companyVacancies.some((vacancy) => vacancy.id === normalizedVacancyId)
-        setSelectedVacancyId(vacancyFromQueryExists ? normalizedVacancyId : (companyVacancies[0]?.id ?? null))
+        setSelectedVacancyId(queryExists ? normalizedVacancyId : (companyVacancies[0]?.id ?? null))
       } catch (err) {
-        if (!isMounted) {
-          return
-        }
+        if (!isMounted) return
         const message = err instanceof Error ? err.message : "Не вдалося завантажити вакансії"
         setChatError(message)
       } finally {
-        if (isMounted) {
-          setIsVacanciesLoading(false)
-        }
+        if (isMounted) setIsVacanciesLoading(false)
       }
     }
-
     void loadVacancies()
     return () => {
       isMounted = false
@@ -302,9 +295,7 @@ const Messages = () => {
   }, [isEmployer, normalizedVacancyId])
 
   useEffect(() => {
-    if (!selectedChatId) {
-      return
-    }
+    if (!selectedChatId) return
     let isMounted = true
     setIsMessagesLoading(true)
     setChatError(null)
@@ -312,32 +303,18 @@ const Messages = () => {
     const loadHistory = async () => {
       try {
         const data = await listChatMessages(selectedChatId, 100, 0)
-        if (!isMounted) {
-          return
-        }
-        setMessagesByChatId((prev) => ({
-          ...prev,
-          [selectedChatId]: toUiMessages(selectedChatId, data.messages),
-        }))
-        setPreviewByChatId((prev) => ({
-          ...prev,
-          [selectedChatId]: data.messages[0] ?? null,
-        }))
+        if (!isMounted) return
+        setMessagesByChatId((prev) => ({ ...prev, [selectedChatId]: toUiMessages(selectedChatId, data.messages) }))
+        setPreviewByChatId((prev) => ({ ...prev, [selectedChatId]: data.messages[0] ?? null }))
         setChats((prev) =>
-          sortChatsByRecent(
-            prev.map((chat) => (chat.id === selectedChatId ? { ...chat, unread_count: 0 } : chat)),
-          ),
+          sortChatsByRecent(prev.map((chat) => (chat.id === selectedChatId ? { ...chat, unread_count: 0 } : chat))),
         )
       } catch (err) {
-        if (!isMounted) {
-          return
-        }
+        if (!isMounted) return
         const message = err instanceof Error ? err.message : "Не вдалося завантажити повідомлення"
         setChatError(message)
       } finally {
-        if (isMounted) {
-          setIsMessagesLoading(false)
-        }
+        if (isMounted) setIsMessagesLoading(false)
       }
     }
 
@@ -348,26 +325,13 @@ const Messages = () => {
   }, [selectedChatId])
 
   useEffect(() => {
-    if (!isEmployer) {
-      return
-    }
-    if (!normalizedResumeId) {
-      return
-    }
-    if (!selectedVacancyId) {
-      return
-    }
-    if (autoOpenHandledRef.current === normalizedResumeId) {
-      return
-    }
-    if (isChatsLoading || isVacanciesLoading) {
-      return
-    }
+    if (!isEmployer || !normalizedResumeId || !selectedVacancyId) return
+    if (autoOpenHandledRef.current === normalizedResumeId) return
+    if (isChatsLoading || isVacanciesLoading) return
+
     void (async () => {
       const chatId = await openOrCreateConversation(normalizedResumeId)
-      if (chatId) {
-        autoOpenHandledRef.current = normalizedResumeId
-      }
+      if (chatId) autoOpenHandledRef.current = normalizedResumeId
     })()
   }, [
     isChatsLoading,
@@ -380,19 +344,15 @@ const Messages = () => {
 
   useEffect(() => {
     if (!visibleChats.length) {
-      if (selectedChatId !== null) {
-        setSelectedChatId(null)
-      }
+      if (selectedChatId !== null) setSelectedChatId(null)
       return
     }
     if (selectedChatId === null) {
       setSelectedChatId(visibleChats[0].id)
       return
     }
-    const isSelectedVisible = visibleChats.some((chat) => chat.id === selectedChatId)
-    if (!isSelectedVisible) {
-      setSelectedChatId(visibleChats[0].id)
-    }
+    const isVisible = visibleChats.some((chat) => chat.id === selectedChatId)
+    if (!isVisible) setSelectedChatId(visibleChats[0].id)
   }, [selectedChatId, visibleChats])
 
   useEffect(() => {
@@ -400,7 +360,6 @@ const Messages = () => {
       setIsSocketReady(false)
       return
     }
-
     const ws = new WebSocket(buildChatWebSocketUrl(selectedChatId, token))
     socketRef.current = ws
 
@@ -416,22 +375,14 @@ const Messages = () => {
       } catch {
         return
       }
-
-      if (!payload || typeof payload !== "object") {
-        return
-      }
+      if (!payload || typeof payload !== "object") return
 
       const envelope = payload as { type?: string; detail?: string }
       if (envelope.type === "error") {
-        if (typeof envelope.detail === "string") {
-          setChatError(envelope.detail)
-        }
+        if (typeof envelope.detail === "string") setChatError(envelope.detail)
         return
       }
-
-      if (envelope.type !== "message") {
-        return
-      }
+      if (envelope.type !== "message") return
 
       const messagePayload = payload as ChatSocketMessage
       const chat = chatsRef.current.find((item) => item.id === messagePayload.chat_id)
@@ -454,9 +405,7 @@ const Messages = () => {
 
       setMessagesByChatId((prev) => {
         const current = prev[messagePayload.chat_id] ?? []
-        if (current.some((item) => item.serverId === incoming.serverId)) {
-          return prev
-        }
+        if (current.some((item) => item.serverId === incoming.serverId)) return prev
         const next = [...current]
         if (isOwnMessage) {
           const optimisticIndex = next.findIndex(
@@ -466,11 +415,8 @@ const Messages = () => {
               item.chatId === incoming.chatId &&
               item.text === incoming.text,
           )
-          if (optimisticIndex >= 0) {
-            next[optimisticIndex] = incoming
-          } else {
-            next.push(incoming)
-          }
+          if (optimisticIndex >= 0) next[optimisticIndex] = incoming
+          else next.push(incoming)
         } else {
           next.push(incoming)
         }
@@ -478,59 +424,35 @@ const Messages = () => {
         return { ...prev, [messagePayload.chat_id]: next }
       })
 
-      setPreviewByChatId((prev) => ({
-        ...prev,
-        [messagePayload.chat_id]: toPreviewMessage(messagePayload),
-      }))
-
+      setPreviewByChatId((prev) => ({ ...prev, [messagePayload.chat_id]: toPreviewMessage(messagePayload) }))
       setChats((prev) =>
         sortChatsByRecent(
           prev.map((item) => {
-            if (item.id !== messagePayload.chat_id) {
-              return item
-            }
-            const nextUnread =
-              selectedChatId === messagePayload.chat_id || isOwnMessage
-                ? 0
-                : item.unread_count + 1
-            return {
-              ...item,
-              unread_count: nextUnread,
-              last_message_at: messagePayload.created_at,
-            }
+            if (item.id !== messagePayload.chat_id) return item
+            const nextUnread = selectedChatId === messagePayload.chat_id || isOwnMessage ? 0 : item.unread_count + 1
+            return { ...item, unread_count: nextUnread, last_message_at: messagePayload.created_at }
           }),
         ),
       )
     }
 
-    ws.onclose = () => {
-      setIsSocketReady(false)
-    }
-
-    ws.onerror = () => {
-      setIsSocketReady(false)
-    }
+    ws.onclose = () => setIsSocketReady(false)
+    ws.onerror = () => setIsSocketReady(false)
 
     return () => {
       ws.close()
-      if (socketRef.current === ws) {
-        socketRef.current = null
-      }
+      if (socketRef.current === ws) socketRef.current = null
       setIsSocketReady(false)
     }
   }, [loadChatsAndPreviews, role, selectedChatId, token])
 
   const handleSend = () => {
-    if (!selectedChat || !selectedChatId) {
-      return
-    }
+    if (!selectedChat || !selectedChatId) return
     const text = draft.trim()
-    if (!text) {
-      return
-    }
+    if (!text) return
     const socket = socketRef.current
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      setChatError("Немає активного зʼєднання. Спробуйте ще раз за кілька секунд.")
+      setChatError("Немає активного з’єднання. Спробуйте ще раз за кілька секунд.")
       return
     }
 
@@ -547,12 +469,8 @@ const Messages = () => {
 
     setMessagesByChatId((prev) => {
       const current = prev[selectedChatId] ?? []
-      return {
-        ...prev,
-        [selectedChatId]: [...current, optimisticMessage],
-      }
+      return { ...prev, [selectedChatId]: [...current, optimisticMessage] }
     })
-
     setPreviewByChatId((prev) => ({
       ...prev,
       [selectedChatId]: {
@@ -563,31 +481,20 @@ const Messages = () => {
         created_at: optimisticMessage.createdAt,
       },
     }))
-
     setChats((prev) =>
       sortChatsByRecent(
         prev.map((chat) =>
-          chat.id === selectedChatId
-            ? {
-                ...chat,
-                last_message_at: optimisticMessage.createdAt,
-              }
-            : chat,
+          chat.id === selectedChatId ? { ...chat, last_message_at: optimisticMessage.createdAt } : chat,
         ),
       ),
     )
     setDraft("")
     setChatError(null)
 
-    socket.send(
-      JSON.stringify({
-        type: "message",
-        text,
-        to_user_id: peerUserId,
-      }),
-    )
+    socket.send(JSON.stringify({ type: "message", text, to_user_id: peerUserId }))
   }
 
+  const selectedParticipantLabel = selectedChat ? getParticipantLabel(selectedChat) : "Виберіть діалог"
   const selectedParticipantLabel = selectedChat
     ? (role === "employer"
       ? (selectedChat.worker_name || "Невідомий кандидат")
@@ -597,9 +504,7 @@ const Messages = () => {
   const selectedVacancy = selectedChat ? chatVacancyById[selectedChat.vacancy_id] ?? null : null
 
   const handleOpenVacancy = async () => {
-    if (!selectedChat) {
-      return
-    }
+    if (!selectedChat) return
     if (selectedVacancy) {
       setOpenedVacancy(selectedVacancy)
       return
@@ -615,9 +520,7 @@ const Messages = () => {
   }
 
   const handleOpenResume = async () => {
-    if (!selectedChat) {
-      return
-    }
+    if (!selectedChat) return
     try {
       const resume = await getChatWorkerResume(selectedChat.id)
       setOpenedResume(resume)
@@ -628,9 +531,7 @@ const Messages = () => {
   }
 
   const handleOpenResumePdf = async () => {
-    if (!openedResume?.pdf_file_path) {
-      return
-    }
+    if (!openedResume?.pdf_file_path) return
     try {
       await openResumePdf(openedResume.id)
     } catch (err) {
@@ -639,6 +540,9 @@ const Messages = () => {
     }
   }
 
+  const handleSelectChat = (chatId: number) => {
+    setSelectedChatId(chatId)
+    if (isMobileLayout) setMobilePane("thread")
   const handleOpenWorkerProfile = (workerUserId?: number | null) => {
     if (!workerUserId) {
       return
@@ -647,28 +551,29 @@ const Messages = () => {
   }
 
   return (
-    <div className="h-screen bg-[#e9edf4] flex flex-col">
+    <div className="min-h-screen bg-[#e9edf4]">
       <Navbar />
-      <main className="w-full px-4 pb-10 pt-8 flex-1 overflow-hidden">
-        <section className="rounded-[28px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-6 text-white shadow-medium">
+      <main className="mx-auto w-full max-w-[1240px] px-3 pb-7 pt-3 sm:px-4 sm:pb-8 sm:pt-6">
+        <section className="rounded-[24px] bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-3.5 text-white shadow-medium sm:p-6">
           <p className="text-xs uppercase tracking-[0.35em] text-white/60">
             {isEmployer ? "Employer inbox" : "Candidate inbox"}
           </p>
-          <h1 className="mt-2 font-display text-2xl font-semibold md:text-3xl">
-            {isEmployer ? "Messaging with candidates" : "Messaging with employers"}
+          <h1 className="mt-2 text-xl font-semibold sm:text-2xl md:text-3xl">
+            {isEmployer ? "Листування з кандидатами" : "Листування з роботодавцями"}
           </h1>
           <p className="mt-2 text-sm text-white/75">
             {isEmployer
               ? "Починайте діалоги з картки кандидата, ведіть переписку та перемикайтеся між усіма розмовами в одному місці."
               : "Відповідайте роботодавцям у реальному часі та переглядайте всю історію листування в одному місці."}
           </p>
+
           {isEmployer ? (
-            <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="mt-3.5 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:items-center">
               <label className="text-xs font-semibold uppercase tracking-wide text-white/75">
                 Вакансія для нового чату
               </label>
               <select
-                className="max-w-full rounded-xl border border-white/30 bg-white/95 px-3 py-2 text-sm text-slate-800 outline-none focus:border-orange-400/70 md:min-w-[320px]"
+                className="h-10 w-full rounded-xl border border-white/30 bg-white/95 px-3 text-sm text-slate-800 outline-none focus:border-orange-400/70 sm:h-11 sm:w-auto sm:min-w-[280px]"
                 value={selectedVacancyId ?? ""}
                 onChange={(event) => setSelectedVacancyId(event.target.value ? Number(event.target.value) : null)}
                 disabled={isVacanciesLoading}
@@ -684,17 +589,17 @@ const Messages = () => {
               <button
                 type="button"
                 onClick={() => void loadChatsAndPreviews()}
-                className="rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="h-10 rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/20 sm:h-11"
               >
                 Оновити чати
               </button>
             </div>
           ) : (
-            <div className="mt-4">
+            <div className="mt-3.5 sm:mt-4">
               <button
                 type="button"
                 onClick={() => void loadChatsAndPreviews()}
-                className="rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                className="h-10 rounded-xl border border-white/30 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/20 sm:h-11"
               >
                 Оновити чати
               </button>
@@ -708,6 +613,42 @@ const Messages = () => {
           </div>
         )}
 
+        <section className="mt-3.5 lg:mt-6">
+          {isMobileLayout ? (
+            <div className="h-[calc(100dvh-215px)] min-h-[420px]">
+              {mobilePane === "list" ? (
+                <ConversationList
+                  chats={visibleChats}
+                  selectedChatId={selectedChatId}
+                  previewByChatId={previewByChatId}
+                  isLoading={isChatsLoading}
+                  onSelect={handleSelectChat}
+                  getParticipantLabel={getParticipantLabel}
+                  currentUserRole={role}
+                />
+              ) : selectedChat ? (
+                <MessageThread
+                  participantLabel={selectedParticipantLabel}
+                  vacancyTitle={selectedVacancy?.title ?? null}
+                  messages={activeMessages}
+                  currentUserId={currentUserId}
+                  draft={draft}
+                  isLoading={isMessagesLoading}
+                  isSocketReady={isSocketReady}
+                  participantAvatarUrl={role === "worker" ? selectedChat.employer_avatar_url : selectedChat.worker_avatar_url}
+                  onOpenVacancy={role === "worker" ? () => void handleOpenVacancy() : undefined}
+                  onOpenResume={role === "employer" ? () => void handleOpenResume() : undefined}
+                  onDraftChange={setDraft}
+                  onSend={handleSend}
+                  onBack={() => setMobilePane("list")}
+                  showBackButton
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-soft">
+                  Оберіть діалог зі списку
+                </div>
+              )}
+            </div>
         <section className="mt-6 grid gap-4 lg:grid-cols-[320px,1fr] h-[calc(100vh-320px)] min-h-[500px] overflow-hidden">
           <ConversationList
             chats={visibleChats}
@@ -741,31 +682,44 @@ const Messages = () => {
               onSend={handleSend}
             />
           ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-soft h-full flex items-center justify-center overflow-hidden">
-              <div className="flex flex-col items-center">
-                <div className="rounded-full bg-slate-100 p-3 mb-3">
-                  <svg className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+            <div className="grid h-[calc(100dvh-320px)] min-h-[500px] gap-4 overflow-hidden lg:grid-cols-[320px,1fr]">
+              <ConversationList
+                chats={visibleChats}
+                selectedChatId={selectedChatId}
+                previewByChatId={previewByChatId}
+                isLoading={isChatsLoading}
+                onSelect={handleSelectChat}
+                getParticipantLabel={getParticipantLabel}
+                currentUserRole={role}
+              />
+
+              {selectedChat ? (
+                <MessageThread
+                  participantLabel={selectedParticipantLabel}
+                  vacancyTitle={selectedVacancy?.title ?? null}
+                  messages={activeMessages}
+                  currentUserId={currentUserId}
+                  draft={draft}
+                  isLoading={isMessagesLoading}
+                  isSocketReady={isSocketReady}
+                  participantAvatarUrl={role === "worker" ? selectedChat.employer_avatar_url : selectedChat.worker_avatar_url}
+                  onOpenVacancy={role === "worker" ? () => void handleOpenVacancy() : undefined}
+                  onOpenResume={role === "employer" ? () => void handleOpenResume() : undefined}
+                  onDraftChange={setDraft}
+                  onSend={handleSend}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500 shadow-soft">
+                  Оберіть діалог зліва або відкрийте його з картки кандидата
                 </div>
-                <p className="font-medium">Оберіть діалог зліва</p>
-                <p className="text-xs mt-1">або відкрийте його з картки кандидата</p>
-              </div>
+              )}
             </div>
           )}
         </section>
       </main>
-      <VacancyModal
-        vacancy={openedVacancy}
-        onClose={() => setOpenedVacancy(null)}
-        onApply={() => setOpenedVacancy(null)}
-        showApplyButton={false}
-      />
-      <ResumeModal
-        resume={openedResume}
-        onClose={() => setOpenedResume(null)}
-        onOpenPdf={() => void handleOpenResumePdf()}
-      />
+
+      <VacancyModal vacancy={openedVacancy} onClose={() => setOpenedVacancy(null)} onApply={() => setOpenedVacancy(null)} showApplyButton={false} />
+      <ResumeModal resume={openedResume} onClose={() => setOpenedResume(null)} onOpenPdf={() => void handleOpenResumePdf()} />
     </div>
   )
 }
