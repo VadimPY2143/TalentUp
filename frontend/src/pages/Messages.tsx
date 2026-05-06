@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import ConversationList from "../components/chat/ConversationList"
 import MessageThread from "../components/chat/MessageThread"
 import ResumeModal from "../components/ResumeModal"
@@ -60,6 +60,7 @@ const toPreviewMessage = (payload: ChatSocketMessage): ChatMessageResponse => ({
 
 const Messages = () => {
   const { role, token } = useAuth()
+  const navigate = useNavigate()
   const isEmployer = role === "employer"
   const [searchParams] = useSearchParams()
 
@@ -494,6 +495,11 @@ const Messages = () => {
   }
 
   const selectedParticipantLabel = selectedChat ? getParticipantLabel(selectedChat) : "Виберіть діалог"
+  const selectedParticipantLabel = selectedChat
+    ? (role === "employer"
+      ? (selectedChat.worker_name || "Невідомий кандидат")
+      : getParticipantLabel(selectedChat))
+    : "Select conversation"
   const currentUserId = selectedChat ? currentUserIdByRole(selectedChat, role) : null
   const selectedVacancy = selectedChat ? chatVacancyById[selectedChat.vacancy_id] ?? null : null
 
@@ -537,6 +543,11 @@ const Messages = () => {
   const handleSelectChat = (chatId: number) => {
     setSelectedChatId(chatId)
     if (isMobileLayout) setMobilePane("thread")
+  const handleOpenWorkerProfile = (workerUserId?: number | null) => {
+    if (!workerUserId) {
+      return
+    }
+    navigate(`/workers/${workerUserId}`)
   }
 
   return (
@@ -638,6 +649,38 @@ const Messages = () => {
                 </div>
               )}
             </div>
+        <section className="mt-6 grid gap-4 lg:grid-cols-[320px,1fr] h-[calc(100vh-320px)] min-h-[500px] overflow-hidden">
+          <ConversationList
+            chats={visibleChats}
+            selectedChatId={selectedChatId}
+            previewByChatId={previewByChatId}
+            isLoading={isChatsLoading}
+            onSelect={setSelectedChatId}
+            getParticipantLabel={getParticipantLabel}
+            currentUserRole={role}
+            onOpenWorkerProfile={role === "employer" ? (workerUserId) => handleOpenWorkerProfile(workerUserId) : undefined}
+          />
+          {selectedChat ? (
+            <MessageThread
+              participantLabel={selectedParticipantLabel}
+              vacancyTitle={selectedVacancy?.title ?? null}
+              messages={activeMessages}
+              currentUserId={currentUserId}
+              draft={draft}
+              isLoading={isMessagesLoading}
+              isSocketReady={isSocketReady}
+              participantAvatarUrl={role === "worker" ? selectedChat.employer_avatar_url : selectedChat.worker_avatar_url}
+              isTyping={false}
+              onOpenVacancy={role === "worker" ? () => void handleOpenVacancy() : undefined}
+              onOpenResume={role === "employer" ? () => void handleOpenResume() : undefined}
+              onOpenParticipantProfile={
+                role === "employer"
+                  ? () => handleOpenWorkerProfile(selectedChat.worker_user_id)
+                  : undefined
+              }
+              onDraftChange={setDraft}
+              onSend={handleSend}
+            />
           ) : (
             <div className="grid h-[calc(100dvh-320px)] min-h-[500px] gap-4 overflow-hidden lg:grid-cols-[320px,1fr]">
               <ConversationList

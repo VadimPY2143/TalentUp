@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics"
 import OAuthCallback from "./pages/OAuthCallback"
 import CompanyProfile from "./pages/CompanyProfile"
 import PaymentTest from "./pages/PaymentTest"
+import WorkerPublicProfile from "./pages/WorkerPublicProfile"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import RoleRoute from "./routes/RoleRoute"
 import Footer from "./components/layout/Footer"
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="/jobs-old" element={<JobSearch />} />
                 <Route element={<RoleRoute allowed={["employer"]} />}>
                   <Route path="/candidates" element={<CandidateSearch />} />
+                  <Route path="/workers/:workerUserId" element={<WorkerPublicProfile />} />
                 </Route>
                 <Route element={<RoleRoute allowed={["worker"]} />}>
                   <Route path="/analytics" element={<Analytics />} />

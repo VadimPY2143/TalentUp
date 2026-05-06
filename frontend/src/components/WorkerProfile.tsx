@@ -1797,13 +1797,6 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
                         </div>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => window.open(`/vacancies/${saved.vacancy_id}`, "_blank")}
-                            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-700"
-                            title="Перегляти вакансію"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </button>
-                          <button
                             onClick={() => handleRemoveSavedVacancy(saved.id)}
                             className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
                             title="Видалити"

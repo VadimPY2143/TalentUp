@@ -1,5 +1,6 @@
 import { useEffect, useRef, type KeyboardEvent } from "react"
 import { ArrowLeft, Briefcase, Check, CheckCheck, FileText, Send } from "lucide-react"
+import { Send, FileText, Briefcase, Check, CheckCheck, MoreVertical } from "lucide-react"
 import type { ChatUiMessage } from "../../types/chat"
 
 interface MessageThreadProps {
@@ -13,6 +14,7 @@ interface MessageThreadProps {
   participantAvatarUrl?: string | null
   onOpenVacancy?: () => void
   onOpenResume?: () => void
+  onOpenParticipantProfile?: () => void
   onDraftChange: (value: string) => void
   onSend: () => void
   onBack?: () => void
@@ -89,6 +91,7 @@ export const MessageThread = ({
   participantAvatarUrl,
   onOpenVacancy,
   onOpenResume,
+  onOpenParticipantProfile,
   onDraftChange,
   onSend,
   onBack,
@@ -139,6 +142,19 @@ export const MessageThread = ({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{participantLabel}</h2>
             <div className="flex flex-wrap items-center gap-2">
+          <div>
+            {onOpenParticipantProfile ? (
+              <button
+                className="text-left text-base font-semibold text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                type="button"
+                onClick={onOpenParticipantProfile}
+              >
+                {participantLabel}
+              </button>
+            ) : (
+              <h2 className="text-base font-semibold text-slate-900">{participantLabel}</h2>
+            )}
+            <div className="flex items-center gap-2">
               {vacancyTitle && (
                 <p className="flex items-center gap-1 text-xs text-slate-500">
                   <Briefcase className="h-3 w-3" />
@@ -173,6 +189,15 @@ export const MessageThread = ({
               Вакансія
             </button>
           )}
+          
+          <div className="relative">
+            <button
+              type="button"
+              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

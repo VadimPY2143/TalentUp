@@ -10,6 +10,7 @@ interface ConversationListProps {
   onSelect: (chatId: number) => void
   getParticipantLabel: (chat: MyChatResponse) => string
   currentUserRole?: "employer" | "worker" | null
+  onOpenWorkerProfile?: (workerUserId: number) => void
 }
 
 const formatConversationTime = (value?: string | null) => {
@@ -55,6 +56,7 @@ export const ConversationList = ({
   onSelect,
   getParticipantLabel,
   currentUserRole,
+  onOpenWorkerProfile,
 }: ConversationListProps) => {
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -156,6 +158,29 @@ export const ConversationList = ({
                     <div className="flex items-center justify-between gap-2">
                       <p className={`truncate text-sm ${hasUnread && !isActive ? "font-semibold text-slate-900" : "text-slate-700"}`}>
                         {label}
+                      <p className={`truncate text-sm font-semibold ${hasUnread && !isActive ? "text-slate-900" : "text-slate-700"}`}>
+                        {currentUserRole === "employer" && chat.worker_name && onOpenWorkerProfile ? (
+                          <span
+                            className="cursor-pointer text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                            role="button"
+                            tabIndex={0}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              onOpenWorkerProfile(chat.worker_user_id)
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault()
+                                event.stopPropagation()
+                                onOpenWorkerProfile(chat.worker_user_id)
+                              }
+                            }}
+                          >
+                            {chat.worker_name}
+                          </span>
+                        ) : (
+                          label
+                        )}
                       </p>
                       <span className="shrink-0 text-[11px] text-slate-400">{formatConversationTime(previewTimestamp)}</span>
                     </div>
