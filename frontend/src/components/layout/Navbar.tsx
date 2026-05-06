@@ -70,12 +70,12 @@ const Navbar = () => {
       <div className="pointer-events-none absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-cyan-300/15 blur-2xl" />
       <div className="pointer-events-none absolute -right-8 top-0 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
 
-      <div className="relative mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 md:h-20 md:px-1">
+      <div className="relative mx-auto flex h-16 max-w-[1120px] items-center justify-between px-3 md:h-24 md:px-1">
         <Link to="/" className="flex h-full items-center">
           <img
             src={logo}
             alt="TalentUp"
-            className="block h-10 w-auto object-contain md:relative md:top-3 md:h-16 md:min-w-[190px] md:object-contain"
+            className="block h-12 w-auto object-contain md:relative md:top-3 md:h-[145px] md:min-w-[300px]"
           />
         </Link>
 

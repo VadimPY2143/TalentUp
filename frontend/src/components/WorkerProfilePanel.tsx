@@ -9,6 +9,16 @@ import {
 import { getUserProfile, searchLanguages, upsertUserProfile } from "../api/profile"
 import type { LanguageOption, UserProfilePayload } from "../types/profile"
 
+interface ProfileFormSource {
+  city?: string | null
+  education?: string | null
+  bio?: string | null
+  birth_date?: string | null
+  phone?: string | null
+  languages?: string[] | null
+  links?: string[] | null
+}
+
 interface WorkerProfileForm {
   city: string
   education: string
@@ -38,7 +48,7 @@ const normalizeLinkList = (links: string[]) => {
   return links.map((item) => item.trim()).filter(Boolean)
 }
 
-const mapProfileToForm = (profile?: Partial<UserProfilePayload> | null): WorkerProfileForm => {
+const mapProfileToForm = (profile?: ProfileFormSource | null): WorkerProfileForm => {
   const links = profile?.links?.length ? profile.links : [""]
 
   return {

@@ -71,6 +71,21 @@ class UserProfileRepository:
         result = await session.execute(stmt)
         return [dict(row) for row in result.mappings().all()]
 
+    async def get_language_ids_by_names(
+        self, session: AsyncSession, names: list[str]
+    ) -> dict[str, int]:
+        normalized_names = [name.strip() for name in names if isinstance(name, str) and name.strip()]
+        if not normalized_names:
+            return {}
+
+        lowered = {name.lower() for name in normalized_names}
+        stmt = select(languages_table.c.id, languages_table.c.name).where(
+            func.lower(languages_table.c.name).in_(lowered)
+        )
+        result = await session.execute(stmt)
+        rows = result.mappings().all()
+        return {str(row["name"]).lower(): int(row["id"]) for row in rows}
+
     async def upsert_user_languages(
         self, session: AsyncSession, user_id: int, languages: list[dict[str, Any]]
     ) -> None:

@@ -1,8 +1,7 @@
-import { startTransition, useEffect, useMemo, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import Navbar from "../components/layout/Navbar"
 import { paymentsApi, type CreditPackage } from "../api/payments"
-import { normalizeReturnTo } from "../payments/insufficientCredits"
 
 const RESUME_SUMMARY_CREDITS = 4
 const VACANCY_AI_FILL_CREDITS = 12
@@ -62,22 +61,6 @@ const resolvePaymentStatus = (params: URLSearchParams): PaymentStatus => {
   return "returned"
 }
 
-const getFeatureLabel = (feature: string | null): string | null => {
-  if (!feature) {
-    return null
-  }
-  if (feature === "candidate_matching") {
-    return "AI Candidate Match"
-  }
-  if (feature === "vacancy_ai_fill") {
-    return "AI Vacancy Fill"
-  }
-  if (feature === "resume_summary") {
-    return "AI Resume Summary"
-  }
-  return feature.replace(/_/g, " ")
-}
-
 const getPackageCardDescription = (pkg: CreditPackage): string => {
   if (pkg.credits <= 80) {
     return "Для швидкого старту: протестувати AI-функції, закрити точкові задачі та оцінити результат."
@@ -89,7 +72,6 @@ const getPackageCardDescription = (pkg: CreditPackage): string => {
 }
 
 export default function PaymentTest() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [packages, setPackages] = useState<CreditPackage[]>([])
   const [balance, setBalance] = useState(0)
@@ -102,9 +84,6 @@ export default function PaymentTest() {
   const requiredCredits = parsePositiveInt(searchParams.get("required"))
   const currentCredits = parsePositiveInt(searchParams.get("current"))
   const requestedMissing = parsePositiveInt(searchParams.get("missing"))
-  const feature = searchParams.get("feature")
-  const featureLabel = getFeatureLabel(feature)
-  const returnTo = normalizeReturnTo(searchParams.get("return_to"), "/dashboard")
   const paymentStatus = resolvePaymentStatus(searchParams)
 
   const missingCredits = Math.max(
@@ -195,12 +174,6 @@ export default function PaymentTest() {
     } finally {
       setProcessingCode(null)
     }
-  }
-
-  const handleBack = () => {
-    startTransition(() => {
-      navigate(returnTo)
-    })
   }
 
   const selectedPricePerCredit = selectedPackage

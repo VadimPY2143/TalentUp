@@ -1,6 +1,6 @@
 import { useEffect, useRef, type KeyboardEvent } from "react"
 import { ArrowLeft, Briefcase, Check, CheckCheck, FileText, Send } from "lucide-react"
-import { Send, FileText, Briefcase, Check, CheckCheck, MoreVertical } from "lucide-react"
+import { MoreVertical } from "lucide-react"
 import type { ChatUiMessage } from "../../types/chat"
 
 interface MessageThreadProps {
@@ -140,21 +140,18 @@ export const MessageThread = ({
             </div>
           )}
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{participantLabel}</h2>
-            <div className="flex flex-wrap items-center gap-2">
-          <div>
             {onOpenParticipantProfile ? (
               <button
-                className="text-left text-base font-semibold text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800"
+                className="truncate text-left text-sm font-semibold text-indigo-700 underline underline-offset-2 transition hover:text-indigo-800 sm:text-base"
                 type="button"
                 onClick={onOpenParticipantProfile}
               >
                 {participantLabel}
               </button>
             ) : (
-              <h2 className="text-base font-semibold text-slate-900">{participantLabel}</h2>
+              <h2 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{participantLabel}</h2>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {vacancyTitle && (
                 <p className="flex items-center gap-1 text-xs text-slate-500">
                   <Briefcase className="h-3 w-3" />

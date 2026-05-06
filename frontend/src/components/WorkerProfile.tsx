@@ -21,7 +21,6 @@ import {
   BarChart3,
   Home,
   Trash2,
-  ExternalLink,
   X,
 } from "lucide-react"
 import { useAuth } from "../auth/useAuth"
@@ -33,7 +32,7 @@ import {
   type UserProfileUpdate,
 } from "../api/userProfile"
 import { searchLanguages } from "../api/profile"
-import type { LanguageOption, UserLanguage, UserLink } from "../types/profile"
+import type { LanguageOption } from "../types/profile"
 import {
   createResume,
   deleteResume,

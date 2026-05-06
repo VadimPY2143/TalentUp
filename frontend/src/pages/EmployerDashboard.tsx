@@ -217,17 +217,6 @@ const normalizeWorkFormats = (values?: string[] | null): string[] => {
   return Array.from(new Set(mapped))
 }
 
-const toDateInputValue = (value?: string) => {
-  if (!value) {
-    return ""
-  }
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) {
-    return ""
-  }
-  return parsed.toISOString().slice(0, 10)
-}
-
 const aiVacancyToForm = (vacancy: VacancyPayload): VacancyFormState => {
   const employment = Array.from(
     new Set([

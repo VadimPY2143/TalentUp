@@ -17,6 +17,68 @@ class UserProfileService:
     def __init__(self, repository: UserProfileRepository):
         self.repository = repository
 
+    async def _normalize_user_languages_payload(
+        self,
+        session: AsyncSession,
+        raw_languages: list[dict] | None,
+    ) -> list[dict[str, str | int]]:
+        if raw_languages is None:
+            return []
+
+        names_to_resolve: list[str] = []
+        for item in raw_languages:
+            if not isinstance(item, dict):
+                continue
+            language_id = item.get("language_id")
+            if language_id in (None, ""):
+                name = str(item.get("name", "")).strip()
+                if name:
+                    names_to_resolve.append(name)
+
+        resolved_by_name = await self.repository.get_language_ids_by_names(session=session, names=names_to_resolve)
+
+        normalized: list[dict[str, str | int]] = []
+        missing_names: list[str] = []
+        for item in raw_languages:
+            if not isinstance(item, dict):
+                continue
+
+            proficiency_level = str(item.get("proficiency_level", "")).strip()
+            if not proficiency_level:
+                raise HTTPException(status_code=400, detail="Language proficiency_level is required")
+
+            language_id_raw = item.get("language_id")
+            language_id: int | None = None
+            if language_id_raw not in (None, ""):
+                try:
+                    language_id = int(language_id_raw)
+                except (TypeError, ValueError):
+                    raise HTTPException(status_code=400, detail="language_id must be integer") from None
+            else:
+                name = str(item.get("name", "")).strip()
+                if not name:
+                    raise HTTPException(status_code=400, detail="Language name is required")
+                language_id = resolved_by_name.get(name.lower())
+                if language_id is None:
+                    missing_names.append(name)
+                    continue
+
+            normalized.append(
+                {
+                    "language_id": language_id,
+                    "proficiency_level": proficiency_level,
+                }
+            )
+
+        if missing_names:
+            missing_joined = ", ".join(sorted(set(missing_names)))
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown languages: {missing_joined}",
+            )
+
+        return normalized
+
     async def get_profile(self, session: AsyncSession, user_id: int) -> UserProfileResponse:
         row = await self.repository.get_by_user_id(session=session, user_id=user_id)
         if not row:
@@ -37,24 +99,24 @@ class UserProfileService:
 
         values = payload.model_dump(exclude_none=True, exclude={"user_languages", "user_links"})
         row = await self.repository.create(session=session, user_id=user_id, values=values)
-        await session.commit()
-        
-        # Handle user languages if provided
-        if hasattr(payload, "user_languages") and payload.user_languages:
+        if payload.user_languages:
+            normalized_languages = await self._normalize_user_languages_payload(
+                session=session,
+                raw_languages=payload.user_languages,
+            )
             await self.repository.upsert_user_languages(
                 session=session,
                 user_id=user_id,
-                languages=payload.user_languages,
+                languages=normalized_languages,
             )
-        
-        # Handle user links if provided
-        if hasattr(payload, "user_links") and payload.user_links:
+        if payload.user_links:
             await self.repository.upsert_user_links(
                 session=session,
                 user_id=user_id,
                 links=payload.user_links,
             )
-        
+        await session.commit()
+
         user_languages = await self.repository.get_user_languages(session=session, user_id=user_id)
         user_links = await self.repository.get_user_links(session=session, user_id=user_id)
         return UserProfileResponse(**row, user_languages=user_languages, user_links=user_links)
@@ -87,24 +149,24 @@ class UserProfileService:
             else:
                 row = {"id": 0, "user_id": user_id}
 
-        await session.commit()
-        
-        # Handle user languages if provided
-        if hasattr(payload, "user_languages") and payload.user_languages is not None:
+        if payload.user_languages is not None:
+            normalized_languages = await self._normalize_user_languages_payload(
+                session=session,
+                raw_languages=payload.user_languages,
+            )
             await self.repository.upsert_user_languages(
                 session=session,
                 user_id=user_id,
-                languages=payload.user_languages,
+                languages=normalized_languages,
             )
-        
-        # Handle user links if provided
-        if hasattr(payload, "user_links") and payload.user_links is not None:
+        if payload.user_links is not None:
             await self.repository.upsert_user_links(
                 session=session,
                 user_id=user_id,
                 links=payload.user_links,
             )
-        
+        await session.commit()
+
         user_languages = await self.repository.get_user_languages(session=session, user_id=user_id)
         user_links = await self.repository.get_user_links(session=session, user_id=user_id)
         return UserProfileResponse(**row, user_languages=user_languages, user_links=user_links)

@@ -1,4 +1,15 @@
 import { apiFetch } from "./client"
+import type { UserLanguage, UserLink } from "../types/profile"
+
+interface UserLanguagePayload {
+  name: string
+  proficiency_level: string
+}
+
+interface UserLinkPayload {
+  title: string
+  url: string
+}
 
 export interface UserProfile {
   id: number
@@ -10,6 +21,8 @@ export interface UserProfile {
   phone: string | null
   languages: string[] | null
   links: string[] | null
+  user_languages?: UserLanguage[] | null
+  user_links?: UserLink[] | null
   created_at: string
   updated_at: string
 }
@@ -22,6 +35,8 @@ export interface UserProfileCreate {
   phone?: string
   languages?: string[]
   links?: string[]
+  user_languages?: UserLanguagePayload[]
+  user_links?: UserLinkPayload[]
 }
 
 export interface UserProfileUpdate {
@@ -32,6 +47,8 @@ export interface UserProfileUpdate {
   phone?: string | null
   languages?: string[] | null
   links?: string[] | null
+  user_languages?: UserLanguagePayload[] | null
+  user_links?: UserLinkPayload[] | null
 }
 
 export const getUserProfile = async (): Promise<UserProfile> => {

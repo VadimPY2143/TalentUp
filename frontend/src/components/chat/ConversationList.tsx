@@ -156,8 +156,6 @@ export const ConversationList = ({
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`truncate text-sm ${hasUnread && !isActive ? "font-semibold text-slate-900" : "text-slate-700"}`}>
-                        {label}
                       <p className={`truncate text-sm font-semibold ${hasUnread && !isActive ? "text-slate-900" : "text-slate-700"}`}>
                         {currentUserRole === "employer" && chat.worker_name && onOpenWorkerProfile ? (
                           <span

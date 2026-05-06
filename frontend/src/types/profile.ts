@@ -28,9 +28,16 @@ export interface UserProfilePayload {
   user_links?: Array<{ title: string; url: string }>
 }
 
-export interface UserProfile extends UserProfilePayload {
+export interface UserProfile {
   id: number
   user_id: number
+  city?: string | null
+  education?: string | null
+  bio?: string | null
+  birth_date?: string | null
+  phone?: string | null
+  languages?: string[] | null
+  links?: string[] | null
   created_at: string
   updated_at: string
   user_languages?: UserLanguage[]

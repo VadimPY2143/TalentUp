@@ -115,7 +115,6 @@ const NotificationBell = () => {
           void loadNotifications("initial")
         }
       } catch {
-        // ignore malformed websocket payloads
       }
     }
 
