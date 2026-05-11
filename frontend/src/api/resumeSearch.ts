@@ -9,6 +9,7 @@ export interface ResumeSearchParams {
 
 export interface ResumeSearchResponse {
   resumes: Resume[]
+  total?: number
 }
 
 const appendParam = (

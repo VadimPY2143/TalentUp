@@ -36,6 +36,31 @@ def _build_token_conditions(term: str) -> list[Any]:
     return conditions
 
 
+async def _load_resumes_with_total(
+    *,
+    session: AsyncSession,
+    filters: ResumeSearchFilters,
+    conditions: list[Any],
+    limit: int,
+    offset: int,
+) -> tuple[list[dict[str, Any]], int]:
+    base_stmt = select(resumes_table)
+    base_stmt = apply_resume_search_filters(base_stmt, filters)
+    base_stmt = base_stmt.where(or_(*conditions))
+
+    count_stmt = select(func.count()).select_from(base_stmt.order_by(None).subquery())
+    total = int((await session.execute(count_stmt)).scalar_one() or 0)
+
+    rows_stmt = (
+        base_stmt.order_by(resumes_table.c.updated_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows_result = await session.execute(rows_stmt)
+    resumes = [dict(row) for row in rows_result.mappings().all()]
+    return resumes, total
+
+
 async def get_resume_search_filters(
     session: AsyncSession = Depends(get_session),
     city_id: int | None = Query(None, ge=1),
@@ -88,7 +113,7 @@ async def search_resume(
     term = resume_name.strip()
     conditions = _build_token_conditions(term)
     if not conditions:
-        return {"resumes": []}
+        return {"resumes": [], "total": 0}
 
     await session.execute(
         insert(resume_search_history_table).values(
@@ -98,16 +123,14 @@ async def search_resume(
     )
     await session.commit()
 
-    stmt = select(resumes_table)
-    stmt = apply_resume_search_filters(stmt, filters)
-    stmt = (
-        stmt.where(or_(*conditions))
-        .order_by(resumes_table.c.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+    resumes, total = await _load_resumes_with_total(
+        session=session,
+        filters=filters,
+        conditions=conditions,
+        limit=limit,
+        offset=offset,
     )
-    result = await session.execute(stmt)
-    return {"resumes": [dict(row) for row in result.mappings().all()]}
+    return {"resumes": resumes, "total": total}
 
 
 @router.get("/resume_search/recommendations")
@@ -139,18 +162,16 @@ async def resumes_recommendations(
 
     conditions = _build_token_conditions(str(term or ""))
     if not conditions:
-        return {"resumes": []}
+        return {"resumes": [], "total": 0}
 
-    stmt = select(resumes_table)
-    stmt = apply_resume_search_filters(stmt, filters)
-    stmt = (
-        stmt.where(or_(*conditions))
-        .order_by(resumes_table.c.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+    resumes, total = await _load_resumes_with_total(
+        session=session,
+        filters=filters,
+        conditions=conditions,
+        limit=limit,
+        offset=offset,
     )
-    result = await session.execute(stmt)
-    return {"resumes": [dict(row) for row in result.mappings().all()]}
+    return {"resumes": resumes, "total": total}
 
 
 @router.get("/resume_search/summary", response_model=ResumeSummaryResponse)

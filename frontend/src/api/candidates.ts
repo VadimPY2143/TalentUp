@@ -58,15 +58,13 @@ export const searchCandidates = async (
 ): Promise<CandidateSearchResponse> => {
   const query = buildSearchParams(payload)
   const path = query ? `/resume_search?${query}` : "/resume_search"
-  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(path, { signal })
+  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"]; total?: number }>(path, { signal })
   const items = data?.resumes ?? []
-  const pageSize = payload.page_size
+  const total = typeof data?.total === "number" ? data.total : items.length
+  const pageSize = payload.page_size ?? items.length
   const page = payload.page ?? 1
-  const hasMore = pageSize !== undefined && items.length === pageSize
-  const estimatedTotal = pageSize
-    ? (hasMore ? (page * pageSize) + 1 : ((page - 1) * pageSize) + items.length)
-    : items.length
-  return { total: estimatedTotal, items, has_more: hasMore }
+  const hasMore = total > page * pageSize
+  return { total, items, has_more: hasMore }
 }
 
 export const fetchRecommendedCandidates = async (
@@ -92,15 +90,15 @@ export const fetchRecommendedCandidates = async (
     }
   }
 
-  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"] }>(
+  const data = await apiFetch<{ resumes: CandidateSearchResponse["items"]; total?: number }>(
     `/resume_search/recommendations?${params.toString()}`,
     { signal },
   )
   const items = data?.resumes ?? []
+  const total = typeof data?.total === "number" ? data.total : items.length
   const page = Math.floor(offset / limit) + 1
-  const hasMore = items.length === limit
-  const estimatedTotal = hasMore ? (page * limit) + 1 : ((page - 1) * limit) + items.length
-  return { total: estimatedTotal, items, has_more: hasMore }
+  const hasMore = total > page * limit
+  return { total, items, has_more: hasMore }
 }
 
 export const openCandidateResume = async (resumeId: number): Promise<void> => {

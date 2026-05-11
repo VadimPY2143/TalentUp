@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start containers
+        run: docker compose build up -d --build
+
+
+      - name: Run tests
+        run: docker compose run --rm backend pytest
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down

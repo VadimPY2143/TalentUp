@@ -46,6 +46,7 @@ const formatLocation = (resume: Resume) => {
 const ResumeSearch = () => {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<Resume[]>([])
+  const [total, setTotal] = useState(0)
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -58,16 +59,17 @@ const ResumeSearch = () => {
     if (!hasSearched) {
       return "Введіть назву резюме та натисніть «Пошук»"
     }
-    if (!results.length) {
+    if (total === 0) {
       return "Нічого не знайдено"
     }
-    return `Знайдено: ${results.length}`
-  }, [hasSearched, results.length])
+    return `Знайдено: ${total}`
+  }, [hasSearched, total])
 
   const runSearch = async (nextOffset = 0, append = false) => {
     const term = query.trim()
     if (term.length < 2) {
       setResults([])
+      setTotal(0)
       setHasMore(false)
       setHasSearched(true)
       setError(null)
@@ -85,9 +87,14 @@ const ResumeSearch = () => {
       })
 
       const incoming = data.resumes ?? []
+      const responseTotal = typeof data.total === "number"
+        ? data.total
+        : nextOffset + incoming.length
+      const loadedCount = nextOffset + incoming.length
       setResults((prev) => (append ? [...prev, ...incoming] : incoming))
+      setTotal(responseTotal)
       setOffset(nextOffset)
-      setHasMore(incoming.length === PAGE_SIZE)
+      setHasMore(responseTotal > loadedCount)
       setHasSearched(true)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не вдалося виконати пошук"
@@ -95,6 +102,7 @@ const ResumeSearch = () => {
       setHasSearched(true)
       if (!append) {
         setResults([])
+        setTotal(0)
         setHasMore(false)
       }
     } finally {
