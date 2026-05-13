@@ -112,7 +112,6 @@ async def notifications_ws(websocket: WebSocket, session: AsyncSession = Depends
     logger.info(f"User {user['id']} connected to notifications ws")
     try:
         while True:
-            # Keep the socket alive; clients may send ping JSON messages.
             await websocket.receive_text()
     except WebSocketDisconnect:
         pass
