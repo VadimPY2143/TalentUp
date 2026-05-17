@@ -21,6 +21,25 @@ class Vacancy(BaseModel):
     work_format: Optional[list[str]] = None
 
 
+class VacancyAIFillOutput(BaseModel):
+    """Stricter schema for structured AI output; mapped to Vacancy before API response."""
+
+    title: str = Field(min_length=2, max_length=255)
+    description: str = Field(min_length=10)
+    responsibilities: str = Field(min_length=1)
+    requirements: str = Field(min_length=1)
+    is_active: bool = True
+    employment_type: list[str] = Field(min_length=1)
+    city_id: Optional[int] = Field(default=None, ge=1)
+    location: str = Field(min_length=1, max_length=255)
+    salary_min: int = Field(ge=0)
+    salary_max: int = Field(ge=0)
+    salary_currency: str = Field(min_length=1, max_length=10)
+    experience_years_min: int = Field(ge=0)
+    experience_years_max: int = Field(ge=0)
+    work_format: list[str] = Field(min_length=1)
+
+
 class VacancyAIFillRequest(BaseModel):
     description: str = Field(min_length=10)
 

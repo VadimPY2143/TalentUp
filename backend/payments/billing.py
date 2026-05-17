@@ -43,6 +43,19 @@ class CreditBillingService:
             return None
         return int(existing["balance_after"])
 
+    async def _sync_user_credits(
+        self,
+        *,
+        session: AsyncSession,
+        user_id: int,
+        credits: int,
+    ) -> None:
+        await session.execute(
+            update(users_table)
+            .where(users_table.c.id == user_id)
+            .values(credits=credits)
+        )
+
     async def _lock_user_credits(
         self,
         *,
@@ -104,6 +117,11 @@ class CreditBillingService:
             idempotency_key=idempotency_key,
         )
         if existing_balance is not None:
+            await self._sync_user_credits(
+                session=session,
+                user_id=user_id,
+                credits=existing_balance,
+            )
             return ChargeResult(charged=False, balance_after=existing_balance)
 
         current_credits = await self._lock_user_credits(session=session, user_id=user_id)
@@ -113,6 +131,11 @@ class CreditBillingService:
             idempotency_key=idempotency_key,
         )
         if existing_balance is not None:
+            await self._sync_user_credits(
+                session=session,
+                user_id=user_id,
+                credits=existing_balance,
+            )
             return ChargeResult(charged=False, balance_after=existing_balance)
 
         if current_credits < amount:
@@ -154,12 +177,17 @@ class CreditBillingService:
             )
             if existing_balance is None:
                 raise RuntimeError("Failed to apply debit transaction")
+            await self._sync_user_credits(
+                session=session,
+                user_id=user_id,
+                credits=existing_balance,
+            )
             return ChargeResult(charged=False, balance_after=existing_balance)
 
-        await session.execute(
-            update(users_table)
-            .where(users_table.c.id == user_id)
-            .values(credits=int(inserted_balance))
+        await self._sync_user_credits(
+            session=session,
+            user_id=user_id,
+            credits=int(inserted_balance),
         )
         return ChargeResult(charged=True, balance_after=int(inserted_balance))
 

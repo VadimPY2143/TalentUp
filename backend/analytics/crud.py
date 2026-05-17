@@ -245,12 +245,14 @@ async def dashboard(
         all_days.append(ts_map.get(cursor) or AnalyticsTimeseriesPointOut(day=cursor))
         cursor = cursor + timedelta(days=1)
 
-    apps_viewed = int(apps_by_status.get("viewed", 0))
+    apps_chat_started = int(apps_by_status.get("chat_started", 0))
+    # `chat_started` is a later stage after opening an application, so it should
+    # be included in "viewed" progression for a monotonic seeker funnel.
+    apps_viewed = int(apps_by_status.get("viewed", 0)) + apps_chat_started
     funnel = [
-        AnalyticsFunnelStepOut(step="profile_views", count=overview.profile_views),
-        AnalyticsFunnelStepOut(step="resume_views", count=overview.resume_views),
         AnalyticsFunnelStepOut(step="applications_sent", count=overview.applications_sent),
         AnalyticsFunnelStepOut(step="applications_viewed", count=apps_viewed),
+        AnalyticsFunnelStepOut(step="applications_chat_started", count=apps_chat_started),
     ]
 
     apps_stmt = (

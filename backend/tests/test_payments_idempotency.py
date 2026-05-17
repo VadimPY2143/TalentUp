@@ -264,6 +264,30 @@ async def test_charge_for_feature_returns_existing_when_idempotent_tx_appears_af
         "_lock_user_credits",
         AsyncMock(return_value=10),
     )
+    sync_mock = AsyncMock()
+    monkeypatch.setattr(service, "_sync_user_credits", sync_mock)
+    session = SimpleNamespace()
+    result = await service.charge_for_feature(
+        session=session,
+        user_id=7,
+        feature_code="resume_summary",
+        amount=4,
+        idempotency_key="resume_summary:7:11:version",
+    )
+
+    assert result == ChargeResult(charged=False, balance_after=96)
+    sync_mock.assert_awaited_once_with(session=session, user_id=7, credits=96)
+
+
+@pytest.mark.asyncio
+async def test_charge_for_feature_syncs_user_credits_on_existing_idempotency_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = CreditBillingService()
+    sync_mock = AsyncMock()
+    monkeypatch.setattr(service, "_get_existing_balance_after", AsyncMock(return_value=46))
+    monkeypatch.setattr(service, "_sync_user_credits", sync_mock)
+
     result = await service.charge_for_feature(
         session=SimpleNamespace(),
         user_id=7,
@@ -272,4 +296,5 @@ async def test_charge_for_feature_returns_existing_when_idempotent_tx_appears_af
         idempotency_key="resume_summary:7:11:version",
     )
 
-    assert result == ChargeResult(charged=False, balance_after=96)
+    assert result == ChargeResult(charged=False, balance_after=46)
+    sync_mock.assert_awaited_once_with(session=SimpleNamespace(), user_id=7, credits=46)

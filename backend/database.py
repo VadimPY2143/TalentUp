@@ -406,6 +406,7 @@ vacancy_subscription_deliveries_table = Table(
     Index("ix_vacancy_subscription_deliveries_status", "status"),
 )
 
+
 saved_resumes_table = Table(
     'saved_resumes',
     metadata,

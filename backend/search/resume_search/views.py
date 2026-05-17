@@ -186,23 +186,43 @@ async def resume_summary(
     if not resume_row:
         raise HTTPException(status_code=404, detail="Resume not found")
 
+    user_id = int(current_user["id"])
     cache_key = build_resume_summary_cache_key(
         resume_id=resume_id,
         resume_updated_at=resume_row.get("updated_at"),
     )
+    resume_updated_at = resume_row.get("updated_at")
+    version = resume_updated_at.isoformat() if resume_updated_at else "none"
+    idempotency_key = f"resume_summary:{user_id}:{resume_id}:{version}"
+
     cached_summary = await get_cached_resume_summary(cache_key)
     if cached_summary is not None:
         return ResumeSummaryResponse(**cached_summary, cached=True)
 
+    already_paid = (
+        await billing_service._get_existing_balance_after(
+            session=session,
+            idempotency_key=idempotency_key,
+        )
+        is not None
+    )
+    if already_paid:
+        summary = await summarize_resume(dict(resume_row))
+        await set_cached_resume_summary(cache_key, summary)
+        return ResumeSummaryResponse(**summary, cached=False)
+
+    await billing_service.ensure_sufficient_credits(
+        session=session,
+        user_id=user_id,
+        required_credits=RESUME_SUMMARY_CREDITS,
+    )
     summary = await summarize_resume(dict(resume_row))
-    resume_updated_at = resume_row.get("updated_at")
-    version = resume_updated_at.isoformat() if resume_updated_at else "none"
     await billing_service.charge_for_feature(
         session=session,
-        user_id=int(current_user["id"]),
+        user_id=user_id,
         feature_code="resume_summary",
         amount=RESUME_SUMMARY_CREDITS,
-        idempotency_key=f"resume_summary:{current_user['id']}:{resume_id}:{version}",
+        idempotency_key=idempotency_key,
         reference_type="resume",
         reference_id=str(resume_id),
     )

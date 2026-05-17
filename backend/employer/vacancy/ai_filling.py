@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
-from .models import Vacancy
+from .models import Vacancy, VacancyAIFillOutput
 from logger import logger
 
 load_dotenv()
@@ -54,10 +54,12 @@ async def generate_vacancy(vacancy_description: str) -> dict[str, Any]:
 
     result = await agent.run(
         f"Description: {vacancy_description}",
-        output_type=Vacancy,
+        output_type=VacancyAIFillOutput,
         model_settings={"max_tokens": 3072},
     )
     output = result.output
-    if isinstance(output, Vacancy):
-        return output.model_dump()
-    return Vacancy.model_validate(output).model_dump()
+    if isinstance(output, VacancyAIFillOutput):
+        parsed = output
+    else:
+        parsed = VacancyAIFillOutput.model_validate(output)
+    return Vacancy.model_validate(parsed.model_dump()).model_dump()

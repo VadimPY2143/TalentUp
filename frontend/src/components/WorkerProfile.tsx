@@ -878,7 +878,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
           {activeSection === "profile" ? (
             <div className="space-y-6">
               {profileError && (
@@ -1820,7 +1820,7 @@ const WorkerProfile = ({ userEmail, userName }: WorkerProfileProps) => {
               <VacancySubscriptionsPanel userEmail={userEmail} />
             </div>
           ) : activeSection === "analytics" ? (
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1736] via-[#13244d] to-[#243b77] p-8 text-white shadow-lg">
                 <div className="relative">
                   <h1 className="text-3xl font-bold">Аналітика</h1>

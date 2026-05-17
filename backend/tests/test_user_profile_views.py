@@ -106,3 +106,5 @@ async def test_delete_user_profile_calls_service_and_returns_no_content(
     assert isinstance(result, Response)
     assert result.status_code == status.HTTP_204_NO_CONTENT
     delete_profile_mock.assert_awaited_once_with(session=session, user_id=52)
+
+

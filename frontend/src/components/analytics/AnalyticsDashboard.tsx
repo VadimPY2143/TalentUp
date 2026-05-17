@@ -1,76 +1,29 @@
 import { useEffect, useMemo, useState } from "react"
+import { Briefcase, Eye, MessageCircle, TrendingUp } from "lucide-react"
 
 import { fetchAnalyticsDashboard } from "../../api/analytics"
 import type { AnalyticsDashboard as AnalyticsDashboardData } from "../../types/analytics"
+import AnalyticsActivityChart from "./AnalyticsActivityChart"
+import AnalyticsFunnelPanel from "./AnalyticsFunnelPanel"
+import {
+  dayOptions,
+  formatDate,
+  formatNumber,
+  statusLabel,
+  toPercent,
+} from "./analyticsUtils"
 
 interface AnalyticsDashboardProps {
   embedded?: boolean
   hideLeadCard?: boolean
 }
 
-const dayOptions = [
-  { value: 7, label: "7 днів" },
-  { value: 30, label: "30 днів" },
-  { value: 90, label: "90 днів" },
-] as const
-
-const formatNumber = (value: number) => new Intl.NumberFormat("uk-UA").format(value)
-
-const toPercent = (num: number, den: number) => {
-  if (!den) return "0%"
-  const pct = (num / den) * 100
-  return `${pct.toFixed(pct >= 10 ? 0 : 1)}%`
-}
-
-const formatDate = (iso: string) => {
-  const dt = new Date(iso)
-  if (Number.isNaN(dt.getTime())) return iso
-  return new Intl.DateTimeFormat("uk-UA", { year: "numeric", month: "2-digit", day: "2-digit" }).format(dt)
-}
-
-const statusLabel = (status: string) => {
-  switch (status) {
-    case "applied":
-      return "Подано"
-    case "viewed":
-      return "Переглянуто"
-    case "chat_started":
-      return "Чат розпочато"
-    default:
-      return "Невідомий статус"
-  }
-}
-
-const stepLabel = (step: string) => {
-  switch (step) {
-    case "profile_views":
-      return "Перегляди профілю"
-    case "resume_views":
-      return "Перегляди резюме"
-    case "applications_sent":
-      return "Відгуки на вакансії"
-    case "applications_viewed":
-      return "Відгуки переглянуто"
-    default:
-      return step
-  }
-}
-
-const buildLinePath = (values: number[], width: number, height: number, padding = 8) => {
-  if (values.length === 0) return ""
-  const max = Math.max(1, ...values)
-  const min = 0
-  const innerW = Math.max(1, width - padding * 2)
-  const innerH = Math.max(1, height - padding * 2)
-
-  const points = values.map((v, i) => {
-    const x = padding + (i / Math.max(1, values.length - 1)) * innerW
-    const y = padding + (1 - (v - min) / (max - min || 1)) * innerH
-    return [x, y] as const
-  })
-
-  return points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ")
-}
+const periodButtonClass = (active: boolean) =>
+  `rounded-xl px-4 py-2 text-sm font-semibold transition ${
+    active
+      ? "bg-[#13244d] text-white shadow-sm"
+      : "bg-white text-slate-600 hover:bg-slate-50"
+  }`
 
 const AnalyticsDashboard = ({ embedded = false, hideLeadCard = false }: AnalyticsDashboardProps) => {
   const [days, setDays] = useState<number>(30)
@@ -99,74 +52,72 @@ const AnalyticsDashboard = ({ embedded = false, hideLeadCard = false }: Analytic
     }
   }, [days])
 
-  const timeseries = data?.timeseries ?? []
-  const profileSeries = useMemo(() => timeseries.map((p) => p.profile_views ?? 0), [timeseries])
-  const resumeSeries = useMemo(() => timeseries.map((p) => p.resume_views ?? 0), [timeseries])
-  const appSeries = useMemo(() => timeseries.map((p) => p.applications_sent ?? 0), [timeseries])
-
-  const chart = useMemo(() => {
-    const width = 760
-    const height = 180
-    const profilePath = buildLinePath(profileSeries, width, height)
-    const resumePath = buildLinePath(resumeSeries, width, height)
-    const appPath = buildLinePath(appSeries, width, height)
-    return { width, height, profilePath, resumePath, appPath }
-  }, [profileSeries, resumeSeries, appSeries])
-
   const overview = data?.overview
+  const timeseries = data?.timeseries ?? []
   const funnel = data?.funnel ?? []
-  const visibleFunnel = useMemo(
-    () => funnel.filter((step) => step.step !== "applications_accepted"),
-    [funnel],
-  )
   const apps = data?.applications ?? []
 
-  const profileToApply = overview ? toPercent(overview.applications_sent, overview.profile_views) : "0%"
-  const wrapperClass = embedded ? "" : "mx-auto max-w-[1120px] px-4 py-8"
+  const metrics = useMemo(() => {
+    if (!overview) return []
+    const chatStarted = overview.applications_by_status.chat_started ?? 0
+    const viewedOrMore = (overview.applications_by_status.viewed ?? 0) + chatStarted
+    const viewedRate = toPercent(viewedOrMore, overview.applications_sent)
+    const chatRate = toPercent(chatStarted, overview.applications_sent)
+    return [
+      {
+        label: "Відгуки подано",
+        value: overview.applications_sent,
+        hint: `За період: ${formatDate(overview.from_dt)} — ${formatDate(overview.to_dt)}`,
+        icon: Briefcase,
+        accent: "from-emerald-50 to-emerald-100/40",
+        iconColor: "text-emerald-600",
+      },
+      {
+        label: "Переглянуто роботодавцями",
+        value: viewedOrMore,
+        hint: viewedRate
+          ? `Конверсія з поданих відгуків: ${viewedRate}`
+          : "Ще немає переглянутих відгуків",
+        icon: Eye,
+        accent: "from-[#13244d]/10 to-[#243b77]/5",
+        iconColor: "text-[#243b77]",
+      },
+      {
+        label: "Почато переписку",
+        value: chatStarted,
+        hint: chatRate
+          ? `Частка від усіх відгуків: ${chatRate}`
+          : "Ще немає активних чатів",
+        icon: MessageCircle,
+        accent: "from-orange-50 to-orange-100/40",
+        iconColor: "text-orange-600",
+      },
+    ]
+  }, [overview])
+
+  const wrapperClass = embedded
+    ? "min-w-0"
+    : "mx-auto min-w-0 max-w-[1120px] px-4 py-8"
 
   return (
     <div className={wrapperClass}>
-      {!hideLeadCard ? (
+      {!hideLeadCard && (
         <div className="flex flex-col gap-4 rounded-[26px] border border-slate-200 bg-white p-6 shadow-soft md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Кабінет</p>
             <h1 className="mt-2 text-2xl font-semibold text-slate-900">Аналітика</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Перегляди профілю та резюме, відгуки на вакансії і воронка за період.
+              Ваша активність як шукача роботи: відгуки, перегляди профілю та резюме.
             </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Період</div>
-            <select
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-800 outline-none focus:border-orange-500/60"
-              value={days}
-              onChange={(event) => setDays(Number(event.target.value))}
-            >
-              {dayOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <PeriodSelector days={days} onChange={setDays} />
         </div>
-      ) : (
-        <div className="mb-4 flex justify-start">
-          <div className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-soft">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Період аналізу</div>
-            <select
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 outline-none focus:border-orange-500/60"
-              value={days}
-              onChange={(event) => setDays(Number(event.target.value))}
-            >
-              {dayOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+      )}
+
+      {hideLeadCard && (
+        <div className="sticky top-0 z-20 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-[#f5f7fa]/95 px-1 py-3 backdrop-blur-sm">
+          <p className="text-sm text-slate-500">Оберіть період для оновлення даних</p>
+          <PeriodSelector days={days} onChange={setDays} />
         </div>
       )}
 
@@ -177,140 +128,122 @@ const AnalyticsDashboard = ({ embedded = false, hideLeadCard = false }: Analytic
       )}
 
       {isLoading && (
-        <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500 shadow-soft">
-          Завантаження...
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {[0, 1, 2].map((key) => (
+            <div
+              key={key}
+              className="h-32 animate-pulse rounded-2xl border border-slate-200 bg-slate-100"
+            />
+          ))}
         </div>
       )}
 
       {!isLoading && !error && overview && (
         <>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Перегляди профілю</div>
-              <div className="mt-2 text-3xl font-semibold text-slate-900">{formatNumber(overview.profile_views)}</div>
-              <div className="mt-1 text-sm text-slate-500">Унікальні: {formatNumber(overview.profile_viewers_unique)}</div>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Перегляди резюме</div>
-              <div className="mt-2 text-3xl font-semibold text-slate-900">{formatNumber(overview.resume_views)}</div>
-              <div className="mt-1 text-sm text-slate-500">Унікальні: {formatNumber(overview.resume_viewers_unique)}</div>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Відгуки на вакансії</div>
-              <div className="mt-2 text-3xl font-semibold text-slate-900">{formatNumber(overview.applications_sent)}</div>
-              <div className="mt-1 text-sm text-slate-500">Конверсія профіль → відгук: {profileToApply}</div>
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-[1.2fr,0.8fr]">
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Динаміка</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">Перегляди та відгуки по днях</div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-[#243b77]" />
-                    Профіль
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-orange-500" />
-                    Резюме
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    Відгуки
-                  </span>
-                </div>
-              </div>
-
-              {timeseries.length === 0 ? (
-                <div className="mt-4 text-sm text-slate-500">Даних за період поки немає.</div>
-              ) : (
-                <div className="mt-4 overflow-x-auto">
-                  <svg
-                    viewBox={`0 0 ${chart.width} ${chart.height}`}
-                    className="min-w-[620px] max-w-full"
-                    role="img"
-                    aria-label="Графік аналітики"
-                  >
-                    <rect x="0" y="0" width={chart.width} height={chart.height} rx="14" fill="#f8fafc" />
-                    <path d={chart.profilePath} fill="none" stroke="#243b77" strokeWidth="3" />
-                    <path d={chart.resumePath} fill="none" stroke="#f97316" strokeWidth="3" />
-                    <path d={chart.appPath} fill="none" stroke="#10b981" strokeWidth="3" />
-                  </svg>
-                  <div className="mt-2 flex justify-between text-xs text-slate-400">
-                    <span>{formatDate(timeseries[0].day)}</span>
-                    <span>{formatDate(timeseries[timeseries.length - 1].day)}</span>
+            {metrics.map((metric) => {
+              const Icon = metric.icon
+              return (
+                <article
+                  key={metric.label}
+                  className={`rounded-2xl border border-slate-200 bg-gradient-to-br ${metric.accent} p-5 shadow-soft`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {metric.label}
+                      </p>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-slate-900">
+                        {formatNumber(metric.value)}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">{metric.hint}</p>
+                    </div>
+                    <span
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 ${metric.iconColor}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
                   </div>
+                </article>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 grid min-w-0 gap-4 lg:grid-cols-[1.35fr,0.65fr] lg:items-stretch">
+            <section className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft lg:min-h-[520px] lg:p-6">
+              <div className="shrink-0">
+                <div>
+                  <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <TrendingUp className="h-4 w-4" />
+                    Динаміка
+                  </div>
+                  <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                    Динаміка активності
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Перегляди вашого профілю/резюме роботодавцями та подані вами відгуки.
+                  </p>
                 </div>
-              )}
+              </div>
+              <div className="mt-4 flex min-h-0 flex-1 flex-col">
+                <AnalyticsActivityChart points={timeseries} />
+              </div>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Воронка</div>
-              <div className="mt-1 text-sm font-semibold text-slate-900">Перегляд → відгук</div>
-
-              <div className="mt-4 space-y-3">
-                {visibleFunnel.length === 0 && <div className="text-sm text-slate-500">Немає даних.</div>}
-                {visibleFunnel.length > 0 && (() => {
-                  const top = Math.max(1, ...visibleFunnel.map((s) => s.count))
-                  return visibleFunnel.map((s) => {
-                    const widthPct = Math.max(2, Math.round((s.count / top) * 100))
-                    const pct = visibleFunnel[0]?.count ? toPercent(s.count, visibleFunnel[0].count) : "0%"
-                    return (
-                      <div key={s.step} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <div className="text-sm font-semibold text-slate-800">{stepLabel(s.step)}</div>
-                          <div className="text-xs text-slate-500">
-                            {formatNumber(s.count)} ({pct})
-                          </div>
-                        </div>
-                        <div className="mt-2 h-2 w-full rounded-full bg-white">
-                          <div className="h-2 rounded-full bg-[#13244d]" style={{ width: `${widthPct}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })
-                })()}
+            <section className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 shadow-soft lg:p-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Воронка</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900">Прогрес моїх відгуків</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Етапи обробки ваших відгуків: подано, переглянуто, почато переписку.
+                </p>
+              </div>
+              <div className="mt-5">
+                <AnalyticsFunnelPanel steps={funnel} />
               </div>
             </section>
           </div>
 
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-            <div className="flex flex-wrap items-end justify-between gap-3">
+          <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-100 px-5 py-4 lg:px-6">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">Мої відгуки</div>
-                <div className="mt-1 text-sm font-semibold text-slate-900">Заявки за період</div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Мої відгуки</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-900">Заявки за період</h2>
               </div>
-              <div className="text-xs text-slate-500">
-                {formatDate(overview.from_dt)} - {formatDate(overview.to_dt)}
-              </div>
+              <p className="text-xs text-slate-500">
+                {formatDate(overview.from_dt)} — {formatDate(overview.to_dt)}
+              </p>
             </div>
 
             {apps.length === 0 ? (
-              <div className="mt-4 text-sm text-slate-500">За цей період ви не надсилали відгуків.</div>
+              <p className="px-5 py-8 text-sm text-slate-500 lg:px-6">
+                За цей період ви не надсилали відгуків.
+              </p>
             ) : (
-              <div className="mt-4 overflow-x-auto">
+              <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      <th className="px-2 py-2">Вакансія</th>
-                      <th className="px-2 py-2">Статус</th>
-                      <th className="px-2 py-2">Дата</th>
+                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <tr>
+                      <th className="px-5 py-3 lg:px-6">Вакансія</th>
+                      <th className="px-5 py-3 lg:px-6">Статус</th>
+                      <th className="px-5 py-3 lg:px-6">Дата</th>
                     </tr>
                   </thead>
                   <tbody>
                     {apps.map((row) => (
-                      <tr key={row.id} className="border-b border-slate-100 last:border-b-0">
-                        <td className="px-2 py-3">
-                          <div className="font-semibold text-slate-800">
-                            {row.vacancy_title ?? "Вакансія (назва недоступна)"}
-                          </div>
+                      <tr
+                        key={row.id}
+                        className="border-t border-slate-100 transition hover:bg-slate-50/80"
+                      >
+                        <td className="px-5 py-3.5 font-medium text-slate-800 lg:px-6">
+                          {row.vacancy_title ?? "Вакансія (назва недоступна)"}
                         </td>
-                        <td className="px-2 py-3 text-slate-700">{statusLabel(row.status)}</td>
-                        <td className="px-2 py-3 text-slate-500">{formatDate(row.created_at)}</td>
+                        <td className="px-5 py-3.5 lg:px-6">
+                          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                            {statusLabel(row.status)}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-500 lg:px-6">{formatDate(row.created_at)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -323,5 +256,26 @@ const AnalyticsDashboard = ({ embedded = false, hideLeadCard = false }: Analytic
     </div>
   )
 }
+
+const PeriodSelector = ({
+  days,
+  onChange,
+}: {
+  days: number
+  onChange: (value: number) => void
+}) => (
+  <div className="inline-flex shrink-0 rounded-2xl border border-slate-200 bg-slate-50 p-1">
+    {dayOptions.map((opt) => (
+      <button
+        key={opt.value}
+        type="button"
+        className={periodButtonClass(days === opt.value)}
+        onClick={() => onChange(opt.value)}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+)
 
 export default AnalyticsDashboard

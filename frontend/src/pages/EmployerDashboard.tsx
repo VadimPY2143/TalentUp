@@ -16,6 +16,7 @@ import {
 } from "../api/applications"
 import { deleteSavedResumeByCompany, listSavedResumesByCompany } from "../api/candidates"
 import { createCompany, listCompanies, updateCompany } from "../api/companies"
+import { listCities } from "../api/cities"
 import {
   aiFillCompanyVacancy,
   createCompanyVacancy,
@@ -109,6 +110,21 @@ const toText = (value: string) => {
   return normalized ? normalized : undefined
 }
 
+const toFormNumber = (value: number | null | undefined) =>
+  value != null && Number.isFinite(value) ? String(value) : ""
+
+const coerceStringArray = (values?: string[] | string | null): string[] => {
+  if (values == null) {
+    return []
+  }
+  if (typeof values === "string") {
+    return values.trim() ? [values.trim()] : []
+  }
+  return values
+    .map((value) => (typeof value === "string" ? value.trim() : String(value).trim()))
+    .filter(Boolean)
+}
+
 const toCompanyPayload = (form: CompanyFormState): CompanyPayload => ({
   name: form.name.trim(),
   legal_name: toText(form.legal_name),
@@ -163,11 +179,11 @@ const vacancyToForm = (vacancy: VacancyResponse): VacancyFormState => ({
   requirements: vacancy.requirements ?? "",
   city_id: vacancy.city_id ?? null,
   location: vacancy.location ?? "",
-  salary_min: vacancy.salary_min ? String(vacancy.salary_min) : "",
-  salary_max: vacancy.salary_max ? String(vacancy.salary_max) : "",
+  salary_min: toFormNumber(vacancy.salary_min),
+  salary_max: toFormNumber(vacancy.salary_max),
   salary_currency: vacancy.salary_currency ?? "UAH",
-  experience_years_min: vacancy.experience_years_min ? String(vacancy.experience_years_min) : "",
-  experience_years_max: vacancy.experience_years_max ? String(vacancy.experience_years_max) : "",
+  experience_years_min: toFormNumber(vacancy.experience_years_min),
+  experience_years_max: toFormNumber(vacancy.experience_years_max),
   employment_type: vacancy.employment_type ?? [],
   work_format: vacancy.work_format ?? [],
   is_active: vacancy.is_active ?? true,
@@ -179,13 +195,15 @@ const normalizeToken = (value: string) =>
     .toLowerCase()
     .replace(/[\s_-]/g, "")
 
-const normalizeEmploymentTypes = (values?: string[] | null): string[] => {
-  if (!values?.length) {
-    return []
-  }
-
+const normalizeEmploymentTypes = (values?: string[] | string | null): string[] => {
   const mapped: string[] = []
-  for (const value of values) {
+  for (const value of coerceStringArray(values)) {
+    const exact = employmentTypeOptions.find((option) => option.toLowerCase() === value.toLowerCase())
+    if (exact) {
+      mapped.push(exact)
+      continue
+    }
+
     const token = normalizeToken(value)
     if (token === "fulltime") {
       mapped.push("Full-time")
@@ -197,13 +215,15 @@ const normalizeEmploymentTypes = (values?: string[] | null): string[] => {
   return Array.from(new Set(mapped))
 }
 
-const normalizeWorkFormats = (values?: string[] | null): string[] => {
-  if (!values?.length) {
-    return []
-  }
-
+const normalizeWorkFormats = (values?: string[] | string | null): string[] => {
   const mapped: string[] = []
-  for (const value of values) {
+  for (const value of coerceStringArray(values)) {
+    const exact = workFormatOptions.find((option) => option.toLowerCase() === value.toLowerCase())
+    if (exact) {
+      mapped.push(exact)
+      continue
+    }
+
     const token = normalizeToken(value)
     if (token === "remote") {
       mapped.push("Remote")
@@ -240,16 +260,42 @@ const aiVacancyToForm = (vacancy: VacancyPayload): VacancyFormState => {
     requirements: vacancy.requirements ?? "",
     city_id: vacancy.city_id ?? null,
     location: vacancy.location ?? "",
-    salary_min: vacancy.salary_min ? String(vacancy.salary_min) : "",
-    salary_max: vacancy.salary_max ? String(vacancy.salary_max) : "",
+    salary_min: toFormNumber(vacancy.salary_min),
+    salary_max: toFormNumber(vacancy.salary_max),
     salary_currency: currencyOptions.includes(normalizedCurrency as "UAH" | "USD")
       ? normalizedCurrency
       : "UAH",
-    experience_years_min: vacancy.experience_years_min ? String(vacancy.experience_years_min) : "",
-    experience_years_max: vacancy.experience_years_max ? String(vacancy.experience_years_max) : "",
+    experience_years_min: toFormNumber(vacancy.experience_years_min),
+    experience_years_max: toFormNumber(vacancy.experience_years_max),
     employment_type: employment,
     work_format: workFormat,
     is_active: vacancy.is_active ?? true,
+  }
+}
+
+const resolveCityForVacancyForm = async (form: VacancyFormState): Promise<VacancyFormState> => {
+  if (form.city_id != null || !form.location.trim()) {
+    return form
+  }
+
+  try {
+    const cities = await listCities(form.location.trim(), 12)
+    const needle = form.location.trim().toLowerCase()
+    const match =
+      cities.find((city) => city.name_uk.toLowerCase() === needle) ??
+      cities.find((city) => city.name_en.toLowerCase() === needle)
+
+    if (!match) {
+      return form
+    }
+
+    return {
+      ...form,
+      city_id: match.id,
+      location: match.name_uk,
+    }
+  } catch {
+    return form
   }
 }
 
@@ -965,7 +1011,8 @@ const EmployerDashboard = () => {
       const generated = await aiFillCompanyVacancy(company.id, {
         description: aiDescription.trim(),
       })
-      setVacancyForm(aiVacancyToForm(generated))
+      const filledForm = await resolveCityForVacancyForm(aiVacancyToForm(generated))
+      setVacancyForm(filledForm)
       setVacancySuccess("Форму заповнено через AI. Перевірте поля перед збереженням.")
       setShowAIPromptEditor(false)
       setEditingVacancyId(null)

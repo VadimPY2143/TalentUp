@@ -79,6 +79,18 @@ async def fill_vacancy_with_ai(
     try:
         generated = await generate_vacancy(payload.description)
         vacancy = Vacancy.model_validate(generated)
+
+        city_service = CityService(session=session)
+        city = await city_service.resolve_city(city_id=vacancy.city_id, location=vacancy.location)
+        if city:
+            vacancy = Vacancy.model_validate(
+                {
+                    **vacancy.model_dump(),
+                    "city_id": city["id"],
+                    "location": city["name_uk"],
+                }
+            )
+
         description_hash = hashlib.sha256(payload.description.strip().encode("utf-8")).hexdigest()
         await billing_service.charge_for_feature(
             session=session,
