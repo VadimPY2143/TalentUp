@@ -114,7 +114,6 @@ class _PaymentsRepoStub:
         idempotency_key: str,
     ) -> tuple[dict[str, Any], bool]:
         del session, user_id, package_id, provider, provider_order_id, amount_uah, idempotency_key
-        # Simulates race: another request inserted the same idempotency key first.
         return self.order, False
 
     async def get_package_by_id(self, *, session: Any, package_id: int) -> dict[str, Any] | None:

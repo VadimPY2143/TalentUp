@@ -6760,3 +6760,83 @@ fastapi.exceptions.HTTPException: 400: Invalid amount in payment payload
 2026-05-17 09:45:11 - moodshare - INFO - User 6 connected to notifications ws
 2026-05-17 09:55:16 - moodshare - INFO - User 6 connected to notifications ws
 2026-05-17 09:55:16 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:52 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:52 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:55 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:55 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:56 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:56 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:58:56 - moodshare - INFO - User 6 connected to chat 15
+2026-05-18 05:59:04 - moodshare - INFO - User 6 disconnected from chat 15
+2026-05-18 05:59:04 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:59:04 - moodshare - INFO - User 6 connected to notifications ws
+2026-05-18 05:59:37 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:37 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:52 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:52 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 05:59:53 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:01:29 - moodshare - INFO - WFP order created order_id=53 provider_order_id=wfp_e8fbdc9903a44eebaba1aa65e4c0b835 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-05-18 06:02:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:31 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:02:34 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Order Not Found', 'reasonCode': 1127, 'orderReference': 'wfp_e8fbdc9903a44eebaba1aa65e4c0b835', 'amount': '', 'currency': '', 'authCode': '', 'createdDate': '', 'processingDate': '', 'cardPan': '', 'cardType': '', 'issuerBankCountry': '', 'issuerBankName': '', 'transactionStatus': 'Declined', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 0, 'merchantSignature': 'b6fb0c281fa3b2b0ede0f9c4b73ad605'}
+2026-05-18 06:02:34 - moodshare - INFO - CHECK_STATUS transaction status: Declined (normalized: failed)
+2026-05-18 06:02:34 - moodshare - INFO - WFP reconcile status order_id=53 order_reference=wfp_e8fbdc9903a44eebaba1aa65e4c0b835 status=failed
+2026-05-18 06:02:36 - moodshare - INFO - WFP order created order_id=54 provider_order_id=wfp_faf5ce4c0ce744b182ac7cf76c11b489 user_id=4 service_url=https://tawna-scutate-lenna.ngrok-free.dev/payments/webhook/wayforpay
+2026-05-18 06:03:20 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-18 06:03:20 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_faf5ce4c0ce744b182ac7cf76c11b489', 'merchantSignature': 'cf9e84969266d862304fe16277c0c1f6', 'amount': 149, 'currency': 'UAH', 'authCode': '030666', 'email': 'vadym.papusha.ri.2025@lpnu.ua', 'phone': '380992220142', 'createdDate': 1779084156, 'processingDate': 1779084200, 'cardPan': '44****3596', 'cardType': 'Visa', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'recToken': '', 'transactionStatus': 'Approved', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 2.98, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': 'Вадим Вадимович Папуша'}
+2026-05-18 06:03:20 - moodshare - INFO - Order reference: wfp_faf5ce4c0ce744b182ac7cf76c11b489
+2026-05-18 06:03:20 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-05-18 06:03:20 - moodshare - INFO - Verifying callback signature...
+2026-05-18 06:03:20 - moodshare - INFO - Signature verified successfully
+2026-05-18 06:03:20 - moodshare - INFO - Order found: id=54, status=pending, user_id=4
+2026-05-18 06:03:20 - moodshare - INFO - Amount check: callback=149.00, expected=149.00
+2026-05-18 06:03:20 - moodshare - INFO - Currency: UAH
+2026-05-18 06:03:20 - moodshare - INFO - Transaction status: Approved (normalized: success)
+2026-05-18 06:03:20 - moodshare - INFO - Callback status Approved, checking status before crediting...
+2026-05-18 06:03:21 - moodshare - INFO - CHECK_STATUS response: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'reason': 'Ok', 'reasonCode': 1100, 'orderReference': 'wfp_faf5ce4c0ce744b182ac7cf76c11b489', 'amount': 149, 'currency': 'UAH', 'authCode': '030666', 'createdDate': 1779084156, 'processingDate': 1779084200, 'cardPan': '', 'cardType': '', 'issuerBankCountry': 'Ukraine', 'issuerBankName': 'JSC UNIVERSAL BANK', 'transactionStatus': 'Approved', 'refundAmount': 0, 'settlementDate': '', 'settlementAmount': 0, 'fee': 2.98, 'merchantSignature': 'eaf8a4d8ef867768f5a8a6fada5a8b26'}
+2026-05-18 06:03:21 - moodshare - INFO - CHECK_STATUS transaction status: Approved (normalized: success)
+2026-05-18 06:03:21 - moodshare - INFO - Applying credits to user_id=4, credits=50
+2026-05-18 06:03:21 - moodshare - INFO - Package found: Start 50, credits: 50
+2026-05-18 06:03:21 - moodshare - INFO - WFP payment approved order_id=54 order_reference=wfp_faf5ce4c0ce744b182ac7cf76c11b489 check_status=Approved credits_applied=50
+2026-05-18 06:03:22 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:22 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:30 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:33 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:33 - moodshare - INFO - User 4 connected to chat 15
+2026-05-18 06:03:33 - moodshare - INFO - User 4 disconnected from chat 15
+2026-05-18 06:03:36 - moodshare - INFO - User 4 connected to chat 15
+2026-05-18 06:03:39 - moodshare - INFO - User 4 disconnected from chat 15
+2026-05-18 06:03:39 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:03:39 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:02 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:07 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:07 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:08 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:08 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:20 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:20 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:45 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:04:48 - moodshare - INFO - User 4 connected to notifications ws
+2026-05-18 06:19:37 - moodshare - INFO - === WFP WEBHOOK RECEIVED ===
+2026-05-18 06:19:37 - moodshare - INFO - Webhook payload: {'merchantAccount': 'tawna_scutate_lenna_ngrok_free_dev', 'orderReference': 'wfp_faf5ce4c0ce744b182ac7cf76c11b489', 'merchantSignature': 'fc22752ef624543c8974cc1fa1301f30', 'amount': 149, 'currency': 'UAH', 'authCode': '030666', 'email': None, 'phone': None, 'createdDate': 1779084156, 'processingDate': 1779085177, 'cardPan': '', 'cardType': None, 'issuerBankCountry': None, 'issuerBankName': None, 'recToken': '', 'transactionStatus': 'Refunded', 'reason': 'Ok', 'reasonCode': 1100, 'fee': 0, 'paymentSystem': 'googlePay', 'acquirerBankName': 'WayForPay', 'cardProduct': 'credit', 'clientName': None}
+2026-05-18 06:19:37 - moodshare - INFO - Order reference: wfp_faf5ce4c0ce744b182ac7cf76c11b489
+2026-05-18 06:19:37 - moodshare - INFO - Merchant account from payload: tawna_scutate_lenna_ngrok_free_dev, expected: tawna_scutate_lenna_ngrok_free_dev
+2026-05-18 06:19:37 - moodshare - INFO - Verifying callback signature...
+2026-05-18 06:19:37 - moodshare - INFO - Signature verified successfully
+2026-05-18 06:19:37 - moodshare - INFO - Order found: id=54, status=success, user_id=4
+2026-05-18 06:19:37 - moodshare - INFO - Amount check: callback=149.00, expected=149.00
+2026-05-18 06:19:37 - moodshare - INFO - Currency: UAH
+2026-05-18 06:19:37 - moodshare - INFO - Transaction status: Refunded (normalized: failed)
+2026-05-18 06:19:37 - moodshare - INFO - WFP duplicate callback order_id=54 order_reference=wfp_faf5ce4c0ce744b182ac7cf76c11b489
